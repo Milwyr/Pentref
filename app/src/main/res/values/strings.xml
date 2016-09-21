@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Pentref</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="facebook_app_id">195665774189937</string>
+    <string name="sign_out">Sign Out</string>
+</resources>
