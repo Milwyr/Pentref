@@ -1,4 +1,4 @@
-package com.ymca.pentref.fragments;
+package com.ywca.pentref.fragments;
 
 import android.app.Fragment;
 import android.content.Intent;
@@ -30,7 +30,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.ymca.pentref.R;
+import com.ywca.pentref.R;
 
 
 /**

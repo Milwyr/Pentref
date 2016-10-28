@@ -1,4 +1,4 @@
-package com.ymca.pentref;
+package com.ywca.pentref;
 
 import org.junit.Test;
 

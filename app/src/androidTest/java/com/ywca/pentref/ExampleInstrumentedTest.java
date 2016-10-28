@@ -1,4 +1,4 @@
-package com.ymca.pentref;
+package com.ywca.pentref;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
