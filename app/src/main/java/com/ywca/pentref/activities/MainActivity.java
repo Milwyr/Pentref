@@ -1,6 +1,8 @@
-package com.ymca.pentref.activities;
+package com.ywca.pentref.activities;
 
+import android.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -13,8 +15,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.ymca.pentref.R;
-import com.ymca.pentref.fragments.SignInFragment;
+import com.ywca.pentref.R;
+import com.ywca.pentref.fragments.BookmarksFragment;
+import com.ywca.pentref.fragments.DiscoverFragment;
+import com.ywca.pentref.fragments.SettingsFragment;
+import com.ywca.pentref.fragments.SignInFragment;
+import com.ywca.pentref.fragments.TransportationFragment;
+import com.ywca.pentref.fragments.WeatherFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -25,7 +32,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         initialiseComponents();
 
-        getFragmentManager().beginTransaction().add(R.id.frame, new SignInFragment()).commit();
+        getFragmentManager().beginTransaction().add(
+                R.id.frame, DiscoverFragment.newInstance("")).commit();
     }
 
     @Override
@@ -60,24 +68,28 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        switch (item.getItemId()) {
+            case R.id.nav_discover:
+                changeFragment(R.string.discover, DiscoverFragment.newInstance(""));
+                break;
+            case R.id.nav_bookmarks:
+                changeFragment(R.string.bookmarks, BookmarksFragment.newInstance(""));
+                break;
+            case R.id.nav_weather:
+                changeFragment(R.string.weather, WeatherFragment.newInstance(""));
+                break;
+            case R.id.nav_transportation:
+                changeFragment(R.string.transportation, TransportationFragment.newInstance(""));
+                break;
+            case R.id.nav_login:
+                changeFragment(R.string.transportation, new SignInFragment());
+                break;
+            case R.id.action_settings:
+                changeFragment(R.string.settings, new SettingsFragment());
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -85,6 +97,14 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    // Changes the title to the given string resource and
+    // replaces the current fragment by the given one.
+    private void changeFragment(int resourceId, Fragment fragment) {
+        setTitle(resourceId);
+        getFragmentManager().beginTransaction().replace(R.id.frame, fragment).commit();
+    }
+
+    // Initialises components when onCreate() method is called
     private void initialiseComponents() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -101,11 +121,12 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        // Set the first item (Discover) to be checked by default
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().getItem(0).setChecked(true);
     }
-
 }
