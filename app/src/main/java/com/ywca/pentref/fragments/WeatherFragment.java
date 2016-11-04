@@ -1,12 +1,11 @@
 package com.ywca.pentref.fragments;
 
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.ywca.pentref.R;
+import android.webkit.WebView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,7 +53,12 @@ public class WeatherFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_weather, container, false);
+        WebView webView = new WebView(getActivity());
+        webView.loadUrl("https://www.yahoo.com/news/weather/hong-kong/tai-o/tai-o-2165422");
+        webView.getSettings().setJavaScriptEnabled(true);
+        return webView;
+
+//        return inflater.inflate(R.layout.fragment_weather, container, false);
     }
 
 }

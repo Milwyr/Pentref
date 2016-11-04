@@ -1,24 +1,24 @@
 package com.ywca.pentref.fragments;
 
+import android.Manifest;
+import android.app.Fragment;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.ywca.pentref.R;
 import com.ywca.pentref.databinding.FragmentDiscoverBinding;
-import com.ywca.pentref.models.POI;
+import com.ywca.pentref.models.Poi;
 
 /**
  * Use the {@link DiscoverFragment#newInstance} factory method to
@@ -34,7 +34,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
     private String mParam1;
 
     private MapView mMapView;
-    private POI mPoi;
+    private Poi mPoi;
 
     public DiscoverFragment() {
         // Required empty public constructor
@@ -62,14 +62,28 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
         }
-        mPoi = new POI("Custom name", "");
+
+        /* Request location permissions if not granted */
+        if (!(ContextCompat.checkSelfPermission(getActivity(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getActivity(),
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION},
+                    10000);
+
+        }
+
+//        mPoi = new Poi(12345, "Tai O", "Beautiful", "www.google.com.hk", "Address", null);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Reference: https://developer.android.com/topic/libraries/data-binding/index.html
-        // Bind the layout to the object of type POI so the views
+        // Bind the layout to the object of type Poi so the views
         FragmentDiscoverBinding binding = DataBindingUtil
                 .inflate(inflater, R.layout.fragment_discover, container, false);
         binding.setPoi(mPoi);
@@ -85,7 +99,21 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        // TODO: Do something
+        // Zoom to Tai O by default
+        LatLng taiOLatLng = new LatLng(22.2574336, 113.8620642);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(taiOLatLng, 15));
+
+        // TODO: Check whether GPS is on
+        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+
+        }
+        googleMap.setMyLocationEnabled(true);
+        //googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+
     }
 
     // Map view requires these lifecycle methods to be forwarded to itself
@@ -110,8 +138,8 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onStop() {
-        mMapView.onStop();
         super.onStop();
+        mMapView.onStop();
     }
 
     @Override
@@ -122,8 +150,8 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onLowMemory() {
-        mMapView.onLowMemory();
         super.onLowMemory();
+        mMapView.onLowMemory();
     }
     //endregion
 }

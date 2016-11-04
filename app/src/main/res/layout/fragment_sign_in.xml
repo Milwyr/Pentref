@@ -2,6 +2,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingEnd="@dimen/activity_horizontal_margin"
+    android:paddingStart="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ywca.pentref.fragments.SignInFragment">
 
     <TextView
@@ -9,27 +13,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/sign_in_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="52dp" />
-
     <com.facebook.login.widget.LoginButton
         android:id="@+id/facebook_sign_in_button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@id/sign_in_button"
-        android:layout_toRightOf="@id/sign_in_button" />
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp" />
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/facebook_sign_in_button"
+        android:layout_marginBottom="20dp" />
 
     <Button
         android:id="@+id/sign_out_button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="52dp"
+        android:layout_above="@id/facebook_sign_in_button"
+        android:layout_marginBottom="20dp"
         android:text="@string/sign_out"
         android:visibility="gone" />
 
