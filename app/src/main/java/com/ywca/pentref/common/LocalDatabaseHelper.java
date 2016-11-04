@@ -64,11 +64,11 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
                 Transport.TABLE_NAME + " (" +
                 Transport.COLUMN_ID + " LONG PRIMARY KEY, " +
                 Transport.COLUMN_ROUTENUM + " VARCHAR(255), " +
-                Transport.COLUMN_TYPE + " VARCHAR(255), " +
+                Transport.COLUMN_TYPE + " INTEGER, " +
                 Transport.COLUMN_ADULTPRICE + " FLOAT, " +
                 Transport.COLUMN_CHILDPRICE + " FLOAT, " +
                 Transport.COLUMN_DEP_STATION + " VARCHAR(255), " +
-                Transport.COLUMN_DES_STATION + " VARCHAR(255), ";
+                Transport.COLUMN_DES_STATION + " VARCHAR(255)); ";
         sqLiteDatabase.execSQL(CREATE_TRAN_TABLE_SQL_QUERY);
         // TODO: Create a Transport table
     }

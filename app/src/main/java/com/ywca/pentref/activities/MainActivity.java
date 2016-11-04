@@ -30,6 +30,7 @@ import com.ywca.pentref.fragments.SignInFragment;
 import com.ywca.pentref.fragments.TransportationFragment;
 import com.ywca.pentref.fragments.WeatherFragment;
 import com.ywca.pentref.models.Poi;
+import com.ywca.pentref.models.Transport;
 
 import org.json.JSONArray;
 
@@ -145,22 +146,25 @@ public class MainActivity extends BaseActivity
         navigationView.getMenu().getItem(0).setChecked(true);
 
         mDbHelper = LocalDatabaseHelper.getInstance(this);
-//        fetchJsonFromServer();
+        // fetchJsonFromServer();
     }
 
     private void fetchJsonFromServer() {
         RequestQueue queue = Volley.newRequestQueue(this);
 
         // Put a JSON file on this website http://www.jsonblob.com
-        String url = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
+        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
+        String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transports.json";
 
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        JsonArrayRequest PoiJsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 Gson gson = new Gson();
                 List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
-                mDbHelper.insertPois(pois);
+                for (Poi poi : pois) {
+                    mDbHelper.insertPoi(poi);
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -169,6 +173,24 @@ public class MainActivity extends BaseActivity
             }
         });
 
-        queue.add(jsonArrayRequest);
+        JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                Gson gson = new Gson();
+                List<Transport> transports = Arrays.asList(gson.fromJson(response.toString(), Transport[].class));
+                for (Transport transport : transports) {
+                    mDbHelper.insertTransport(transport);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                String temp = "123";
+            }
+        });
+
+        queue.add(PoiJsonArrayRequest);
+        queue.add(transportJsonArrayRequest);
     }
 }

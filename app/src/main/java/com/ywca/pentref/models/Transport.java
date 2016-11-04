@@ -2,6 +2,7 @@ package com.ywca.pentref.models;
 
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Encapsulates the information of a transportation (bus or ferry) such as
@@ -72,7 +73,11 @@ public class Transport extends BaseObservable {
     }
 
     public enum TypeEnum {
-        BUS(0), FERRY(1);
+        @SerializedName("0")
+        BUS(0),
+
+        @SerializedName("1")
+        FERRY(1);
 
         private int value;
 
