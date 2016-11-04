@@ -10,16 +10,12 @@ import android.databinding.Bindable;
 
 public class Transport extends BaseObservable {
     public static final String TABLE_NAME = "Transport";
-
-    public enum TypeEnum {BUS, FERRY}
-
     private String routeNumber;
     private TypeEnum typeEnum;
     private float adultPrice;
     private float childPrice;
     private String departureStation;
     private String destinationStation;
-
     public Transport(String routeNumber, TypeEnum typeEnum, float adultPrice,
                      float childPrice, String departureStation, String destinationStation) {
         this.routeNumber = routeNumber;
@@ -53,4 +49,6 @@ public class Transport extends BaseObservable {
     public String getDestinationStation() {
         return this.destinationStation;
     }
+
+    public enum TypeEnum {BUS, FERRY}
 }

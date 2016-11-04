@@ -1,16 +1,12 @@
 package com.ywca.pentref.fragments;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
+import android.app.Fragment;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.app.Fragment;
-import android.support.v4.app.ActivityCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -69,7 +65,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Reference: https://developer.android.com/topic/libraries/data-binding/index.html
-        // Bind the layout to the object of type POI so the views
+        // Bind the layout to the object of type Poi so the views
         FragmentDiscoverBinding binding = DataBindingUtil
                 .inflate(inflater, R.layout.fragment_discover, container, false);
         binding.setPoi(mPoi);
