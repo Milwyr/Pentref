@@ -6,7 +6,7 @@
 
         <variable
             name="poi"
-            type="com.ywca.pentref.models.POI" />
+            type="com.ywca.pentref.models.Poi" />
     </data>
 
     <RelativeLayout

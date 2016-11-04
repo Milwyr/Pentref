@@ -153,9 +153,10 @@ public class SignInFragment extends Fragment implements
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
         mAccessTokenTracker.stopTracking();
+        mGoogleApiClient.stopAutoManage((AppCompatActivity) getActivity());
         mGoogleApiClient.disconnect();
     }
 
