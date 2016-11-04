@@ -1,8 +1,12 @@
 package com.ywca.pentref.fragments;
 
+import android.Manifest;
 import android.app.Fragment;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +62,20 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
         }
+
+        /* Request location permissions if not granted */
+        if (!(ContextCompat.checkSelfPermission(getActivity(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getActivity(),
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION},
+                    10000);
+
+        }
+
 //        mPoi = new Poi(12345, "Tai O", "Beautiful", "www.google.com.hk", "Address", null);
     }
 
@@ -86,7 +104,16 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(taiOLatLng, 15));
 
         // TODO: Check whether GPS is on
+        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+
+        }
         googleMap.setMyLocationEnabled(true);
+        //googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+
     }
 
     // Map view requires these lifecycle methods to be forwarded to itself

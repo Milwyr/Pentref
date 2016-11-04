@@ -2,20 +2,16 @@ package com.ywca.pentref.models;
 
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
-import android.databinding.Observable;
-import android.databinding.ObservableField;
-import android.databinding.PropertyChangeRegistry;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.annotations.Expose;
 
 /**
- * A POI (Point of Interest) encapsulates information about a physical location,
+ * A Poi (Point of Interest) encapsulates information about a physical location,
  * including its name, address, and other relevant information.
  */
 public class Poi extends BaseObservable {
     //region Constants
-    public static final String TABLE_NAME = "POI";
+    public static final String TABLE_NAME = "Poi";
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_DESCRIPTION = "description";

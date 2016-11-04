@@ -3,7 +3,6 @@
     tools:context="com.ywca.pentref.fragments.DiscoverFragment">
 
     <data>
-
         <variable
             name="poi"
             type="com.ywca.pentref.models.Poi" />
