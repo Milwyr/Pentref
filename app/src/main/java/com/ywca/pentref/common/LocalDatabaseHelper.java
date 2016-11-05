@@ -28,6 +28,7 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
     // An instance of LocalDatabaseHelper
     private static LocalDatabaseHelper mDbInstance;
 
+
     private LocalDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -59,6 +60,16 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
                 Poi.COLUMN_TIMESTAMP + " VARCHAR(255));";
         sqLiteDatabase.execSQL(CREATE_POI_TABLE_SQL_QUERY);
 
+        final String CREATE_TRAN_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
+                Transport.TABLE_NAME + " (" +
+                Transport.COLUMN_ID + " LONG PRIMARY KEY, " +
+                Transport.COLUMN_ROUTENUM + " VARCHAR(255), " +
+                Transport.COLUMN_TYPE + " INTEGER, " +
+                Transport.COLUMN_ADULTPRICE + " FLOAT, " +
+                Transport.COLUMN_CHILDPRICE + " FLOAT, " +
+                Transport.COLUMN_DEP_STATION + " VARCHAR(255), " +
+                Transport.COLUMN_DES_STATION + " VARCHAR(255)); ";
+        sqLiteDatabase.execSQL(CREATE_TRAN_TABLE_SQL_QUERY);
         // TODO: Create a Transport table
     }
 
@@ -180,14 +191,49 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
     //endregion
 
     //region Transport
-    public Transport getTransport(long id) {
-        // TODO: To be implemented
-        return null;
-    }
 
     public List<Transport> getTransports() {
-        // TODO: To be implemented
-        return null;
+        List<Transport> transports = new ArrayList<>();
+
+        String[] columns = {
+                Transport.COLUMN_ID,
+                Transport.COLUMN_ROUTENUM,
+                Transport.COLUMN_TYPE,
+                Transport.COLUMN_ADULTPRICE,
+                Transport.COLUMN_CHILDPRICE,
+                Transport.COLUMN_DEP_STATION,
+                Transport.COLUMN_DES_STATION
+        };
+
+        //not sure
+        Cursor cursor = getWritableDatabase().query(
+                Transport.TABLE_NAME, columns, null, null, null, null, null);
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast()) {
+            long id = cursor.getLong(cursor.getColumnIndex(Transport.COLUMN_ID));
+            String routeNum = cursor.getString(cursor.getColumnIndex(Transport.COLUMN_ROUTENUM));
+            long typeIndex = cursor.getLong(cursor.getColumnIndex(Transport.COLUMN_TYPE));
+
+            Transport.TypeEnum typeEnum;
+            if (typeIndex == 0) {
+                typeEnum = Transport.TypeEnum.BUS;
+            } else {
+                typeEnum = Transport.TypeEnum.FERRY;
+            }
+
+            float adultPrice = cursor.getFloat(cursor.getColumnIndex(Transport.COLUMN_ADULTPRICE));
+            float childPrice = cursor.getFloat(cursor.getColumnIndex(Transport.COLUMN_CHILDPRICE));
+            String depStation = cursor.getString(cursor.getColumnIndex(Transport.COLUMN_DEP_STATION));
+            String desStation = cursor.getString(cursor.getColumnIndex(Transport.COLUMN_DES_STATION));
+
+
+            transports.add(new Transport(id, routeNum, typeEnum, adultPrice, childPrice, depStation, desStation));
+
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return transports;
     }
 
     /**
@@ -198,7 +244,19 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
      */
     public boolean insertTransport(Transport transport) {
         // TODO: To be implemented
-        return false;
+        ContentValues values = new ContentValues();
+
+        values.put(Transport.COLUMN_ID, transport.getId());
+        values.put(Transport.COLUMN_ROUTENUM, transport.getRouteNum());
+        values.put(Transport.COLUMN_TYPE, transport.getTypeEnum().getValue());
+        values.put(Transport.COLUMN_ADULTPRICE, transport.getAdultPrice());
+        values.put(Transport.COLUMN_CHILDPRICE, transport.getChildPrice());
+        values.put(Transport.COLUMN_DEP_STATION, transport.getDepartureStation());
+        values.put(Transport.COLUMN_DES_STATION, transport.getDestinationStation());
+
+
+        return getWritableDatabase().insertWithOnConflict(
+                Transport.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_ROLLBACK) > 0;
     }
 
     /**
@@ -207,7 +265,45 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
      * @param transports A list of transports (bus or ferry)
      */
     public void insertTransports(List<Transport> transports) {
-        // TODO: To be implemented
+        SQLiteDatabase database = getWritableDatabase();
+        database.beginTransactionNonExclusive();
+
+        String sql = "INSERT OR ROLLBACK INTO " + Transport.TABLE_NAME + " (" +
+                Transport.COLUMN_ID + ", " +
+                Transport.COLUMN_ROUTENUM + ", " +
+                Transport.COLUMN_TYPE + ", " +
+                Transport.COLUMN_ADULTPRICE + ", " +
+                Transport.COLUMN_CHILDPRICE + ", " +
+                Transport.COLUMN_DEP_STATION + ", " +
+                Transport.COLUMN_DES_STATION + ")  VALUES(?, ?, ?, ?, ?, ?, ?);";
+
+        try {
+            SQLiteStatement statement = database.compileStatement(sql);
+
+            for (Transport transport : transports) {
+                statement.bindLong(1, transport.getId());
+                statement.bindString(2, transport.getRouteNum());
+                statement.bindLong(3, transport.getTypeEnum().getValue());
+                statement.bindDouble(4, transport.getAdultPrice());
+                statement.bindDouble(5, transport.getChildPrice());
+                statement.bindString(6, transport.getDepartureStation());
+                statement.bindString(7, transport.getDestinationStation());
+
+                // TODO: Get the timestamp from server
+                statement.bindString(8, "To be implemented");
+
+                statement.execute();
+                statement.clearBindings();
+            }
+
+            database.setTransactionSuccessful();
+        } catch (SQLiteException e) {
+            Log.e("LocalDatabaseHelper", e.getMessage());
+        } finally {
+            if (database.inTransaction()) {
+                database.endTransaction();
+            }
+        }
     }
 
     public void updateTransport() {
