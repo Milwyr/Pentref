@@ -31,6 +31,7 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.ywca.pentref.R;
+import com.ywca.pentref.activities.PoiDetailActiviy;
 
 
 /**
@@ -91,8 +92,6 @@ public class SignInFragment extends Fragment implements
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_sign_in, container, false);
 
-        mNameTextView = (TextView) rootView.findViewById(R.id.name_text_view);
-
         LoginButton loginButton = (LoginButton) rootView.findViewById(R.id.facebook_sign_in_button);
         loginButton.setReadPermissions("email");
         loginButton.setFragment(this);
@@ -118,6 +117,14 @@ public class SignInFragment extends Fragment implements
 
         mGoogleSignOutButton = (Button) rootView.findViewById(R.id.sign_out_button);
         mGoogleSignOutButton.setOnClickListener(this);
+
+        Button tempButton = (Button) rootView.findViewById(R.id.temp_button);
+        tempButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), PoiDetailActiviy.class));
+            }
+        });
 
         return rootView;
     }
