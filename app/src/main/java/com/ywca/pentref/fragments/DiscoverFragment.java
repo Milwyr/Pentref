@@ -2,6 +2,7 @@ package com.ywca.pentref.fragments;
 
 import android.Manifest;
 import android.app.Fragment;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.ywca.pentref.R;
+import com.ywca.pentref.activities.PoiDetailActiviy;
 import com.ywca.pentref.databinding.FragmentDiscoverBinding;
 import com.ywca.pentref.models.Poi;
 
@@ -27,7 +29,6 @@ import com.ywca.pentref.models.Poi;
 // Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
 public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
     // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
 
     // TODO: Rename and change types of parameters
@@ -111,9 +112,14 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
 
         }
         googleMap.setMyLocationEnabled(true);
-        //googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-
+        // TODO: Should display a POI summary instead
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                startActivity(new Intent(getActivity(), PoiDetailActiviy.class));
+            }
+        });
     }
 
     // Map view requires these lifecycle methods to be forwarded to itself

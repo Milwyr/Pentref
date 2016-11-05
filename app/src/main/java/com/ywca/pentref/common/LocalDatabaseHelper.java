@@ -60,16 +60,16 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
                 Poi.COLUMN_TIMESTAMP + " VARCHAR(255));";
         sqLiteDatabase.execSQL(CREATE_POI_TABLE_SQL_QUERY);
 
-        final String CREATE_TRAN_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
+        final String CREATE_TRANSPORT_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
                 Transport.TABLE_NAME + " (" +
                 Transport.COLUMN_ID + " LONG PRIMARY KEY, " +
-                Transport.COLUMN_ROUTENUM + " VARCHAR(255), " +
+                Transport.COLUMN_ROUTE_NUMBER + " VARCHAR(255), " +
                 Transport.COLUMN_TYPE + " INTEGER, " +
-                Transport.COLUMN_ADULTPRICE + " FLOAT, " +
-                Transport.COLUMN_CHILDPRICE + " FLOAT, " +
-                Transport.COLUMN_DEP_STATION + " VARCHAR(255), " +
-                Transport.COLUMN_DES_STATION + " VARCHAR(255)); ";
-        sqLiteDatabase.execSQL(CREATE_TRAN_TABLE_SQL_QUERY);
+                Transport.COLUMN_ADULT_PRICE + " FLOAT, " +
+                Transport.COLUMN_CHILD_PRICE + " FLOAT, " +
+                Transport.COLUMN_DEPARTURE_STATION + " VARCHAR(255), " +
+                Transport.COLUMN_DESTINATION_STATION + " VARCHAR(255)); ";
+        sqLiteDatabase.execSQL(CREATE_TRANSPORT_TABLE_SQL_QUERY);
         // TODO: Create a Transport table
     }
 
@@ -197,12 +197,12 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
 
         String[] columns = {
                 Transport.COLUMN_ID,
-                Transport.COLUMN_ROUTENUM,
+                Transport.COLUMN_ROUTE_NUMBER,
                 Transport.COLUMN_TYPE,
-                Transport.COLUMN_ADULTPRICE,
-                Transport.COLUMN_CHILDPRICE,
-                Transport.COLUMN_DEP_STATION,
-                Transport.COLUMN_DES_STATION
+                Transport.COLUMN_ADULT_PRICE,
+                Transport.COLUMN_CHILD_PRICE,
+                Transport.COLUMN_DEPARTURE_STATION,
+                Transport.COLUMN_DESTINATION_STATION
         };
 
         //not sure
@@ -212,7 +212,7 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
 
         while (!cursor.isAfterLast()) {
             long id = cursor.getLong(cursor.getColumnIndex(Transport.COLUMN_ID));
-            String routeNum = cursor.getString(cursor.getColumnIndex(Transport.COLUMN_ROUTENUM));
+            String routeNum = cursor.getString(cursor.getColumnIndex(Transport.COLUMN_ROUTE_NUMBER));
             long typeIndex = cursor.getLong(cursor.getColumnIndex(Transport.COLUMN_TYPE));
 
             Transport.TypeEnum typeEnum;
@@ -222,11 +222,10 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
                 typeEnum = Transport.TypeEnum.FERRY;
             }
 
-            float adultPrice = cursor.getFloat(cursor.getColumnIndex(Transport.COLUMN_ADULTPRICE));
-            float childPrice = cursor.getFloat(cursor.getColumnIndex(Transport.COLUMN_CHILDPRICE));
-            String depStation = cursor.getString(cursor.getColumnIndex(Transport.COLUMN_DEP_STATION));
-            String desStation = cursor.getString(cursor.getColumnIndex(Transport.COLUMN_DES_STATION));
-
+            float adultPrice = cursor.getFloat(cursor.getColumnIndex(Transport.COLUMN_ADULT_PRICE));
+            float childPrice = cursor.getFloat(cursor.getColumnIndex(Transport.COLUMN_CHILD_PRICE));
+            String depStation = cursor.getString(cursor.getColumnIndex(Transport.COLUMN_DEPARTURE_STATION));
+            String desStation = cursor.getString(cursor.getColumnIndex(Transport.COLUMN_DESTINATION_STATION));
 
             transports.add(new Transport(id, routeNum, typeEnum, adultPrice, childPrice, depStation, desStation));
 
@@ -247,12 +246,12 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         values.put(Transport.COLUMN_ID, transport.getId());
-        values.put(Transport.COLUMN_ROUTENUM, transport.getRouteNum());
+        values.put(Transport.COLUMN_ROUTE_NUMBER, transport.getRouteNumber());
         values.put(Transport.COLUMN_TYPE, transport.getTypeEnum().getValue());
-        values.put(Transport.COLUMN_ADULTPRICE, transport.getAdultPrice());
-        values.put(Transport.COLUMN_CHILDPRICE, transport.getChildPrice());
-        values.put(Transport.COLUMN_DEP_STATION, transport.getDepartureStation());
-        values.put(Transport.COLUMN_DES_STATION, transport.getDestinationStation());
+        values.put(Transport.COLUMN_ADULT_PRICE, transport.getAdultPrice());
+        values.put(Transport.COLUMN_CHILD_PRICE, transport.getChildPrice());
+        values.put(Transport.COLUMN_DEPARTURE_STATION, transport.getDepartureStation());
+        values.put(Transport.COLUMN_DESTINATION_STATION, transport.getDestinationStation());
 
 
         return getWritableDatabase().insertWithOnConflict(
@@ -270,19 +269,19 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
 
         String sql = "INSERT OR ROLLBACK INTO " + Transport.TABLE_NAME + " (" +
                 Transport.COLUMN_ID + ", " +
-                Transport.COLUMN_ROUTENUM + ", " +
+                Transport.COLUMN_ROUTE_NUMBER + ", " +
                 Transport.COLUMN_TYPE + ", " +
-                Transport.COLUMN_ADULTPRICE + ", " +
-                Transport.COLUMN_CHILDPRICE + ", " +
-                Transport.COLUMN_DEP_STATION + ", " +
-                Transport.COLUMN_DES_STATION + ")  VALUES(?, ?, ?, ?, ?, ?, ?);";
+                Transport.COLUMN_ADULT_PRICE + ", " +
+                Transport.COLUMN_CHILD_PRICE + ", " +
+                Transport.COLUMN_DEPARTURE_STATION + ", " +
+                Transport.COLUMN_DESTINATION_STATION + ")  VALUES(?, ?, ?, ?, ?, ?, ?);";
 
         try {
             SQLiteStatement statement = database.compileStatement(sql);
 
             for (Transport transport : transports) {
                 statement.bindLong(1, transport.getId());
-                statement.bindString(2, transport.getRouteNum());
+                statement.bindString(2, transport.getRouteNumber());
                 statement.bindLong(3, transport.getTypeEnum().getValue());
                 statement.bindDouble(4, transport.getAdultPrice());
                 statement.bindDouble(5, transport.getChildPrice());

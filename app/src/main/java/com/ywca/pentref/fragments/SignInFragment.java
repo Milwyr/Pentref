@@ -118,14 +118,6 @@ public class SignInFragment extends Fragment implements
         mGoogleSignOutButton = (Button) rootView.findViewById(R.id.sign_out_button);
         mGoogleSignOutButton.setOnClickListener(this);
 
-        Button tempButton = (Button) rootView.findViewById(R.id.temp_button);
-        tempButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(getActivity(), PoiDetailActiviy.class));
-            }
-        });
-
         return rootView;
     }
 

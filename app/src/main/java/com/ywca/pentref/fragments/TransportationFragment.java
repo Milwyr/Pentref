@@ -2,11 +2,18 @@ package com.ywca.pentref.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.ywca.pentref.R;
+import com.ywca.pentref.common.TransportRecyclerViewAdapter;
+import com.ywca.pentref.models.Transport;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,8 +60,26 @@ public class TransportationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View rootVIew = inflater.inflate(R.layout.fragment_transportation, container, false);
+        RecyclerView recyclerView = (RecyclerView) rootVIew.findViewById(R.id.transport_recycler_view);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        recyclerView.setHasFixedSize(true);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+
+        List<Transport> transportList = new ArrayList<>();
+        transportList.add(new Transport(123, "1A", Transport.TypeEnum.BUS, 20f, 1.0f, "Tai O", "Tsim Sha Tsui"));
+        transportList.add(new Transport(456, "1S", Transport.TypeEnum.BUS, 10f, 5.0f, "Tai O", "Tsing Yi"));
+        transportList.add(new Transport(789, "2C", Transport.TypeEnum.BUS, 15f, 7.5f, "Tai O", "Central"));
+        TransportRecyclerViewAdapter adapter =
+                new TransportRecyclerViewAdapter(R.layout.transport_card_layout, transportList);
+        recyclerView.setAdapter(adapter);
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_transportation, container, false);
+        return rootVIew;
     }
 
 }

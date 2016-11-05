@@ -8,12 +8,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ywca.pentref.fragments.SignInFragment">
 
-    <Button
-        android:id="@+id/temp_button"
-        android:layout_alignParentTop="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
     <com.facebook.login.widget.LoginButton
         android:id="@+id/facebook_sign_in_button"
         android:layout_width="match_parent"
