@@ -8,8 +8,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ywca.pentref.fragments.SignInFragment">
 
-    <TextView
-        android:id="@+id/name_text_view"
+    <Button
+        android:id="@+id/temp_button"
+        android:layout_alignParentTop="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
