@@ -20,7 +20,7 @@
             android:value="AIzaSyDguzZCUexPJKuUApa3ZoYIPnOeGUtQPwk" />
 
         <activity
-            android:name="com.ywca.pentref.activities.MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -29,6 +29,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activities.PoiDetailActiviy"
+            android:label="@string/title_activity_poi_detail_activiy"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>
