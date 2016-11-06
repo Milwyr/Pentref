@@ -13,6 +13,9 @@
     <string name="transportation">Transportation</string>
     <string name="settings">Settings</string>
 
+    <!-- Timetable activity -->
+    <string name="adult_price">Adult price: </string>
+
       <string name="cheese_ipsum">Jarlsberg lancashire edam. Dolcelatte hard cheese brie st. agur blue
     cheese caerphilly bavarian bergkase cheese and biscuits mascarpone. Cheeseburger swiss bavarian
     bergkase cream cheese fromage frais cheesy feet port-salut airedale. St. agur blue cheese rubber

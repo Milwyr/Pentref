@@ -1,15 +1,12 @@
 package com.ywca.pentref.models;
 
-import android.databinding.BaseObservable;
-import android.databinding.Bindable;
-
 import com.google.android.gms.maps.model.LatLng;
 
 /**
  * A Poi (Point of Interest) encapsulates information about a physical location,
  * including its name, address, and other relevant information.
  */
-public class Poi extends BaseObservable {
+public class Poi {
     //region Constants
     public static final String TABLE_NAME = "Poi";
     public static final String COLUMN_ID = "id";
@@ -46,22 +43,18 @@ public class Poi extends BaseObservable {
         return this.id;
     }
 
-    @Bindable
     public String getName() {
         return this.name;
     }
 
-    @Bindable
     public String getDescription() {
         return this.description;
     }
 
-    @Bindable
     public String getWebsiteUri() {
         return this.websiteUri;
     }
 
-    @Bindable
     public String getAddress() {
         return this.address;
     }

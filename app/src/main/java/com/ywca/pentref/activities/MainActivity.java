@@ -10,6 +10,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,6 +48,7 @@ public class MainActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initialiseComponents();
+//        fetchJsonFromServer();
 
         getFragmentManager().beginTransaction().add(
                 R.id.frame, DiscoverFragment.newInstance("")).commit();
@@ -146,13 +148,11 @@ public class MainActivity extends BaseActivity
         navigationView.getMenu().getItem(0).setChecked(true);
 
         mDbHelper = LocalDatabaseHelper.getInstance(this);
-        // fetchJsonFromServer();
     }
 
     private void fetchJsonFromServer() {
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        // Put a JSON file on this website http://www.jsonblob.com
         String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
         String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transports.json";
 
@@ -169,7 +169,7 @@ public class MainActivity extends BaseActivity
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                String temp = "123";
+                Log.e("MainActivity", error.getMessage());
             }
         });
 
@@ -186,7 +186,7 @@ public class MainActivity extends BaseActivity
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                String temp = "123";
+                Log.e("MainActivity", error.getMessage());
             }
         });
 

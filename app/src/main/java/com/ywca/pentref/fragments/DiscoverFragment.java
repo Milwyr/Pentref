@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -19,7 +18,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailActiviy;
-import com.ywca.pentref.databinding.FragmentDiscoverBinding;
 import com.ywca.pentref.models.Poi;
 
 /**
@@ -83,19 +81,14 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Reference: https://developer.android.com/topic/libraries/data-binding/index.html
-        // Bind the layout to the object of type Poi so the views
-        FragmentDiscoverBinding binding = DataBindingUtil
-                .inflate(inflater, R.layout.fragment_discover, container, false);
-        binding.setPoi(mPoi);
+        View rootView = inflater.inflate(R.layout.fragment_discover, container, false);
 
-        View v = binding.getRoot();
-        mMapView = (MapView) v.findViewById(R.id.map_view);
+        mMapView = (MapView) rootView.findViewById(R.id.map_view);
         mMapView.onCreate(savedInstanceState);
         mMapView.getMapAsync(this);
 
         // Inflate the layout for this fragment
-        return v;
+        return rootView;
     }
 
     @Override

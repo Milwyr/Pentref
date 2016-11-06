@@ -1,19 +1,15 @@
 package com.ywca.pentref.models;
 
-import android.databinding.BaseObservable;
-import android.databinding.Bindable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
-import com.ywca.pentref.BR;
 
 /**
  * Encapsulates the information of a transportation (bus or ferry) such as
  * price, departure station and destination station.
  */
-
-public class Transport extends BaseObservable implements Parcelable {
+public class Transport implements Parcelable {
     //region Constants
     public static final String TABLE_NAME = "TRANSPORTATION";
     public static final String COLUMN_ID = "ID";
@@ -55,27 +51,22 @@ public class Transport extends BaseObservable implements Parcelable {
         return this.typeEnum;
     }
 
-    @Bindable
     public String getRouteNumber() {
         return this.routeNumber;
     }
 
-    @Bindable
     public float getAdultPrice() {
         return this.adultPrice;
     }
 
-    @Bindable
     public float getChildPrice() {
         return this.childPrice;
     }
 
-    @Bindable
     public String getDepartureStation() {
         return this.departureStation;
     }
 
-    @Bindable
     public String getDestinationStation() {
         return this.destinationStation;
     }
@@ -84,12 +75,10 @@ public class Transport extends BaseObservable implements Parcelable {
     //region Setter methods
     public void setAdultPrice(float adultPrice) {
         this.adultPrice = adultPrice;
-        notifyPropertyChanged(BR.adultPrice);
     }
 
     public void setChildPrice(float childPrice) {
         this.childPrice = childPrice;
-        notifyPropertyChanged(BR.childPrice);
     }
     //endregion
 

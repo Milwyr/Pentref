@@ -2,15 +2,13 @@ package com.ywca.pentref.common;
 
 import android.content.Context;
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-import com.ywca.pentref.BR;
-import com.ywca.pentref.activities.MainActivity;
+import com.ywca.pentref.R;
 import com.ywca.pentref.activities.TimetableActivity;
 import com.ywca.pentref.models.Transport;
 
@@ -28,15 +26,21 @@ public class TransportRecyclerViewAdapter extends
     private List<Transport> mTransports;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        private ViewDataBinding binding;
+        private View rootView;
+        private TextView routeNumberTextView;
+        private TextView departureStationTextView;
+        private TextView destinationStationTextView;
+        private TextView firstTransportTimeTextView;
+        private TextView lastTransportTimeTextView;
 
-        ViewHolder(ViewDataBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-        }
-
-        ViewDataBinding getBinding() {
-            return this.binding;
+        ViewHolder(View view) {
+            super(view);
+            rootView = view;
+            routeNumberTextView = (TextView) view.findViewById(R.id.route_number_text_view);
+            departureStationTextView = (TextView) view.findViewById(R.id.departure_station_text_view);
+            destinationStationTextView = (TextView) view.findViewById(R.id.destination_station_text_view);
+            firstTransportTimeTextView = (TextView) view.findViewById(R.id.first_transport_time_text_view);
+            lastTransportTimeTextView = (TextView) view.findViewById(R.id.last_transport_time_text_view);
         }
     }
 
@@ -58,17 +62,15 @@ public class TransportRecyclerViewAdapter extends
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-        ViewDataBinding binding = DataBindingUtil.inflate(LayoutInflater.from(
-                parent.getContext()), mLayoutId, parent, false);
-        return new ViewHolder(binding);
+        View rootView = LayoutInflater.from(mContext).inflate(mLayoutId, parent, false);
+        return new ViewHolder(rootView);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Transport transport = mTransports.get(position);
-        holder.getBinding().setVariable(BR.transport, transport);
-        holder.getBinding().executePendingBindings();
-        holder.getBinding().getRoot().setOnClickListener(new View.OnClickListener() {
+
+        holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, TimetableActivity.class);
@@ -76,6 +78,14 @@ public class TransportRecyclerViewAdapter extends
                 mContext.startActivity(intent);
             }
         });
+
+        holder.routeNumberTextView.setText(transport.getRouteNumber());
+        holder.departureStationTextView.setText(transport.getDepartureStation());
+        holder.destinationStationTextView.setText(transport.getDestinationStation());
+
+        // TODO: Add fields in the transport object
+        holder.firstTransportTimeTextView.setText("First bus: 5am");
+        holder.lastTransportTimeTextView.setText("Last bus: 11pm");
     }
 
     @Override
