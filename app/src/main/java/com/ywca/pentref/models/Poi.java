@@ -1,12 +1,15 @@
 package com.ywca.pentref.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
 
 /**
  * A Poi (Point of Interest) encapsulates information about a physical location,
  * including its name, address, and other relevant information.
  */
-public class Poi {
+public class Poi implements Parcelable {
     //region Constants
     public static final String TABLE_NAME = "Poi";
     public static final String COLUMN_ID = "id";
@@ -62,4 +65,44 @@ public class Poi {
     public LatLng getLatLng() {
         return new LatLng(this.latitude, this.longitude);
     }
+
+    //region Code to implement Parcelable
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int i) {
+        out.writeLong(this.id);
+        out.writeString(this.name);
+        out.writeString(this.description);
+        out.writeString(this.websiteUri);
+        out.writeString(this.address);
+        out.writeDouble(this.latitude);
+        out.writeDouble(this.longitude);
+    }
+
+    private Poi(Parcel in) {
+        this.id = in.readLong();
+        this.name = in.readString();
+        this.description = in.readString();
+        this.websiteUri = in.readString();
+        this.address = in.readString();
+        this.latitude = in.readDouble();
+        this.longitude = in.readDouble();
+    }
+
+    public static final Creator<Poi> CREATOR = new Creator<Poi>() {
+        @Override
+        public Poi createFromParcel(Parcel in) {
+            return new Poi(in);
+        }
+
+        @Override
+        public Poi[] newArray(int size) {
+            return new Poi[size];
+        }
+    };
+    //endregion
 }

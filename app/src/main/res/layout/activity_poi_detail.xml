@@ -11,139 +11,216 @@
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/detail_backdrop_height"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleMarginEnd="64dp"
             app:expandedTitleMarginStart="48dp"
-            app:expandedTitleMarginEnd="64dp">
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <ImageView
                 android:id="@+id/backdrop"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
                 android:fitsSystemWindows="true"
+                android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax" />
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
     </android.support.design.widget.AppBarLayout>
 
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:clickable="true"
+        android:src="@drawable/ic_bookmark_black_24dp"
+        app:layout_anchor="@id/appbar"
+        app:layout_anchorGravity="bottom|right|end" />
+
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingStart="@dimen/activity_horizontal_margin"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingTop="24dp">
+            android:paddingTop="16dp">
 
             <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/card_margin">
+                android:id="@+id/tag1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
-                <LinearLayout
-                    style="@style/Widget.CardContent"
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Info"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/cheese_ipsum" />
-
-                </LinearLayout>
-
+                    android:layout_height="wrap_content"
+                    android:text="Restaurant" />
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
+                android:id="@+id/tag2"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/card_margin"
-                android:layout_marginLeft="@dimen/card_margin"
-                android:layout_marginRight="@dimen/card_margin">
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_toEndOf="@id/tag1">
 
-                <LinearLayout
-                    style="@style/Widget.CardContent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Rating"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/cheese_ipsum" />
-
-                </LinearLayout>
-
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="History" />
             </android.support.v7.widget.CardView>
 
-            <android.support.v7.widget.CardView
+            <RatingBar
+                android:id="@+id/rating_bar_main"
+                style="?android:attr/ratingBarStyleIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tag1"
+                android:numStars="5"
+                android:rating="4"
+                android:stepSize="1" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/rating_bar_main"
+                android:layout_marginStart="16dp"
+                android:layout_toEndOf="@id/rating_bar_main"
+                android:text="4/5"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+            <TextView
+                android:id="@+id/temp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/card_margin"
-                android:layout_marginLeft="@dimen/card_margin"
-                android:layout_marginRight="@dimen/card_margin">
+                android:layout_below="@id/rating_bar_main"
+                android:textSize="18sp"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:text="@string/place_info"
+                android:textColor="@color/black" />
+            <!--android:textAppearance="@style/TextAppearance.AppCompat.Title" />-->
 
-                <LinearLayout
-                    style="@style/Widget.CardContent"
+            <TextView
+                android:id="@+id/all_reviews_title_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/temp"
+                android:layout_marginTop="16dp"
+                android:text="@string/all_reviews"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+            <LinearLayout
+                android:id="@+id/first_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/all_reviews_title_text_view"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_menu_camera" />
+
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Comments"
+                        android:id="@+id/review1_name"
+                        android:text="Rachel"
                         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
+                    <RatingBar
+                        android:id="@+id/ratingbar2"
+                        android:layout_alignParentEnd="true"
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:numStars="5"
+                        android:rating="3"
+                        android:stepSize="1" />
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/cheese_ipsum" />
+                        android:layout_below="@id/review1_name"
+                        android:text="@string/user_review" />
+                </RelativeLayout>
+            </LinearLayout>
 
-                </LinearLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/first_row"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
 
-            </android.support.v7.widget.CardView>
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:id="@+id/review2_image"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_menu_camera" />
 
-        </LinearLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_toEndOf="@id/review2_image"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:id="@+id/review2_name"
+                        android:layout_height="wrap_content"
+                        android:text="Mark"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+                    <RatingBar
+                        android:id="@+id/ratingbar1"
+                        android:layout_alignParentEnd="true"
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:numStars="5"
+                        android:rating="4"
+                        android:stepSize="1" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/review2_name"
+                        android:text="@string/user_review_2" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+        </RelativeLayout>
 
     </android.support.v4.widget.NestedScrollView>
-
-    <android.support.design.widget.FloatingActionButton
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        app:layout_anchor="@id/appbar"
-        app:layout_anchorGravity="bottom|right|end"
-        android:src="@drawable/ic_menu_camera"
-        android:layout_margin="@dimen/fab_margin"
-        android:clickable="true"/>
 
 </android.support.design.widget.CoordinatorLayout>

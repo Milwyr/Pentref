@@ -13,17 +13,25 @@
     <string name="transportation">Transportation</string>
     <string name="settings">Settings</string>
 
+    <!-- Poi Details Activity -->
+    <string name="all_reviews">All reviews</string>
+
     <!-- Timetable activity -->
     <string name="adult_price">Adult price: </string>
 
-      <string name="cheese_ipsum">Jarlsberg lancashire edam. Dolcelatte hard cheese brie st. agur blue
-    cheese caerphilly bavarian bergkase cheese and biscuits mascarpone. Cheeseburger swiss bavarian
-    bergkase cream cheese fromage frais cheesy feet port-salut airedale. St. agur blue cheese rubber
-    cheese caerphilly cheddar cheesecake cream cheese manchego lancashire. Roquefort squirty cheese
-    the big cheese.</string>
+    <string name="place_info">
+        Place:Tai O, NT, Hong Kong\n
+        Web  :www.tai-0.com\n
+        Phone:65871092\n
+        Working time: 9:00 - 17:00
+    </string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="user_review">This is good. This is good. This is good. This is good.This is good.
+        This is good. This is good. This is good. This is good.</string>
+
+    <string name="user_review_2">This is good. This is good. This is good. This is good. This is
+good. This is good. This is good. This is good. This is good.This is good. This is good. This is
+good. This is good.This is good. This is good. This is good. This is good. This is good.</string>
 
     <string name="facebook_app_id">195665774189937</string>
     <string name="sign_out">Sign Out</string>

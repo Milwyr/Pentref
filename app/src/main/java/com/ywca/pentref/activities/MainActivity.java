@@ -156,7 +156,7 @@ public class MainActivity extends BaseActivity
         String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
         String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transports.json";
 
-        JsonArrayRequest PoiJsonArrayRequest = new JsonArrayRequest(
+        JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -190,7 +190,7 @@ public class MainActivity extends BaseActivity
             }
         });
 
-        queue.add(PoiJsonArrayRequest);
+        queue.add(poiJsonArrayRequest);
         queue.add(transportJsonArrayRequest);
     }
 }
