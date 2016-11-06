@@ -31,9 +31,13 @@
         </activity>
         <activity
             android:name=".activities.PoiDetailActiviy"
-            android:label="@string/title_activity_poi_detail_activiy"
+            android:label="@string/title_activity_poi_detail"
             android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activities.TimetableActivity"
+            android:label="@string/title_activity_timetable"
+            android:parentActivityName=".activities.MainActivity" />
     </application>
 
 </manifest>
