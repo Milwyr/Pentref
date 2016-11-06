@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.PoiDetailActiviy"
+            android:name=".activities.PoiDetailsActivity"
             android:label="@string/title_activity_poi_detail"
             android:parentActivityName=".activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />

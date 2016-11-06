@@ -1,14 +1,25 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.ywca.pentref.fragments.DiscoverFragment">
 
+    <!-- Zoom to Tai O by default -->
     <com.google.android.gms.maps.MapView
         android:id="@+id/map_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        map:cameraTargetLat="22.2574336"
+        map:cameraTargetLng="113.8620642"
+        map:cameraZoom="15"
+        map:mapType="normal"
+        map:uiCompass="true"
+        map:uiRotateGestures="true"
+        map:uiZoomControls="false"
+        map:uiZoomGestures="true" />
 
+    <!-- A view that shows summary of the selected Point of Interest -->
     <android.support.v7.widget.CardView
         android:id="@+id/poi_summary_card_view"
         android:layout_width="match_parent"
@@ -68,7 +79,7 @@
                 android:layout_centerHorizontal="true"
                 android:text="More"
                 android:textColor="@color/black"
-                android:textSize="20sp" />
+                android:textSize="16sp" />
         </RelativeLayout>
 
     </android.support.v7.widget.CardView>

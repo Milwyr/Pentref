@@ -8,12 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-
-import com.ywca.pentref.R;
-
-import static android.view.View.GONE;
 
 /**
  * A simple {@link Fragment} subclass.

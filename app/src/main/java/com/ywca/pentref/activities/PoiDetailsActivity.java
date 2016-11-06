@@ -3,18 +3,14 @@ package com.ywca.pentref.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.View;
 import android.widget.ImageView;
 
-
 import com.ywca.pentref.R;
+import com.ywca.pentref.models.Poi;
 
-public class PoiDetailActiviy extends AppCompatActivity {
+public class PoiDetailsActivity extends AppCompatActivity {
 
 //    public static final String EXTRA_NAME = "POIName";
     
@@ -25,24 +21,33 @@ public class PoiDetailActiviy extends AppCompatActivity {
 
         Intent intent = getIntent();
 //        final String POIName = intent.getStringExtra(EXTRA_NAME);
-        
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        CollapsingToolbarLayout collapsingToolbar =
-                (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        collapsingToolbar.setTitle("POIName");
+        initialiseComponents();
 
         loadBackdrop();
     }
 
-    private void loadBackdrop() {
-        final ImageView imageView = (ImageView) findViewById(R.id.backdrop);
-//        Glide.with(this).load("tianleecourt").centerCrop().into(imageView);
-//        imageView.setImageBitmap();
-        imageView.setImageDrawable(getResources().getDrawable(R.drawable.poi30, null));
+    private void initialiseComponents() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        Poi poi = null;
+        if (getIntent() != null) {
+            poi = getIntent().getParcelableExtra("SelectedPoi");
+        }
+
+        CollapsingToolbarLayout collapsingToolbar =
+                (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        collapsingToolbar.setTitle("POIName");
     }
 
+    private void loadBackdrop() {
+        final ImageView imageView = (ImageView) findViewById(R.id.backdrop);
+        imageView.setImageDrawable(getResources().getDrawable(R.drawable.poi30, null));
+    }
 }

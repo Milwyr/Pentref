@@ -8,36 +8,50 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 import com.ywca.pentref.R;
-import com.ywca.pentref.activities.PoiDetailActiviy;
+import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.models.Poi;
+
+import org.json.JSONArray;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Use the {@link DiscoverFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 // Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
-public class DiscoverFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener {
+public class DiscoverFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
     // TODO: Rename parameter arguments, choose names that match
     private static final String ARG_PARAM1 = "param1";
 
-    private final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
+    private final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
 
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
-    private Poi mPoi;
+    private Poi mSelectedPoi;
 
     public DiscoverFragment() {
         // Required empty public constructor
@@ -66,7 +80,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
             mParam1 = getArguments().getString(ARG_PARAM1);
         }
 
-//        mPoi = new Poi(12345, "Tai O", "Beautiful", "www.google.com.hk", "Address", null);
+//        mSelectedPoi = new Poi(12345, "Tai O", "Beautiful", "www.google.com.hk", "Address", null);
     }
 
     @Override
@@ -78,7 +92,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
 
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
-            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
+            mapViewBundle = savedInstanceState.getBundle(MAP_VIEW_BUNDLE_KEY);
         }
 
         mMapView.onCreate(mapViewBundle);
@@ -95,20 +109,16 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        Bundle mapViewBundle = outState.getBundle(MAPVIEW_BUNDLE_KEY);
+        Bundle mapViewBundle = outState.getBundle(MAP_VIEW_BUNDLE_KEY);
         if (mapViewBundle == null) {
             mapViewBundle = new Bundle();
-            outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle);
+            outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle);
         }
         mMapView.onSaveInstanceState(outState);
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        // Zoom to Tai O by default
-        LatLng taiOLatLng = new LatLng(22.2574336, 113.8620642);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(taiOLatLng, 15));
-
+    public void onMapReady(final GoogleMap googleMap) {
         // Request location permissions if not granted
         if ((ContextCompat.checkSelfPermission(getActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
@@ -119,24 +129,59 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
                             Manifest.permission.ACCESS_COARSE_LOCATION}, 10000);
         }
 
-        googleMap.setMyLocationEnabled(true);
-
         // TODO: Should display a POI summary instead
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                mPoiSummaryCardView.setVisibility(View.VISIBLE);
+                mPoiSummaryCardView.setVisibility(View.GONE);
             }
         });
+
+        // TODO: Load data offline when available
+        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
+        JsonArrayRequest PoiJsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                Gson gson = new Gson();
+                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
+
+                for (Poi poi: pois) {
+                    googleMap.addMarker(new MarkerOptions()
+                            .title(poi.getName())
+                            .position(poi.getLatLng())).setTag(poi);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("MainActivity", error.getMessage());
+            }
+        });
+
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        queue.add(PoiJsonArrayRequest);
+
+        googleMap.setMyLocationEnabled(true);
+        googleMap.setOnMarkerClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.poi_summary_card_view:
-                startActivity(new Intent(getActivity(), PoiDetailActiviy.class));
+                Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
+                intent.putExtra("SelectedPoi", mSelectedPoi);
+                startActivity(intent);
                 break;
         }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        mSelectedPoi = (Poi) marker.getTag();
+        mPoiSummaryCardView.setVisibility(View.VISIBLE);
+        return false;
     }
 
     // Map view requires these lifecycle methods to be forwarded to itself

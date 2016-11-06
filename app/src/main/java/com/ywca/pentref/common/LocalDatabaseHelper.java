@@ -13,8 +13,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.ywca.pentref.models.Poi;
 import com.ywca.pentref.models.Transport;
 
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.List;
 
