@@ -52,86 +52,158 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingTop="24dp">
+            android:paddingTop="16dp">
 
-            <android.support.v7.widget.CardView
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginLeft="16dp">
+
+                <android.support.v7.widget.CardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="5dp"
+                        android:text="Restaurant"/>
+                </android.support.v7.widget.CardView>
+
+                <android.support.v7.widget.CardView
+                    android:layout_width="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="5dp"
+                        android:text="History"/>
+                </android.support.v7.widget.CardView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginLeft="16dp">
+                <RatingBar
+                    android:id="@+id/ratingbarmain"
+                    style="?android:attr/ratingBarStyleIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:stepSize="1"
+                    android:rating="4"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="4/5"
+                    android:layout_marginLeft="16dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+            </LinearLayout>
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/card_margin">
+                android:padding="@dimen/card_margin"
+                android:text="@string/place_info" />
+                <!--android:textAppearance="@style/TextAppearance.AppCompat.Title" />-->
 
-                <LinearLayout
-                    style="@style/Widget.CardContent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Info"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/cheese_ipsum" />
-
-                </LinearLayout>
-
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/card_margin"
-                android:layout_marginLeft="@dimen/card_margin"
-                android:layout_marginRight="@dimen/card_margin">
+                android:layout_marginTop="16dp"
+                android:layout_marginLeft="16dp"
+                android:text="All Review"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
-                <LinearLayout
-                    style="@style/Widget.CardContent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Rating"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/cheese_ipsum" />
-
-                </LinearLayout>
-
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/card_margin"
-                android:layout_marginLeft="@dimen/card_margin"
-                android:layout_marginRight="@dimen/card_margin">
-
+                android:layout_marginTop="16dp"
+                android:layout_marginLeft="16dp"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_menu_camera"/>
                 <LinearLayout
-                    style="@style/Widget.CardContent"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Rachel"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+                        <RatingBar
+                            android:id="@+id/ratingbar2"
+                            style="?android:attr/ratingBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:numStars="5"
+                            android:stepSize="1"
+                            android:rating="3"/>
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Comments"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/cheese_ipsum" />
-
+                        android:text="@string/user_review"/>
                 </LinearLayout>
+            </LinearLayout>
 
-            </android.support.v7.widget.CardView>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginLeft="16dp"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_menu_camera"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Mark"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+                        <RatingBar
+                            android:id="@+id/ratingbar1"
+                            style="?android:attr/ratingBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:numStars="5"
+                            android:stepSize="1"
+                            android:rating="4"/>
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/user_review_2"/>
+                </LinearLayout>
+            </LinearLayout>
 
         </LinearLayout>
 
