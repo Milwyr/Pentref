@@ -16,9 +16,10 @@
             android:id="@+id/route_number_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
             android:text="Medium Text"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/departure_station_text_view"
@@ -26,6 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
             android:text="Medium Text"
             android:textColor="@color/black" />
 
@@ -34,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
+            android:layout_alignTop="@+id/departure_station_text_view"
             android:text="Medium Text"
             android:textColor="@color/black" />
 

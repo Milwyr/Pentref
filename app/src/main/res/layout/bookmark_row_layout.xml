@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/activity_horizontal_margin">
+
+    <ImageView
+        android:id="@+id/poi_type_row_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_place_black_36dp" />
+
+    <TextView
+        android:id="@+id/place_name_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/poi_type_row_icon"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_toEndOf="@id/poi_type_row_icon"
+        android:text="Tai O YWCA Centre"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/address_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/place_name_text_view"
+        android:layout_below="@id/place_name_text_view"
+        android:layout_marginTop="4dp"
+        android:text="Tai O, New Territories, Hong Kong"
+        android:textColor="@color/black" />
+
+    <ImageView
+        android:id="@+id/bookmarked_image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_bookmarked_black_36dp" />
+
+</RelativeLayout>

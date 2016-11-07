@@ -48,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:src="@drawable/ic_bookmark_black_24dp" />
+                android:src="@drawable/ic_bookmark_black_36dp" />
 
             <RatingBar
                 android:id="@+id/rating_bar"
