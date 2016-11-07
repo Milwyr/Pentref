@@ -1,4 +1,4 @@
-package com.ywca.pentref.common;
+package com.ywca.pentref.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An adapter that provides a displays a data set on a RecyclerView using the given layout.
+ * An adapter that provides a displays a list of transportation items on a RecyclerView using the given layout.
  */
 public class TransportRecyclerViewAdapter extends
         RecyclerView.Adapter<TransportRecyclerViewAdapter.ViewHolder> {
@@ -24,25 +24,6 @@ public class TransportRecyclerViewAdapter extends
     private Context mContext;
     private int mLayoutId;
     private List<Transport> mTransports;
-
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        private View rootView;
-        private TextView routeNumberTextView;
-        private TextView departureStationTextView;
-        private TextView destinationStationTextView;
-        private TextView firstTransportTimeTextView;
-        private TextView lastTransportTimeTextView;
-
-        ViewHolder(View view) {
-            super(view);
-            rootView = view;
-            routeNumberTextView = (TextView) view.findViewById(R.id.route_number_text_view);
-            departureStationTextView = (TextView) view.findViewById(R.id.departure_station_text_view);
-            destinationStationTextView = (TextView) view.findViewById(R.id.destination_station_text_view);
-            firstTransportTimeTextView = (TextView) view.findViewById(R.id.first_transport_time_text_view);
-            lastTransportTimeTextView = (TextView) view.findViewById(R.id.last_transport_time_text_view);
-        }
-    }
 
     /**
      * Constructor
@@ -91,5 +72,24 @@ public class TransportRecyclerViewAdapter extends
     @Override
     public int getItemCount() {
         return (mTransports == null) ? 0 : mTransports.size();
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        private View rootView;
+        private TextView routeNumberTextView;
+        private TextView departureStationTextView;
+        private TextView destinationStationTextView;
+        private TextView firstTransportTimeTextView;
+        private TextView lastTransportTimeTextView;
+
+        ViewHolder(View view) {
+            super(view);
+            rootView = view;
+            routeNumberTextView = (TextView) view.findViewById(R.id.route_number_text_view);
+            departureStationTextView = (TextView) view.findViewById(R.id.departure_station_text_view);
+            destinationStationTextView = (TextView) view.findViewById(R.id.destination_station_text_view);
+            firstTransportTimeTextView = (TextView) view.findViewById(R.id.first_transport_time_text_view);
+            lastTransportTimeTextView = (TextView) view.findViewById(R.id.last_transport_time_text_view);
+        }
     }
 }

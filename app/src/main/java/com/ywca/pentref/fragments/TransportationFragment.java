@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ywca.pentref.R;
-import com.ywca.pentref.common.TransportRecyclerViewAdapter;
+import com.ywca.pentref.adapters.TransportRecyclerViewAdapter;
 import com.ywca.pentref.models.Transport;
 
 import java.util.ArrayList;
