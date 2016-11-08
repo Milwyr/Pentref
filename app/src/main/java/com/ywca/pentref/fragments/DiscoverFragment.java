@@ -25,6 +25,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -142,16 +143,22 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
-        // Request location permissions if not granted
+        //region Request coarse location and fine location permissions if not granted
         if ((ContextCompat.checkSelfPermission(getActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
                 (ContextCompat.checkSelfPermission(getActivity(),
                         Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION}, 10000);
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION}, 10000);
         }
+        //endregion
 
+        // Radius: 500m
+        googleMap.addCircle(new CircleOptions()
+                .center(new LatLng(22.2574336, 113.8620642))
+                .radius(500)
+                .strokeWidth(5));
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -169,7 +176,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
                 Gson gson = new Gson();
                 List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
 
-                for (Poi poi: pois) {
+                for (Poi poi : pois) {
                     googleMap.addMarker(new MarkerOptions()
                             .title(poi.getName())
                             .position(poi.getLatLng())).setTag(poi);
