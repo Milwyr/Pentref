@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -12,6 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -87,14 +89,13 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
         }
-
-//        mSelectedPoi = new Poi(12345, "Tai O", "Beautiful", "www.google.com.hk", "Address", null);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_discover, container, false);
+        setHasOptionsMenu(true);
 
         mMapView = (MapView) rootView.findViewById(R.id.map_view);
 
@@ -139,6 +140,19 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
             outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle);
         }
         mMapView.onSaveInstanceState(outState);
+    }
+
+    // TODO: Consider whether or not to launch CityMapper, and if yes, replace the hard coded values
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.go_to_tai_o) {
+            Uri uri = Uri.parse("http://citymapper.com/directions?startcoord=22.3567807,114.1142079&endcoord=22.2574336,\n" +
+                    "113.8620642&endname=Tai%20O&endaddress\n" +
+                    "=Tai&20O");
+            startActivity(new Intent(Intent.ACTION_VIEW, uri));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

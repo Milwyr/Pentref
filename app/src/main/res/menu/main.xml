@@ -6,4 +6,10 @@
         android:orderInCategory="100"
         android:title="@string/settings"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/go_to_tai_o"
+        android:orderInCategory="101"
+        android:title="Go to Tai O"
+        app:showAsAction="ifRoom" />
 </menu>
