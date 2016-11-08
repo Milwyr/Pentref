@@ -28,6 +28,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
+import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
 import org.json.JSONArray;
@@ -129,7 +130,6 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
                             Manifest.permission.ACCESS_COARSE_LOCATION}, 10000);
         }
 
-        // TODO: Should display a POI summary instead
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -171,7 +171,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
         switch (view.getId()) {
             case R.id.poi_summary_card_view:
                 Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
-                intent.putExtra("SelectedPoi", mSelectedPoi);
+                intent.putExtra(Utility.SELECTED_POI_EXTRA_NAME, mSelectedPoi);
                 startActivity(intent);
                 break;
         }
