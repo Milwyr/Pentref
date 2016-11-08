@@ -1,31 +1,28 @@
 package com.ywca.pentref.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.widget.ImageView;
 
 import com.ywca.pentref.R;
+import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
 public class PoiDetailsActivity extends AppCompatActivity {
 
-//    public static final String EXTRA_NAME = "POIName";
+    private Poi mSelectedPoi;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poi_detail);
 
-        Intent intent = getIntent();
-//        final String POIName = intent.getStringExtra(EXTRA_NAME);
-
+        if (getIntent() != null) {
+            mSelectedPoi = getIntent().getParcelableExtra(Utility.SELECTED_POI_EXTRA_NAME);
+        }
 
         initialiseComponents();
-
-        loadBackdrop();
     }
 
     private void initialiseComponents() {
@@ -36,18 +33,10 @@ public class PoiDetailsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        Poi poi = null;
-        if (getIntent() != null) {
-            poi = getIntent().getParcelableExtra("SelectedPoi");
-        }
-
         CollapsingToolbarLayout collapsingToolbar =
                 (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        collapsingToolbar.setTitle("POIName");
-    }
+        collapsingToolbar.setTitle(mSelectedPoi.getName());
 
-    private void loadBackdrop() {
-        final ImageView imageView = (ImageView) findViewById(R.id.backdrop);
-        imageView.setImageDrawable(getResources().getDrawable(R.drawable.poi30, null));
+        // TODO: Set data for views (address, website uri, phone number...)
     }
 }
