@@ -8,10 +8,13 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -28,11 +31,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
+import com.ywca.pentref.adapters.BookmarksRecyclerViewAdapter;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,6 +57,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
 
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
+    private RelativeLayout mBottomSheetRelativeLayout;
     private Poi mSelectedPoi;
 
     public DiscoverFragment() {
@@ -99,6 +105,22 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
         mMapView.onCreate(mapViewBundle);
         mMapView.getMapAsync(this);
 
+        mBottomSheetRelativeLayout = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet_relative_layout);
+
+        // TODO: Potentially create a new layout for this
+        RecyclerView bottomRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        bottomRecyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        bottomRecyclerView.setLayoutManager(layoutManager);
+        // TODO: Has to use read data
+        List<Poi> pois = new ArrayList<>();
+        pois.add(new Poi(1, "Temp", "Description", "www.yahoo.com", "Somewhere in Tai O", new LatLng(1, 2)));
+        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
+        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
+        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
+        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
+        bottomRecyclerView.setAdapter(new BookmarksRecyclerViewAdapter(R.layout.bookmark_row_layout, pois));
+
         mPoiSummaryCardView = (CardView) rootView.findViewById(R.id.poi_summary_card_view);
         mPoiSummaryCardView.setOnClickListener(this);
 
@@ -133,6 +155,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                mBottomSheetRelativeLayout.setVisibility(View.VISIBLE);
                 mPoiSummaryCardView.setVisibility(View.GONE);
             }
         });
@@ -179,6 +202,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        mBottomSheetRelativeLayout.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
         return false;
