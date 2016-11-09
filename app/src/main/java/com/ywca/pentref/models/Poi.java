@@ -2,6 +2,7 @@ package com.ywca.pentref.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -9,7 +10,7 @@ import com.google.android.gms.maps.model.LatLng;
  * A Poi (Point of Interest) encapsulates information about a physical location,
  * including its name, address, and other relevant information.
  */
-public class Poi implements Parcelable {
+public class Poi implements Comparable, Parcelable {
     //region Constants
     public static final String TABLE_NAME = "Poi";
     public static final String COLUMN_ID = "id";
@@ -65,6 +66,30 @@ public class Poi implements Parcelable {
     public LatLng getLatLng() {
         return new LatLng(this.latitude, this.longitude);
     }
+
+    //region Comparison methods
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Poi) {
+            return this.id == ((Poi) other).getId();
+        }
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.valueOf(this.id).hashCode();
+    }
+
+    @Override
+    public int compareTo(@NonNull Object other) {
+        if (other instanceof Poi) {
+            return Long.valueOf(this.id).compareTo(((Poi) other).getId());
+        }
+        return 0;
+    }
+
+    //endregion
 
     //region Code to implement Parcelable
     @Override

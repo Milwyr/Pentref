@@ -13,8 +13,12 @@
     <string name="transportation">Transportation</string>
     <string name="settings">Settings</string>
 
-    <!-- Poi Details Activity -->
+    <!-- Poi details activity -->
     <string name="all_reviews">All reviews</string>
+
+    <!-- Transportation fragment -->
+    <string name="next_two_transports">Next two: </string>
+    <string name="temporary_route_number">11</string>
 
     <!-- Timetable activity -->
     <string name="adult_price">Adult price: </string>

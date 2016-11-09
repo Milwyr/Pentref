@@ -73,23 +73,4 @@ public class TimetableActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.go_to_tai_o) {
-            Uri uri = Uri.parse("http://citymapper.com/directions?startcoord=22.3567807,114.1142079&endcoord=22.2574336,\n" +
-                    "113.8620642&endname=Tai%20O&endaddress\n" +
-                    "=Tai&20O");
-            startActivity(new Intent(Intent.ACTION_VIEW, uri));
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

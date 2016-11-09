@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Reference: https://developer.android.com/guide/topics/data/autobackup.html -->
+<full-backup-content>
+    <include
+        domain="database"
+        path="Pentref.db" />
+    <include
+        domain="sharedpref"
+        path="." />
+</full-backup-content>

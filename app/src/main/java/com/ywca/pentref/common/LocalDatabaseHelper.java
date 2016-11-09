@@ -41,7 +41,7 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
      */
     public static synchronized LocalDatabaseHelper getInstance(Context context) {
         if (mDbInstance == null) {
-            mDbInstance = new LocalDatabaseHelper(context);
+            mDbInstance = new LocalDatabaseHelper(context.getApplicationContext());
         }
         return mDbInstance;
     }

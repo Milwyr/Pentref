@@ -65,8 +65,7 @@ public class TransportRecyclerViewAdapter extends
         holder.destinationStationTextView.setText(transport.getDestinationStation());
 
         // TODO: Add fields in the transport object
-        holder.firstTransportTimeTextView.setText("First bus: 5am");
-        holder.lastTransportTimeTextView.setText("Last bus: 11pm");
+        holder.nextTwoTransportsTimeTextView.setText("11:00pm, 11:30pm");
     }
 
     @Override
@@ -79,8 +78,7 @@ public class TransportRecyclerViewAdapter extends
         private TextView routeNumberTextView;
         private TextView departureStationTextView;
         private TextView destinationStationTextView;
-        private TextView firstTransportTimeTextView;
-        private TextView lastTransportTimeTextView;
+        private TextView nextTwoTransportsTimeTextView;
 
         ViewHolder(View view) {
             super(view);
@@ -88,8 +86,7 @@ public class TransportRecyclerViewAdapter extends
             routeNumberTextView = (TextView) view.findViewById(R.id.route_number_text_view);
             departureStationTextView = (TextView) view.findViewById(R.id.departure_station_text_view);
             destinationStationTextView = (TextView) view.findViewById(R.id.destination_station_text_view);
-            firstTransportTimeTextView = (TextView) view.findViewById(R.id.first_transport_time_text_view);
-            lastTransportTimeTextView = (TextView) view.findViewById(R.id.last_transport_time_text_view);
+            nextTwoTransportsTimeTextView = (TextView) view.findViewById(R.id.next_two_transports_time_text_view);
         }
     }
 }

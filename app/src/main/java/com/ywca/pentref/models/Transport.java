@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
  * Encapsulates the information of a transportation (bus or ferry) such as
  * price, departure station and destination station.
  */
-public class Transport implements Parcelable {
+public class Transport implements Comparable, Parcelable {
     //region Constants
     public static final String TABLE_NAME = "TRANSPORTATION";
     public static final String COLUMN_ID = "ID";
@@ -79,6 +79,29 @@ public class Transport implements Parcelable {
 
     public void setChildPrice(float childPrice) {
         this.childPrice = childPrice;
+    }
+    //endregion
+
+    //region Comparison methods
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Transport) {
+            return Long.valueOf(this.id).equals(((Transport) other).getId());
+        }
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.valueOf(this.id).hashCode();
+    }
+
+    @Override
+    public int compareTo(Object other) {
+        if (other instanceof Transport) {
+            return Long.valueOf(this.id).compareTo(((Transport) other).getId());
+        }
+        return 0;
     }
     //endregion
 
