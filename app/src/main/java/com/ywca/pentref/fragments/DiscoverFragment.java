@@ -95,13 +95,7 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
         View rootView = inflater.inflate(R.layout.fragment_discover, container, false);
 
         mMapView = (MapView) rootView.findViewById(R.id.map_view);
-
-        Bundle mapViewBundle = null;
-        if (savedInstanceState != null) {
-            mapViewBundle = savedInstanceState.getBundle(MAP_VIEW_BUNDLE_KEY);
-        }
-
-        mMapView.onCreate(mapViewBundle);
+        mMapView.onCreate(savedInstanceState);
         mMapView.getMapAsync(this);
 
         mBottomSheetRelativeLayout = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet_relative_layout);
@@ -130,12 +124,6 @@ public class DiscoverFragment extends Fragment implements OnMapReadyCallback, Vi
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        Bundle mapViewBundle = outState.getBundle(MAP_VIEW_BUNDLE_KEY);
-        if (mapViewBundle == null) {
-            mapViewBundle = new Bundle();
-            outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle);
-        }
         mMapView.onSaveInstanceState(outState);
     }
 

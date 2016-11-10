@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An adapter that provides a displays a list of POIs (Points of Interest) on a RecyclerView using the given layout.
+ * An adapter that displays a list of POIs (Points of Interest) on a RecyclerView using the given layout.
  */
 public class TimetableRecyclerAdapter extends
         RecyclerView.Adapter<TimetableRecyclerAdapter.ViewHolder> {

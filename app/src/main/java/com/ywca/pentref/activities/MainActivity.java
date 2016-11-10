@@ -50,8 +50,12 @@ public class MainActivity extends BaseActivity
         initialiseComponents();
 //        fetchJsonFromServer();
 
-        getFragmentManager().beginTransaction().add(
-                R.id.frame, DiscoverFragment.newInstance("")).commit();
+        // Display the discover fragment only when the app launches as
+        // savedInstanceState != null when orientation changes
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction().add(
+                    R.id.frame, DiscoverFragment.newInstance("")).commit();
+        }
     }
 
     @Override

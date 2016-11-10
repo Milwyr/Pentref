@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An adapter that provides a displays a list of transportation items on a RecyclerView using the given layout.
+ * An adapter that displays a list of transportation items on a RecyclerView using the given layout.
  */
 public class TransportRecyclerViewAdapter extends
         RecyclerView.Adapter<TransportRecyclerViewAdapter.ViewHolder> {
