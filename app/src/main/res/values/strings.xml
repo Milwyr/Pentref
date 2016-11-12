@@ -6,6 +6,9 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <!-- Search -->
+    <string name="search_hint">Enter text</string>
+
     <!-- Navigation drawer headers -->
     <string name="discover">Discover</string>
     <string name="bookmarks">Bookmarks</string>
@@ -33,13 +36,6 @@
         Phone:65871092\n
         Working time: 9:00 - 17:00
     </string>
-
-    <string name="user_review">This is good. This is good. This is good. This is good.This is good.
-        This is good. This is good. This is good. This is good.</string>
-
-    <string name="user_review_2">This is good. This is good. This is good. This is good. This is
-good. This is good. This is good. This is good. This is good.This is good. This is good. This is
-good. This is good.This is good. This is good. This is good. This is good. This is good.</string>
 
     <string name="facebook_app_id">195665774189937</string>
     <string name="sign_out">Sign Out</string>
