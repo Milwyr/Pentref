@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -35,7 +36,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Contract;
-import com.ywca.pentref.common.LocalDatabaseHelper;
+import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.fragments.BookmarksFragment;
 import com.ywca.pentref.fragments.DiscoverFragment;
 import com.ywca.pentref.fragments.SettingsFragment;
@@ -53,8 +54,6 @@ import java.util.List;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-    private LocalDatabaseHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,119 +150,38 @@ public class MainActivity extends BaseActivity
         String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
         String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transports.json";
 
-        new AsyncTask<Void, Void, Void>() {
-
+        // Read all Points of Interest from the server and add them to SQLite database
+        JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
-            protected Void doInBackground(Void... params) {
+            public void onResponse(JSONArray response) {
+                Gson gson = new Gson();
+                final List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
 
-                Cursor cursor = getContentResolver().query(Contract.Poi.CONTENT_URI, Contract.Poi.PROJECTION_ALL, null, null, null);
-                List<Poi> pois = new ArrayList<>();
+                new AsyncTask<Void, Void, Void>() {
 
-                cursor.moveToFirst();
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        for (final Poi poi : pois) {
+                            ContentValues values = PentrefProvider.getContentValues(poi);
 
-                while (!cursor.isAfterLast()) {
-                    long id = cursor.getLong(cursor.getColumnIndex(Contract.Poi.COLUMN_ID));
-                    String name = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_NAME));
-                    String description = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_DESCRIPTION));
-                    String websiteUri = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_WEBSITE_URI));
-                    String address = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_ADDRESS));
-                    double latitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LATITUDE));
-                    double longitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LONGITUDE));
+                            try {
+                                getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
+                            } catch (Exception e) {
+                                Log.e("MainActivity", e.getMessage());
+                            }
+                        }
 
-                    pois.add(new Poi(id, name, description, websiteUri, address, new LatLng(latitude, longitude)));
-
-                    cursor.moveToNext();
+                        return null;
+                    }
+                }.execute();
                 }
-                cursor.close();
-
-                return null;
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("MainActivity", error.getMessage());
             }
-        }.execute();
-
-//        getLoaderManager().initLoader(0, null, new LoaderManager.LoaderCallbacks<Cursor>() {
-//            @Override
-//            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-//                return new CursorLoader(MainActivity.this, Contract.Poi.CONTENT_URI, Contract.Poi.PROJECTION_ALL, null, null, null);
-//            }
-//
-//            @Override
-//            public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-////                Cursor c = getContentResolver().query(Contract.Poi.CONTENT_URI, Contract.Poi.PROJECTION_ALL, null, null, null);
-//                List<Poi> pois = new ArrayList<>();
-//
-//                String[] columns = {
-//                        Poi.COLUMN_ID,
-//                        Poi.COLUMN_NAME,
-//                        Poi.COLUMN_DESCRIPTION,
-//                        Poi.COLUMN_WEBSITE_URI,
-//                        Poi.COLUMN_ADDRESS,
-//                        Poi.COLUMN_LATITUDE,
-//                        Poi.COLUMN_LONGITUDE
-//                };
-//
-//                cursor.moveToFirst();
-//
-//                while (!cursor.isAfterLast()) {
-//                    long id = cursor.getLong(cursor.getColumnIndex(Contract.Poi.COLUMN_ID));
-//                    String name = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_NAME));
-//                    String description = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_DESCRIPTION));
-//                    String websiteUri = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_WEBSITE_URI));
-//                    String address = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_ADDRESS));
-//                    double latitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LATITUDE));
-//                    double longitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LONGITUDE));
-//
-//                    pois.add(new Poi(id, name, description, websiteUri, address, new LatLng(latitude, longitude)));
-//
-//                    cursor.moveToNext();
-//                }
-//                cursor.close();
-//            }
-//
-//            @Override
-//            public void onLoaderReset(Loader<Cursor> loader) {
-//
-//            }
-//        });
-
-//        JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
-//                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
-//            @Override
-//            public void onResponse(JSONArray response) {
-//                Gson gson = new Gson();
-//                final List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
-//
-//                new AsyncTask<Void, Void, Void>() {
-//
-//                    @Override
-//                    protected Void doInBackground(Void... params) {
-//                        for (final Poi poi : pois) {
-//                            ContentValues values = new ContentValues();
-//                                values.put(Contract.Poi.COLUMN_ID, poi.getId());
-//                            values.put(Contract.Poi.COLUMN_NAME, poi.getName());
-//                            values.put(Contract.Poi.COLUMN_DESCRIPTION, poi.getDescription());
-//                            values.put(Contract.Poi.COLUMN_WEBSITE_URI, poi.getWebsiteUri());
-//                            values.put(Contract.Poi.COLUMN_ADDRESS, poi.getAddress());
-//                            values.put(Contract.Poi.COLUMN_LATITUDE, poi.getLatLng().latitude);
-//                            values.put(Contract.Poi.COLUMN_LONGITUDE, poi.getLatLng().longitude);
-//                            values.put(Contract.Poi.COLUMN_TIMESTAMP, "To be implemented");
-//
-//                            try {
-//                                getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
-//                            } catch (Exception e) {
-//                                Log.e("MainActivity", e.getMessage());
-//                            }
-//                        }
-//
-//                        return null;
-//                    }
-//                }.execute();
-//                }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("MainActivity", error.getMessage());
-//            }
-//        });
+        });
 
 //        JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
 //                Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
@@ -282,7 +200,7 @@ public class MainActivity extends BaseActivity
 //            }
 //        });
 
-//        queue.add(poiJsonArrayRequest);
+        queue.add(poiJsonArrayRequest);
 //        queue.add(transportJsonArrayRequest);
     }
 }

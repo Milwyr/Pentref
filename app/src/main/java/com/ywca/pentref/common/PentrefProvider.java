@@ -3,13 +3,21 @@ package com.ywca.pentref.common;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import com.ywca.pentref.models.Poi;
+import com.ywca.pentref.models.Transport;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link ContentProvider} that exposes the local {@link SQLiteDatabase} to other applications via content uri.
@@ -125,6 +133,48 @@ public class PentrefProvider extends ContentProvider {
         return null;
     }
 
+    //region Helper methods
+
+    /**
+     * A helper method that initialises a {@link ContentValues}
+     * with the values of all columns of a {@link Poi} instance.
+     *
+     * @param poi An object instance of {@link Poi}
+     * @return A {@link ContentValues} with the values of a {@link Poi} instance
+     */
+    public static ContentValues getContentValues(Poi poi) {
+        ContentValues values = new ContentValues();
+        values.put(Contract.Poi.COLUMN_ID, poi.getId());
+        values.put(Contract.Poi.COLUMN_NAME, poi.getName());
+        values.put(Contract.Poi.COLUMN_DESCRIPTION, poi.getDescription());
+        values.put(Contract.Poi.COLUMN_WEBSITE_URI, poi.getWebsiteUri());
+        values.put(Contract.Poi.COLUMN_ADDRESS, poi.getAddress());
+        values.put(Contract.Poi.COLUMN_LATITUDE, poi.getLatLng().latitude);
+        values.put(Contract.Poi.COLUMN_LONGITUDE, poi.getLatLng().longitude);
+        values.put(Contract.Poi.COLUMN_TIMESTAMP, "To be implemented");
+        return values;
+    }
+
+    /**
+     * A helper method that initialises a {@link ContentValues}
+     * with the values of all columns of a {@link Transport} instance.
+     *
+     * @param transport An object instance of {@link Transport}
+     * @return A {@link ContentValues} with the values of a {@link Transport} instance
+     */
+    public static ContentValues getContentValues(Transport transport) {
+        ContentValues values = new ContentValues();
+        values.put(Contract.Transport.COLUMN_ID, transport.getId());
+        values.put(Contract.Transport.COLUMN_ROUTE_NUMBER, transport.getRouteNumber());
+        values.put(Contract.Transport.COLUMN_TYPE, transport.getTypeEnum().getValue());
+        values.put(Contract.Transport.COLUMN_ADULT_PRICE, transport.getAdultPrice());
+        values.put(Contract.Transport.COLUMN_CHILD_PRICE, transport.getChildPrice());
+        values.put(Contract.Transport.COLUMN_DEPARTURE_STATION, transport.getDepartureStation());
+        values.put(Contract.Transport.COLUMN_DESTINATION_STATION, transport.getDestinationStation());
+        return values;
+    }
+    //endregion
+
     private String convertToTableName(Uri uri) {
         switch (mUriMatcher.match(uri)) {
             case POI_TABLE:
@@ -139,4 +189,52 @@ public class PentrefProvider extends ContentProvider {
                 throw new IllegalArgumentException("Illegal uri: " + uri);
         }
     }
+
+    //region SQLite database
+    private final int DATABASE_VERSION = 1;
+    private final String DATABASE_NAME = "Pentref.db";
+
+    class LocalDatabaseHelper extends SQLiteOpenHelper {
+
+        LocalDatabaseHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            // Create a table for point of interest
+            final String CREATE_POI_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
+                    Contract.Poi.TABLE_NAME + " (" +
+                    Contract.Poi.COLUMN_ID + " LONG PRIMARY KEY, " +
+                    Contract.Poi.COLUMN_NAME + " VARCHAR(255), " +
+                    Contract.Poi.COLUMN_DESCRIPTION + " VARCHAR(255), " +
+                    Contract.Poi.COLUMN_WEBSITE_URI + " VARCHAR(255), " +
+                    Contract.Poi.COLUMN_ADDRESS + " VARCHAR(255), " +
+                    Contract.Poi.COLUMN_LATITUDE + " DOUBLE, " +
+                    Contract.Poi.COLUMN_LONGITUDE + " DOUBLE, " +
+                    Contract.Poi.COLUMN_TIMESTAMP + " VARCHAR(255));";
+            db.execSQL(CREATE_POI_TABLE_SQL_QUERY);
+
+            // Create a table for transportation
+            final String CREATE_TRANSPORT_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
+                    Contract.Transport.TABLE_NAME + " (" +
+                    Contract.Transport.COLUMN_ID + " LONG PRIMARY KEY, " +
+                    Contract.Transport.COLUMN_ROUTE_NUMBER + " VARCHAR(255), " +
+                    Contract.Transport.COLUMN_TYPE + " INTEGER, " +
+                    Contract.Transport.COLUMN_ADULT_PRICE + " FLOAT, " +
+                    Contract.Transport.COLUMN_CHILD_PRICE + " FLOAT, " +
+                    Contract.Transport.COLUMN_DEPARTURE_STATION + " VARCHAR(255), " +
+                    Contract.Transport.COLUMN_DESTINATION_STATION + " VARCHAR(255)); ";
+            db.execSQL(CREATE_TRANSPORT_TABLE_SQL_QUERY);
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            // The upgrade policy is to simply remove all tables and recreate them
+            db.execSQL("DROP TABLE IF EXISTS " + Contract.Poi.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Contract.Transport.TABLE_NAME);
+            onCreate(db);
+        }
+    }
+    //endregion
 }

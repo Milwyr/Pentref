@@ -14,7 +14,7 @@ public final class Contract {
     public static final class Poi implements BaseColumns {
         public static final String TABLE_NAME = "poi";
 
-        public static final String COLUMN_ID = "_ID";
+        public static final String COLUMN_ID = "id";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_DESCRIPTION = "description";
         public static final String COLUMN_WEBSITE_URI = "website_uri";
@@ -40,7 +40,7 @@ public final class Contract {
     public static final class Transport implements BaseColumns {
         public static final String TABLE_NAME = "transportation";
 
-        public static final String COLUMN_ID = "_ID";
+        public static final String COLUMN_ID = "id";
         public static final String COLUMN_ROUTE_NUMBER = "route_number";
         public static final String COLUMN_TYPE = "type";
         public static final String COLUMN_ADULT_PRICE = "adult_price";

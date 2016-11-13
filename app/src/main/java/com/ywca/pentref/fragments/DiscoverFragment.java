@@ -6,6 +6,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -59,8 +60,12 @@ public class DiscoverFragment extends Fragment implements
 
     private final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
 
+    // Request code for requesting for location permission
+    private final int RC_LOCATION_PERMISSION = 10000;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
+    private GoogleMap mGoogleMap;
 
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
@@ -149,14 +154,25 @@ public class DiscoverFragment extends Fragment implements
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
-        //region Request coarse location and fine location permissions if not granted
-        if ((ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
-                (ContextCompat.checkSelfPermission(getActivity(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION}, 10000);
+        mGoogleMap = googleMap;
+
+        //region Enable locate me button
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            // Check if coarse location and fine location permissions has been granted
+            if ((ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
+                    (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+
+                // Request coarse location and fine location permissions if not granted
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION}, RC_LOCATION_PERMISSION);
+            }
+        } else {
+            // Location permissions have been granted prior to installation before Marshmallow (API 23)
+            googleMap.setMyLocationEnabled(true);
         }
         //endregion
 
@@ -165,6 +181,7 @@ public class DiscoverFragment extends Fragment implements
                 .center(new LatLng(22.2574336, 113.8620642))
                 .radius(500)
                 .strokeWidth(5));
+
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -198,7 +215,6 @@ public class DiscoverFragment extends Fragment implements
         RequestQueue queue = Volley.newRequestQueue(getActivity());
         queue.add(PoiJsonArrayRequest);
 
-        googleMap.setMyLocationEnabled(true);
         googleMap.setOnMarkerClickListener(this);
     }
 
@@ -219,6 +235,20 @@ public class DiscoverFragment extends Fragment implements
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
         return false;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == RC_LOCATION_PERMISSION) {
+
+            // Enable locate me button if permissions are granted
+            if ((ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) &&
+                    (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+                mGoogleMap.setMyLocationEnabled(true);
+            }
+        }
     }
 
     // Map view requires these lifecycle methods to be forwarded to itself
