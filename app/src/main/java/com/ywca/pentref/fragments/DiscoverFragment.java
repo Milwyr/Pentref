@@ -2,10 +2,14 @@ package com.ywca.pentref.fragments;
 
 import android.Manifest;
 import android.app.Fragment;
+import android.app.LoaderManager;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -42,6 +46,8 @@ import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.adapters.BookmarksRecyclerViewAdapter;
 import com.ywca.pentref.adapters.CategoryAdapter;
 import com.ywca.pentref.common.CategoryItem;
+import com.ywca.pentref.common.Contract;
+import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
@@ -201,32 +207,54 @@ public class DiscoverFragment extends Fragment implements
             }
         });
 
-        // TODO: Load data offline when available
-        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
-        JsonArrayRequest PoiJsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
+        getLoaderManager().initLoader(1, null, new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
-            public void onResponse(JSONArray response) {
-                Gson gson = new Gson();
-                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
+            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                return new CursorLoader(getActivity(),
+                        Contract.Poi.CONTENT_URI, Contract.Poi.PROJECTION_ALL, null, null, null);
+            }
 
+            @Override
+            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                List<Poi> pois = PentrefProvider.convertToPois(data);
                 for (Poi poi : pois) {
                     googleMap.addMarker(new MarkerOptions()
                             .title(poi.getName())
                             .position(poi.getLatLng())).setTag(poi);
                 }
+                googleMap.setOnMarkerClickListener(DiscoverFragment.this);
             }
-        }, new Response.ErrorListener() {
+
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("MainActivity", error.getMessage());
+            public void onLoaderReset(Loader<Cursor> loader) {
+
             }
         });
 
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
-        queue.add(PoiJsonArrayRequest);
-
-        googleMap.setOnMarkerClickListener(this);
+//        // TODO: Load data offline when available
+//        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
+//        JsonArrayRequest PoiJsonArrayRequest = new JsonArrayRequest(
+//                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
+//            @Override
+//            public void onResponse(JSONArray response) {
+//                Gson gson = new Gson();
+//                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
+//
+//                for (Poi poi : pois) {
+//                    googleMap.addMarker(new MarkerOptions()
+//                            .title(poi.getName())
+//                            .position(poi.getLatLng())).setTag(poi);
+//                }
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.e("MainActivity", error.getMessage());
+//            }
+//        });
+//
+//        RequestQueue queue = Volley.newRequestQueue(getActivity());
+//        queue.add(PoiJsonArrayRequest);
     }
 
     @Override

@@ -60,6 +60,8 @@ public class MainActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initialiseComponents();
+
+        //TODO: Only execute this method when the items have not been added in the local database
         fetchJsonFromServer();
 
         // Display the discover fragment only when the app launches as
@@ -140,8 +142,6 @@ public class MainActivity extends BaseActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
-
-//        mDbHelper = LocalDatabaseHelper.getInstance(this);
     }
 
     private void fetchJsonFromServer() {
@@ -175,7 +175,7 @@ public class MainActivity extends BaseActivity
                         return null;
                     }
                 }.execute();
-                }
+            }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -183,24 +183,40 @@ public class MainActivity extends BaseActivity
             }
         });
 
-//        JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
-//                Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
-//            @Override
-//            public void onResponse(JSONArray response) {
-//                Gson gson = new Gson();
-//                List<Transport> transports = Arrays.asList(gson.fromJson(response.toString(), Transport[].class));
-//                for (Transport transport : transports) {
-////                    mDbHelper.insertTransport(transport);
-//                }
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("MainActivity", error.getMessage());
-//            }
-//        });
+        JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                Gson gson = new Gson();
+                final List<Transport> transports = Arrays.asList(
+                        gson.fromJson(response.toString(), Transport[].class));
+
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        for (Transport transport : transports) {
+                            ContentValues values = PentrefProvider.getContentValues(transport);
+
+                            try {
+                                getContentResolver().insert(Contract.Transport.CONTENT_URI, values);
+                            } catch (Exception e) {
+                                Log.e("MainActivity", e.getMessage());
+                            }
+                        }
+
+                        return null;
+                    }
+                }.execute();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("MainActivity", error.getMessage());
+            }
+        });
 
         queue.add(poiJsonArrayRequest);
-//        queue.add(transportJsonArrayRequest);
+        queue.add(transportJsonArrayRequest);
     }
 }

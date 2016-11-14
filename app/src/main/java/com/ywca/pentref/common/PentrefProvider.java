@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.ywca.pentref.models.Poi;
 import com.ywca.pentref.models.Transport;
 
@@ -172,6 +173,31 @@ public class PentrefProvider extends ContentProvider {
         values.put(Contract.Transport.COLUMN_DEPARTURE_STATION, transport.getDepartureStation());
         values.put(Contract.Transport.COLUMN_DESTINATION_STATION, transport.getDestinationStation());
         return values;
+    }
+
+    /**
+     * A helper method that returns a list of Points of interest from the given cursor.
+     *
+     * @param cursor A cursor returned by the query method in this class
+     * @return A list of {@link Poi}
+     */
+    public static List<Poi> convertToPois(@NonNull Cursor cursor) {
+        List<Poi> pois = new ArrayList<>();
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            long id = cursor.getLong(cursor.getColumnIndex(Contract.Poi.COLUMN_ID));
+            String name = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_NAME));
+            String description = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_DESCRIPTION));
+            String websiteUri = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_WEBSITE_URI));
+            String address = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_ADDRESS));
+            double latitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LATITUDE));
+            double longitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LONGITUDE));
+            pois.add(new Poi(id, name, description, websiteUri, address, new LatLng(latitude, longitude)));
+
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return pois;
     }
     //endregion
 
