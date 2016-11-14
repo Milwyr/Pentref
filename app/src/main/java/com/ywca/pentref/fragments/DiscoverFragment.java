@@ -6,8 +6,9 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.RelativeLayout;
 
 import com.android.volley.Request;
@@ -38,6 +40,8 @@ import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.adapters.BookmarksRecyclerViewAdapter;
+import com.ywca.pentref.adapters.CategoryAdapter;
+import com.ywca.pentref.common.CategoryItem;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
@@ -59,12 +63,16 @@ public class DiscoverFragment extends Fragment implements
 
     private final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
 
+    // Request code for requesting for location permission
+    private final int RC_LOCATION_PERMISSION = 10000;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
+    private GoogleMap mGoogleMap;
 
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
-    private RelativeLayout mBottomSheetRelativeLayout;
+    private RelativeLayout mBottomSheet;
     private Poi mSelectedPoi;
 
     public DiscoverFragment() {
@@ -105,7 +113,15 @@ public class DiscoverFragment extends Fragment implements
         mMapView.onCreate(savedInstanceState);
         mMapView.getMapAsync(this);
 
-        mBottomSheetRelativeLayout = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet_relative_layout);
+        mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
+
+        GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
+        List<CategoryItem> categories = new ArrayList<>();
+        categories.add(new CategoryItem(R.drawable.ic_ferry_black_36dp, "Restaurants"));
+        categories.add(new CategoryItem(R.drawable.ic_bus_black_36dp, "Bus stops"));
+        categories.add(new CategoryItem(R.drawable.ic_menu_camera, "Toilets"));
+        categories.add(new CategoryItem(R.drawable.ic_bookmark_black_36dp, "Public facilities"));
+        gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
 
         // TODO: Potentially create a new layout for this
         RecyclerView bottomRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
@@ -149,14 +165,25 @@ public class DiscoverFragment extends Fragment implements
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
-        //region Request coarse location and fine location permissions if not granted
-        if ((ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
-                (ContextCompat.checkSelfPermission(getActivity(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION}, 10000);
+        mGoogleMap = googleMap;
+
+        //region Enable locate me button
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            // Check if coarse location and fine location permissions has been granted
+            if ((ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
+                    (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+
+                // Request coarse location and fine location permissions if not granted
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION}, RC_LOCATION_PERMISSION);
+            }
+        } else {
+            // Location permissions have been granted prior to installation before Marshmallow (API 23)
+            googleMap.setMyLocationEnabled(true);
         }
         //endregion
 
@@ -165,10 +192,11 @@ public class DiscoverFragment extends Fragment implements
                 .center(new LatLng(22.2574336, 113.8620642))
                 .radius(500)
                 .strokeWidth(5));
+
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                mBottomSheetRelativeLayout.setVisibility(View.VISIBLE);
+                mBottomSheet.setVisibility(View.VISIBLE);
                 mPoiSummaryCardView.setVisibility(View.GONE);
             }
         });
@@ -198,7 +226,6 @@ public class DiscoverFragment extends Fragment implements
         RequestQueue queue = Volley.newRequestQueue(getActivity());
         queue.add(PoiJsonArrayRequest);
 
-        googleMap.setMyLocationEnabled(true);
         googleMap.setOnMarkerClickListener(this);
     }
 
@@ -215,10 +242,24 @@ public class DiscoverFragment extends Fragment implements
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        mBottomSheetRelativeLayout.setVisibility(View.GONE);
+        mBottomSheet.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
         return false;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == RC_LOCATION_PERMISSION) {
+
+            // Enable locate me button if permissions are granted
+            if ((ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) &&
+                    (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+                mGoogleMap.setMyLocationEnabled(true);
+            }
+        }
     }
 
     // Map view requires these lifecycle methods to be forwarded to itself

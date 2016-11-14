@@ -1,8 +1,16 @@
 package com.ywca.pentref.activities;
 
 import android.app.Fragment;
+import android.app.LoaderManager;
 import android.app.SearchManager;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteConstraintException;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -24,9 +32,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
-import com.ywca.pentref.common.LocalDatabaseHelper;
+import com.ywca.pentref.common.Contract;
+import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.fragments.BookmarksFragment;
 import com.ywca.pentref.fragments.DiscoverFragment;
 import com.ywca.pentref.fragments.SettingsFragment;
@@ -38,20 +48,19 @@ import com.ywca.pentref.models.Transport;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private LocalDatabaseHelper mDbHelper;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initialiseComponents();
-//        fetchJsonFromServer();
+        fetchJsonFromServer();
 
         // Display the discover fragment only when the app launches as
         // savedInstanceState != null when orientation changes
@@ -132,7 +141,7 @@ public class MainActivity extends BaseActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
 
-        mDbHelper = LocalDatabaseHelper.getInstance(this);
+//        mDbHelper = LocalDatabaseHelper.getInstance(this);
     }
 
     private void fetchJsonFromServer() {
@@ -141,16 +150,32 @@ public class MainActivity extends BaseActivity
         String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
         String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transports.json";
 
+        // Read all Points of Interest from the server and add them to SQLite database
         JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 Gson gson = new Gson();
-                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
-                for (Poi poi : pois) {
-                    mDbHelper.insertPoi(poi);
+                final List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
+
+                new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        for (final Poi poi : pois) {
+                            ContentValues values = PentrefProvider.getContentValues(poi);
+
+                            try {
+                                getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
+                            } catch (Exception e) {
+                                Log.e("MainActivity", e.getMessage());
+                            }
+                        }
+
+                        return null;
+                    }
+                }.execute();
                 }
-            }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -158,24 +183,24 @@ public class MainActivity extends BaseActivity
             }
         });
 
-        JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                Gson gson = new Gson();
-                List<Transport> transports = Arrays.asList(gson.fromJson(response.toString(), Transport[].class));
-                for (Transport transport : transports) {
-                    mDbHelper.insertTransport(transport);
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("MainActivity", error.getMessage());
-            }
-        });
+//        JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
+//                Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
+//            @Override
+//            public void onResponse(JSONArray response) {
+//                Gson gson = new Gson();
+//                List<Transport> transports = Arrays.asList(gson.fromJson(response.toString(), Transport[].class));
+//                for (Transport transport : transports) {
+////                    mDbHelper.insertTransport(transport);
+//                }
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.e("MainActivity", error.getMessage());
+//            }
+//        });
 
         queue.add(poiJsonArrayRequest);
-        queue.add(transportJsonArrayRequest);
+//        queue.add(transportJsonArrayRequest);
     }
 }

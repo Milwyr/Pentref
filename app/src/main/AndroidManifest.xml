@@ -47,6 +47,11 @@
             android:name=".activities.TimetableActivity"
             android:label="@string/title_activity_timetable"
             android:parentActivityName=".activities.MainActivity" />
+
+        <provider
+            android:name=".common.PentrefProvider"
+            android:authorities="com.ywca.pentref.provider"
+            android:exported="false" />
     </application>
 
 </manifest>

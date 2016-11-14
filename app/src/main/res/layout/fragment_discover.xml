@@ -20,30 +20,9 @@
         map:uiZoomControls="false"
         map:uiZoomGestures="true" />
 
-    <!-- Reference: https://material.google.com/components/bottom-sheets.html -->
-    <RelativeLayout
-        android:id="@+id/bottom_sheet_relative_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        app:behavior_peekHeight="35dp"
-        app:layout_behavior="@string/bottom_sheet_behavior">
-
-        <TextView
-            android:id="@+id/bottom_sheet_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="8dp"
-            android:text="Nearby places"
-            android:textColor="@color/black" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/bottom_sheet_title" />
-    </RelativeLayout>
+    <include
+        android:id="@+id/bottom_sheet"
+        layout="@layout/discover_bottom_sheet" />
 
     <!-- A fixed-size view that shows summary of the selected Point of Interest -->
     <android.support.v7.widget.CardView

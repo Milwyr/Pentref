@@ -11,18 +11,6 @@ import com.google.android.gms.maps.model.LatLng;
  * including its name, address, and other relevant information.
  */
 public class Poi implements Comparable, Parcelable {
-    //region Constants
-    public static final String TABLE_NAME = "Poi";
-    public static final String COLUMN_ID = "id";
-    public static final String COLUMN_NAME = "name";
-    public static final String COLUMN_DESCRIPTION = "description";
-    public static final String COLUMN_WEBSITE_URI = "website_uri";
-    public static final String COLUMN_ADDRESS = "address";
-    public static final String COLUMN_LATITUDE = "latitude";
-    public static final String COLUMN_LONGITUDE = "longitude";
-    public static final String COLUMN_TIMESTAMP = "timestamp";
-    //endregion
-
     //region Instance variables
     private long id;
     private String name;

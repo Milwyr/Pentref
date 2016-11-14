@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Reference: https://material.google.com/components/bottom-sheets.html -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    app:behavior_peekHeight="105dp"
+    app:layout_behavior="@string/bottom_sheet_behavior">
+
+    <ImageView
+        android:id="@+id/scroll_up_image_view"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="4dp"
+        app:srcCompat="@drawable/ic_scroll_up_black_36dp" />
+
+    <GridView
+        android:id="@+id/category_grid_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/scroll_up_image_view"
+        android:layout_marginTop="4dp"
+        android:numColumns="3" />
+
+    <TextView
+        android:id="@+id/bottom_sheet_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/category_grid_view"
+        android:layout_centerHorizontal="true"
+        android:text="Nearby places"
+        android:textColor="@color/black" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bottom_sheet_title" />
+
+</RelativeLayout>
