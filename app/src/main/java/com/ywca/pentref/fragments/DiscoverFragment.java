@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.RelativeLayout;
 
 import com.android.volley.Request;
@@ -39,6 +40,8 @@ import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.adapters.BookmarksRecyclerViewAdapter;
+import com.ywca.pentref.adapters.CategoryAdapter;
+import com.ywca.pentref.common.CategoryItem;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
@@ -69,7 +72,7 @@ public class DiscoverFragment extends Fragment implements
 
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
-    private RelativeLayout mBottomSheetRelativeLayout;
+    private RelativeLayout mBottomSheet;
     private Poi mSelectedPoi;
 
     public DiscoverFragment() {
@@ -110,7 +113,15 @@ public class DiscoverFragment extends Fragment implements
         mMapView.onCreate(savedInstanceState);
         mMapView.getMapAsync(this);
 
-        mBottomSheetRelativeLayout = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet_relative_layout);
+        mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
+
+        GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
+        List<CategoryItem> categories = new ArrayList<>();
+        categories.add(new CategoryItem(R.drawable.ic_ferry_black_36dp, "Restaurants"));
+        categories.add(new CategoryItem(R.drawable.ic_bus_black_36dp, "Bus stops"));
+        categories.add(new CategoryItem(R.drawable.ic_menu_camera, "Toilets"));
+        categories.add(new CategoryItem(R.drawable.ic_bookmark_black_36dp, "Public facilities"));
+        gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
 
         // TODO: Potentially create a new layout for this
         RecyclerView bottomRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
@@ -185,7 +196,7 @@ public class DiscoverFragment extends Fragment implements
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                mBottomSheetRelativeLayout.setVisibility(View.VISIBLE);
+                mBottomSheet.setVisibility(View.VISIBLE);
                 mPoiSummaryCardView.setVisibility(View.GONE);
             }
         });
@@ -231,14 +242,14 @@ public class DiscoverFragment extends Fragment implements
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        mBottomSheetRelativeLayout.setVisibility(View.GONE);
+        mBottomSheet.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
         return false;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == RC_LOCATION_PERMISSION) {
 
             // Enable locate me button if permissions are granted
