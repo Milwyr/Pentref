@@ -1,6 +1,13 @@
 package com.ywca.pentref.activities;
 
 import android.app.Fragment;
+import android.app.SearchManager;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -9,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -23,7 +31,9 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
-import com.ywca.pentref.common.LocalDatabaseHelper;
+import com.ywca.pentref.common.Contract;
+import com.ywca.pentref.common.PentrefProvider;
+import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.fragments.BookmarksFragment;
 import com.ywca.pentref.fragments.DiscoverFragment;
 import com.ywca.pentref.fragments.SettingsFragment;
@@ -41,17 +51,24 @@ import java.util.List;
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private LocalDatabaseHelper mDbHelper;
+    // The search view that is inflated as a menu item on the Action Bar
+    private MenuItem mActionSearchMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initialiseComponents();
-//        fetchJsonFromServer();
 
-        getFragmentManager().beginTransaction().add(
-                R.id.frame, DiscoverFragment.newInstance("")).commit();
+        //TODO: Only execute this method when the items have not been added in the local database
+        fetchJsonFromServer();
+
+        // Display the discover fragment only when the app launches as
+        // savedInstanceState != null when orientation changes
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction().add(
+                    R.id.frame, DiscoverFragment.newInstance("")).commit();
+        }
     }
 
     @Override
@@ -66,24 +83,77 @@ public class MainActivity extends BaseActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflate the options menu with a search view
         getMenuInflater().inflate(R.menu.main, menu);
+        mActionSearchMenuItem = menu.findItem(R.id.action_search);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) mActionSearchMenuItem.getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
         return true;
     }
 
+    /**
+     * This event is fired by the search view on the Action Bar, i.e. either
+     * the user clicks search or the user selects an item from the suggestion list.
+     *
+     * @param intent Incoming intent
+     */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    // Handles the event from method onNewIntent()
+    private void handleIntent(Intent intent) {
+        if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //TODO: use the query to search your data somehow
+        } else if (intent.getAction().equals(Intent.ACTION_VIEW)) {
+            // Handle a click event on the suggestion list
+            final Uri uri = intent.getData();
+            if (uri != null) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected void onPreExecute() {
+                        super.onPreExecute();
+
+                        // Collapse the search view on the Action Bar after
+                        // on the suggestion list is clicked
+                        mActionSearchMenuItem.collapseActionView();
+                    }
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        // Read from local database and get the cursor with the POI data
+                        // specified by the uri
+                        Cursor cursor = getContentResolver().query(
+                                uri, Contract.Poi.PROJECTION_ALL, null, null, null);
+
+                        if (cursor == null) {
+                            return null;
+                        }
+
+                        // Retrieve the Point of Interest from the cursor
+                        Poi selectedPoi = PentrefProvider.convertToPois(cursor).get(0);
+                        cursor.close();
+
+                        // Launch POIDetailsActivity
+                        Intent poiDetailsIntent = new Intent(MainActivity.this, PoiDetailsActivity.class);
+                        poiDetailsIntent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, selectedPoi);
+                        startActivity(poiDetailsIntent);
+
+                        return null;
+                    }
+                }.execute();
+            }
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -105,7 +175,7 @@ public class MainActivity extends BaseActivity
             case R.id.nav_login:
                 changeFragment(R.string.transportation, new SignInFragment());
                 break;
-            case R.id.action_settings:
+            case R.id.nav_settings:
                 changeFragment(R.string.settings, new SettingsFragment());
                 break;
         }
@@ -119,7 +189,15 @@ public class MainActivity extends BaseActivity
     // replaces the current fragment by the given one.
     private void changeFragment(int resourceId, Fragment fragment) {
         setTitle(resourceId);
+
         getFragmentManager().beginTransaction().replace(R.id.frame, fragment).commit();
+
+        // The search view is only visible when the current fragment is discover fragment
+        if (fragment instanceof DiscoverFragment) {
+            mActionSearchMenuItem.setVisible(true);
+        } else {
+            mActionSearchMenuItem.setVisible(false);
+        }
     }
 
     // Initialises components when onCreate() method is called
@@ -146,8 +224,6 @@ public class MainActivity extends BaseActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
-
-        mDbHelper = LocalDatabaseHelper.getInstance(this);
     }
 
     private void fetchJsonFromServer() {
@@ -156,15 +232,31 @@ public class MainActivity extends BaseActivity
         String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
         String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transports.json";
 
+        // Read all Points of Interest from the server and add them to SQLite database
         JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 Gson gson = new Gson();
-                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
-                for (Poi poi : pois) {
-                    mDbHelper.insertPoi(poi);
-                }
+                final List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
+
+                new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        for (final Poi poi : pois) {
+                            ContentValues values = PentrefProvider.getContentValues(poi);
+
+                            try {
+                                getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
+                            } catch (Exception e) {
+                                Log.e("MainActivity", e.getMessage());
+                            }
+                        }
+
+                        return null;
+                    }
+                }.execute();
             }
         }, new Response.ErrorListener() {
             @Override
@@ -178,10 +270,26 @@ public class MainActivity extends BaseActivity
             @Override
             public void onResponse(JSONArray response) {
                 Gson gson = new Gson();
-                List<Transport> transports = Arrays.asList(gson.fromJson(response.toString(), Transport[].class));
-                for (Transport transport : transports) {
-                    mDbHelper.insertTransport(transport);
-                }
+                final List<Transport> transports = Arrays.asList(
+                        gson.fromJson(response.toString(), Transport[].class));
+
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        for (Transport transport : transports) {
+                            ContentValues values = PentrefProvider.getContentValues(transport);
+
+                            try {
+                                getContentResolver().insert(Contract.Transport.CONTENT_URI, values);
+                            } catch (Exception e) {
+                                Log.e("MainActivity", e.getMessage());
+                            }
+                        }
+
+                        return null;
+                    }
+                }.execute();
+
             }
         }, new Response.ErrorListener() {
             @Override

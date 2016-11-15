@@ -6,6 +6,9 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <!-- Search -->
+    <string name="search_hint">Enter text</string>
+
     <!-- Navigation drawer headers -->
     <string name="discover">Discover</string>
     <string name="bookmarks">Bookmarks</string>
@@ -13,11 +16,19 @@
     <string name="transportation">Transportation</string>
     <string name="settings">Settings</string>
 
-    <!-- Poi Details Activity -->
+    <!-- Poi details activity -->
     <string name="all_reviews">All reviews</string>
+
+    <!-- Transportation fragment -->
+    <string name="next_two_transports">Next two: </string>
+    <string name="temporary_route_number">11</string>
 
     <!-- Timetable activity -->
     <string name="adult_price">Adult price: </string>
+
+    <!-- Content description for image views -->
+    <string name="poi_details_header_image">Details of the Point of Interest</string>
+    <string name="profile_picture">Profile Picture</string>
 
     <string name="place_info">
         Place:Tai O, NT, Hong Kong\n
@@ -25,13 +36,6 @@
         Phone:65871092\n
         Working time: 9:00 - 17:00
     </string>
-
-    <string name="user_review">This is good. This is good. This is good. This is good.This is good.
-        This is good. This is good. This is good. This is good.</string>
-
-    <string name="user_review_2">This is good. This is good. This is good. This is good. This is
-good. This is good. This is good. This is good. This is good.This is good. This is good. This is
-good. This is good.This is good. This is good. This is good. This is good. This is good.</string>
 
     <string name="facebook_app_id">195665774189937</string>
     <string name="sign_out">Sign Out</string>
