@@ -1,15 +1,12 @@
 package com.ywca.pentref.activities;
 
 import android.app.Fragment;
-import android.app.LoaderManager;
 import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.CursorLoader;
-import android.content.Loader;
+import android.content.Intent;
 import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteConstraintException;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -32,11 +29,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
+import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.fragments.BookmarksFragment;
 import com.ywca.pentref.fragments.DiscoverFragment;
 import com.ywca.pentref.fragments.SettingsFragment;
@@ -48,12 +45,14 @@ import com.ywca.pentref.models.Transport;
 
 import org.json.JSONArray;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    // The search view that is inflated as a menu item on the Action Bar
+    private MenuItem mActionSearchMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +78,81 @@ public class MainActivity extends BaseActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the options menu with a search view
+        getMenuInflater().inflate(R.menu.main, menu);
+        mActionSearchMenuItem = menu.findItem(R.id.action_search);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) mActionSearchMenuItem.getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+        return true;
+    }
+
+    /**
+     * This event is fired by the search view on the Action Bar, i.e. either
+     * the user clicks search or the user selects an item from the suggestion list.
+     *
+     * @param intent Incoming intent
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
+    // Handles the event from method onNewIntent()
+    private void handleIntent(Intent intent) {
+        if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //TODO: use the query to search your data somehow
+        } else if (intent.getAction().equals(Intent.ACTION_VIEW)) {
+            // Handle a click event on the suggestion list
+            final Uri uri = intent.getData();
+            if (uri != null) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected void onPreExecute() {
+                        super.onPreExecute();
+
+                        // Collapse the search view on the Action Bar after
+                        // on the suggestion list is clicked
+                        mActionSearchMenuItem.collapseActionView();
+                    }
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        // Read from local database and get the cursor with the POI data
+                        // specified by the uri
+                        Cursor cursor = getContentResolver().query(
+                                uri, Contract.Poi.PROJECTION_ALL, null, null, null);
+
+                        if (cursor == null) {
+                            return null;
+                        }
+
+                        // Retrieve the Point of Interest from the cursor
+                        Poi selectedPoi = PentrefProvider.convertToPois(cursor).get(0);
+                        cursor.close();
+
+                        // Launch POIDetailsActivity
+                        Intent poiDetailsIntent = new Intent(MainActivity.this, PoiDetailsActivity.class);
+                        poiDetailsIntent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, selectedPoi);
+                        startActivity(poiDetailsIntent);
+
+                        return null;
+                    }
+                }.execute();
+            }
         }
     }
 
@@ -115,7 +189,15 @@ public class MainActivity extends BaseActivity
     // replaces the current fragment by the given one.
     private void changeFragment(int resourceId, Fragment fragment) {
         setTitle(resourceId);
+
         getFragmentManager().beginTransaction().replace(R.id.frame, fragment).commit();
+
+        // The search view is only visible when the current fragment is discover fragment
+        if (fragment instanceof DiscoverFragment) {
+            mActionSearchMenuItem.setVisible(true);
+        } else {
+            mActionSearchMenuItem.setVisible(false);
+        }
     }
 
     // Initialises components when onCreate() method is called

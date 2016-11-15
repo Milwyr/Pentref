@@ -3,13 +3,12 @@ package com.ywca.pentref.fragments;
 import android.Manifest;
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,22 +16,12 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -40,7 +29,6 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.adapters.BookmarksRecyclerViewAdapter;
@@ -51,10 +39,7 @@ import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
-import org.json.JSONArray;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -104,7 +89,7 @@ public class DiscoverFragment extends Fragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+//        setHasOptionsMenu(true);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
         }
@@ -150,24 +135,24 @@ public class DiscoverFragment extends Fragment implements
         return rootView;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mMapView.onSaveInstanceState(outState);
-    }
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        mMapView.onSaveInstanceState(outState);
+//    }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main, menu);
-
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getActivity().getComponentName()));
-    }
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        inflater.inflate(R.menu.main, menu);
+//
+//        // Associate searchable configuration with the SearchView
+//        SearchManager searchManager =
+//                (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+//        SearchView searchView =
+//                (SearchView) menu.findItem(R.id.action_search).getActionView();
+//        searchView.setSearchableInfo(
+//                searchManager.getSearchableInfo(getActivity().getComponentName()));
+//    }
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
@@ -207,29 +192,32 @@ public class DiscoverFragment extends Fragment implements
             }
         });
 
-        getLoaderManager().initLoader(1, null, new LoaderManager.LoaderCallbacks<Cursor>() {
+        new AsyncTask<Void, Void, List<Poi>>() {
             @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new CursorLoader(getActivity(),
+            protected List<Poi> doInBackground(Void... params) {
+                // Retrieve a list of Points of Interest from the local database
+                Cursor cursor = getActivity().getContentResolver().query(
                         Contract.Poi.CONTENT_URI, Contract.Poi.PROJECTION_ALL, null, null, null);
+                List<Poi> pois = PentrefProvider.convertToPois(cursor);
+                cursor.close();
+                return pois;
             }
 
             @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                List<Poi> pois = PentrefProvider.convertToPois(data);
+            protected void onPostExecute(List<Poi> pois) {
+                super.onPostExecute(pois);
+
+                // Add a list of Points of Interest to the map
                 for (Poi poi : pois) {
                     googleMap.addMarker(new MarkerOptions()
                             .title(poi.getName())
                             .position(poi.getLatLng())).setTag(poi);
                 }
+
+                // Set a marker click listener
                 googleMap.setOnMarkerClickListener(DiscoverFragment.this);
             }
-
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-
-            }
-        });
+        }.execute();
 
 //        // TODO: Load data offline when available
 //        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
@@ -262,7 +250,7 @@ public class DiscoverFragment extends Fragment implements
         switch (view.getId()) {
             case R.id.poi_summary_card_view:
                 Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
-                intent.putExtra(Utility.SELECTED_POI_EXTRA_NAME, mSelectedPoi);
+                intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
                 startActivity(intent);
                 break;
         }
@@ -295,13 +283,17 @@ public class DiscoverFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
-        mMapView.onResume();
+        if (mMapView != null) {
+            mMapView.onResume();
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        mMapView.onStart();
+        if (mMapView != null) {
+            mMapView.onStart();
+        }
     }
 
     @Override
@@ -313,19 +305,25 @@ public class DiscoverFragment extends Fragment implements
     @Override
     public void onStop() {
         super.onStop();
-        mMapView.onStop();
+        if (mMapView != null) {
+            mMapView.onStop();
+        }
     }
 
     @Override
     public void onDestroy() {
-        mMapView.onDestroy();
+        if (mMapView != null) {
+            mMapView.onDestroy();
+        }
         super.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mMapView.onLowMemory();
+        if (mMapView != null) {
+            mMapView.onLowMemory();
+        }
     }
     //endregion
 }

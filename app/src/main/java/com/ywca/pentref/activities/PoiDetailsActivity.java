@@ -26,7 +26,7 @@ public class PoiDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_poi_details);
 
         if (getIntent() != null) {
-            mSelectedPoi = getIntent().getParcelableExtra(Utility.SELECTED_POI_EXTRA_NAME);
+            mSelectedPoi = getIntent().getParcelableExtra(Utility.SELECTED_POI_EXTRA_KEY);
         }
 
         initialiseComponents();

@@ -5,5 +5,5 @@ package com.ywca.pentref.common;
  */
 
 public class Utility {
-    public static final String SELECTED_POI_EXTRA_NAME = "SelectedPoi";
+    public static final String SELECTED_POI_EXTRA_KEY = "SelectedPoi";
 }

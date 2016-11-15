@@ -1,5 +1,6 @@
 package com.ywca.pentref.common;
 
+import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -10,6 +11,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -29,6 +31,7 @@ public class PentrefProvider extends ContentProvider {
     private static final int POI_ROW = 2;
     private static final int TRANSPORT_TABLE = 3;
     private static final int TRANSPORT_ROW = 4;
+    private static final int SEARCH_SUGGESTIONS = 5;
 
     private static final UriMatcher mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
@@ -37,6 +40,7 @@ public class PentrefProvider extends ContentProvider {
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Poi.TABLE_NAME + "/#", POI_ROW);
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Transport.TABLE_NAME, TRANSPORT_TABLE);
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Transport.TABLE_NAME + "/#", TRANSPORT_ROW);
+        mUriMatcher.addURI(Contract.AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGESTIONS);
     }
     //endregion
 
@@ -60,20 +64,41 @@ public class PentrefProvider extends ContentProvider {
                 break;
             case POI_ROW:
                 tableName = Contract.Poi.TABLE_NAME;
-                selection += Contract.Poi.COLUMN_ID + " = " + uri.getLastPathSegment();
+                selection = Contract.Poi.COLUMN_ID + " = " + uri.getLastPathSegment();
                 break;
             case TRANSPORT_TABLE:
                 tableName = Contract.Transport.TABLE_NAME;
                 break;
             case TRANSPORT_ROW:
                 tableName = Contract.Transport.TABLE_NAME;
-                selection += Contract.Transport.COLUMN_ID + " = " + uri.getLastPathSegment();
+                selection = Contract.Transport.COLUMN_ID + " = " + uri.getLastPathSegment();
+                break;
+            case SEARCH_SUGGESTIONS:
+                tableName = Contract.Poi.TABLE_NAME;
+
+                /*
+                    The column names "_id", "SUGGEST_COLUMN_TEXT_1", "SUGGEST_COLUMN_TEXT_2"
+                    are used to build a suggestion table and show a list of suggestions when
+                    the user searches for Points of Interest.
+
+                    The column "SUGGEST_COLUMN_INTENT_DATA_ID" records the POI id of each row.
+                 */
+                projection = new String[]{
+                        Contract.Poi.COLUMN_ID + " AS " + BaseColumns._ID,
+                        Contract.Poi.COLUMN_NAME + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
+                        Contract.Poi.COLUMN_ADDRESS + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
+                        Contract.Poi.COLUMN_ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
+
+                // The two percent signs are used to match the 'LIKE' statements specified in searchable.xml
+                if (selectionArgs.length > 0) {
+                    selectionArgs = new String[]{"%" + selectionArgs[0] + "%"};
+                }
                 break;
             default:
                 throw new IllegalArgumentException("Illegal uri: " + uri);
         }
 
-        Cursor cursor = mDbHelper.getWritableDatabase().query(
+        Cursor cursor = mDbHelper.getReadableDatabase().query(
                 tableName, projection, selection, selectionArgs, null, null, sortOrder);
 
         if (getContext() != null) {
