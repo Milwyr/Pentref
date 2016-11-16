@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.ywca.pentref.R;
@@ -32,6 +33,9 @@ public class TimetableActivity extends AppCompatActivity {
         if (getIntent() != null) {
             mSelectedTransportItem = getIntent().getParcelableExtra("Transport");
         }
+
+        TextView routeNumberTextView = (TextView) findViewById(R.id.route_number_text_view);
+        routeNumberTextView.setText(mSelectedTransportItem.getRouteNumber());
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.timetable_recycler_view);
         recyclerView.setHasFixedSize(true);
