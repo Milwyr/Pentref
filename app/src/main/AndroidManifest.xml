@@ -47,6 +47,9 @@
             android:name=".activities.TimetableActivity"
             android:label="@string/title_activity_timetable"
             android:parentActivityName=".activities.MainActivity" />
+        <activity
+            android:name=".activities.ReviewActivity"
+            android:parentActivityName=".activities.PoiDetailsActivity" />
 
         <provider
             android:name=".common.PentrefProvider"
