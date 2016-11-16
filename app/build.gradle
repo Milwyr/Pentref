@@ -39,6 +39,7 @@ dependencies {
     compile 'com.android.support:support-vector-drawable:24.2.1'
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.facebook.android:facebook-android-sdk:4.15.0'
+    compile 'joda-time:joda-time:2.9.6'
 
     //Google Play Services needs (as of 4.11.2016) to be be 9.6.0
     compile 'com.google.android.gms:play-services-auth:9.6.0'

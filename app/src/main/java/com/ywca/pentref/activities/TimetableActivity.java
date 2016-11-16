@@ -36,7 +36,7 @@ public class TimetableActivity extends AppCompatActivity {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.timetable_recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new TimetableRecyclerAdapter(R.layout.timetable_row_layout, null));
+        recyclerView.setAdapter(new TimetableRecyclerAdapter(R.layout.timetable_row_layout, mSelectedTransportItem));
 
         Button notifyMeButton = (Button) findViewById(R.id.timetable_notification_button);
         notifyMeButton.setOnClickListener(new View.OnClickListener() {
@@ -60,12 +60,5 @@ public class TimetableActivity extends AppCompatActivity {
                 timePickerDialog.show();
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
     }
 }

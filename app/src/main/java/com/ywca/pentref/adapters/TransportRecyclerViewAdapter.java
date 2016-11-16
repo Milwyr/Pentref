@@ -61,8 +61,8 @@ public class TransportRecyclerViewAdapter extends
         });
 
         holder.routeNumberTextView.setText(transport.getRouteNumber());
-        holder.departureStationTextView.setText(transport.getDepartureStation());
-        holder.destinationStationTextView.setText(transport.getDestinationStation());
+        holder.departureStationTextView.setText(transport.getFromTaiO().getStations().get(0));
+        holder.destinationStationTextView.setText(transport.getToTaiO().getStations().get(0));
 
         // TODO: Add fields in the transport object
         holder.nextTwoTransportsTimeTextView.setText("11:00pm, 11:30pm");

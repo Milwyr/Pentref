@@ -2,6 +2,7 @@ package com.ywca.pentref.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -10,43 +11,21 @@ import com.google.gson.annotations.SerializedName;
  * price, departure station and destination station.
  */
 public class Transport implements Comparable, Parcelable {
-    //region Constants
-    public static final String TABLE_NAME = "TRANSPORTATION";
-    public static final String COLUMN_ID = "ID";
-    public static final String COLUMN_ROUTE_NUMBER = "route_number";
-    public static final String COLUMN_TYPE = "type";
-    public static final String COLUMN_ADULT_PRICE = "adult_price";
-    public static final String COLUMN_CHILD_PRICE = "child_price";
-    public static final String COLUMN_DEPARTURE_STATION = "departure_station";
-    public static final String COLUMN_DESTINATION_STATION = "destination_station";
-    //endregion
-
     //region Instance variables
-    private long id;
     private String routeNumber;
     private TypeEnum typeEnum;
-    private float adultPrice;
-    private float childPrice;
-    private String departureStation;
-    private String destinationStation;
+    private Direction fromTaiO;
+    private Direction toTaiO;
     //endregion
 
-    public Transport(long id, String routeNumber, TypeEnum typeEnum, float adultPrice,
-                     float childPrice, String departureStation, String destinationStation) {
-        this.id = id;
+    public Transport(String routeNumber, TypeEnum typeEnum, Direction fromTaiO, Direction toTaiO) {
         this.routeNumber = routeNumber;
         this.typeEnum = typeEnum;
-        this.adultPrice = adultPrice;
-        this.childPrice = childPrice;
-        this.departureStation = departureStation;
-        this.destinationStation = destinationStation;
+        this.fromTaiO = fromTaiO;
+        this.toTaiO = toTaiO;
     }
 
     //region Getter methods
-    public long getId() {
-        return this.id;
-    }
-
     public TypeEnum getTypeEnum() {
         return this.typeEnum;
     }
@@ -55,51 +34,37 @@ public class Transport implements Comparable, Parcelable {
         return this.routeNumber;
     }
 
-    public float getAdultPrice() {
-        return this.adultPrice;
+    public Direction getFromTaiO() {
+        return this.fromTaiO;
     }
 
-    public float getChildPrice() {
-        return this.childPrice;
-    }
-
-    public String getDepartureStation() {
-        return this.departureStation;
-    }
-
-    public String getDestinationStation() {
-        return this.destinationStation;
+    public Direction getToTaiO() {
+        return this.toTaiO;
     }
     //endregion
 
     //region Setter methods
-    public void setAdultPrice(float adultPrice) {
-        this.adultPrice = adultPrice;
-    }
 
-    public void setChildPrice(float childPrice) {
-        this.childPrice = childPrice;
-    }
     //endregion
 
     //region Comparison methods
     @Override
     public boolean equals(Object other) {
         if (other instanceof Transport) {
-            return Long.valueOf(this.id).equals(((Transport) other).getId());
+            return this.routeNumber.equals(((Transport) other).routeNumber);
         }
         return super.equals(other);
     }
 
     @Override
     public int hashCode() {
-        return Long.valueOf(this.id).hashCode();
+        return this.routeNumber.hashCode();
     }
 
     @Override
-    public int compareTo(Object other) {
+    public int compareTo(@NonNull Object other) {
         if (other instanceof Transport) {
-            return Long.valueOf(this.id).compareTo(((Transport) other).getId());
+            return this.routeNumber.compareTo(((Transport) other).routeNumber);
         }
         return 0;
     }
@@ -112,14 +77,11 @@ public class Transport implements Comparable, Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel out, int i) {
-        out.writeLong(this.id);
-        out.writeString(this.routeNumber);
-        out.writeInt(this.typeEnum.getValue());
-        out.writeFloat(this.adultPrice);
-        out.writeFloat(this.childPrice);
-        out.writeString(this.departureStation);
-        out.writeString(this.destinationStation);
+    public void writeToParcel(Parcel destination, int flags) {
+        destination.writeString(this.routeNumber);
+        destination.writeInt(this.typeEnum.getValue());
+        destination.writeParcelable(this.fromTaiO, flags);
+        destination.writeParcelable(this.toTaiO, flags);
     }
 
     public static final Parcelable.Creator<Transport> CREATOR = new Parcelable.Creator<Transport>() {
@@ -135,22 +97,18 @@ public class Transport implements Comparable, Parcelable {
         }
     };
 
-    private Transport(Parcel in) {
-        this.id = in.readLong();
-        this.routeNumber = in.readString();
+    private Transport(Parcel source) {
+        this.routeNumber = source.readString();
 
-        int typeIndex = in.readInt();
+        int typeIndex = source.readInt();
         if (typeIndex == 0) {
             this.typeEnum = TypeEnum.BUS;
         } else {
             this.typeEnum = TypeEnum.FERRY;
         }
 
-        this.adultPrice = in.readFloat();
-        this.childPrice = in.readFloat();
-        this.departureStation = in.readString();
-        this.destinationStation = in.readString();
-
+        this.fromTaiO = source.readParcelable(getClass().getClassLoader());
+        this.toTaiO = source.readParcelable(getClass().getClassLoader());
     }
     //endregion
 

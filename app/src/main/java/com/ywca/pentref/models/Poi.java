@@ -7,11 +7,11 @@ import android.support.annotation.NonNull;
 import com.google.android.gms.maps.model.LatLng;
 
 /**
- * A Poi (Point of Interest) encapsulates information about a physical location,
+ * A {@link Poi} (Point of Interest) encapsulates information about a physical location,
  * including its name, address, and other relevant information.
  */
 public class Poi implements Comparable, Parcelable {
-    //region Instance variables
+    //region Fields
     private long id;
     private String name;
     private String description;
@@ -86,30 +86,30 @@ public class Poi implements Comparable, Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel out, int i) {
-        out.writeLong(this.id);
-        out.writeString(this.name);
-        out.writeString(this.description);
-        out.writeString(this.websiteUri);
-        out.writeString(this.address);
-        out.writeDouble(this.latitude);
-        out.writeDouble(this.longitude);
+    public void writeToParcel(Parcel destination, int i) {
+        destination.writeLong(this.id);
+        destination.writeString(this.name);
+        destination.writeString(this.description);
+        destination.writeString(this.websiteUri);
+        destination.writeString(this.address);
+        destination.writeDouble(this.latitude);
+        destination.writeDouble(this.longitude);
     }
 
-    private Poi(Parcel in) {
-        this.id = in.readLong();
-        this.name = in.readString();
-        this.description = in.readString();
-        this.websiteUri = in.readString();
-        this.address = in.readString();
-        this.latitude = in.readDouble();
-        this.longitude = in.readDouble();
+    private Poi(Parcel source) {
+        this.id = source.readLong();
+        this.name = source.readString();
+        this.description = source.readString();
+        this.websiteUri = source.readString();
+        this.address = source.readString();
+        this.latitude = source.readDouble();
+        this.longitude = source.readDouble();
     }
 
     public static final Creator<Poi> CREATOR = new Creator<Poi>() {
         @Override
-        public Poi createFromParcel(Parcel in) {
-            return new Poi(in);
+        public Poi createFromParcel(Parcel source) {
+            return new Poi(source);
         }
 
         @Override

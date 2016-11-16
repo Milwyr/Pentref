@@ -181,24 +181,24 @@ public class PentrefProvider extends ContentProvider {
         return values;
     }
 
-    /**
-     * A helper method that initialises a {@link ContentValues}
-     * with the values of all columns of a {@link Transport} instance.
-     *
-     * @param transport An object instance of {@link Transport}
-     * @return A {@link ContentValues} with the values of a {@link Transport} instance
-     */
-    public static ContentValues getContentValues(Transport transport) {
-        ContentValues values = new ContentValues();
-        values.put(Contract.Transport.COLUMN_ID, transport.getId());
-        values.put(Contract.Transport.COLUMN_ROUTE_NUMBER, transport.getRouteNumber());
-        values.put(Contract.Transport.COLUMN_TYPE, transport.getTypeEnum().getValue());
-        values.put(Contract.Transport.COLUMN_ADULT_PRICE, transport.getAdultPrice());
-        values.put(Contract.Transport.COLUMN_CHILD_PRICE, transport.getChildPrice());
-        values.put(Contract.Transport.COLUMN_DEPARTURE_STATION, transport.getDepartureStation());
-        values.put(Contract.Transport.COLUMN_DESTINATION_STATION, transport.getDestinationStation());
-        return values;
-    }
+//    /**
+//     * A helper method that initialises a {@link ContentValues}
+//     * with the values of all columns of a {@link Transport} instance.
+//     *
+//     * @param transport An object instance of {@link Transport}
+//     * @return A {@link ContentValues} with the values of a {@link Transport} instance
+//     */
+//    public static ContentValues getContentValues(Transport transport) {
+//        ContentValues values = new ContentValues();
+//        values.put(Contract.Transport.COLUMN_ID, transport.getId());
+//        values.put(Contract.Transport.COLUMN_ROUTE_NUMBER, transport.getRouteNumber());
+//        values.put(Contract.Transport.COLUMN_TYPE, transport.getTypeEnum().getValue());
+//        values.put(Contract.Transport.COLUMN_ADULT_PRICE, transport.getAdultPrice());
+//        values.put(Contract.Transport.COLUMN_CHILD_PRICE, transport.getChildPrice());
+//        values.put(Contract.Transport.COLUMN_DEPARTURE_STATION, transport.getDepartureStation());
+//        values.put(Contract.Transport.COLUMN_DESTINATION_STATION, transport.getDestinationStation());
+//        return values;
+//    }
 
     /**
      * A helper method that returns a list of Points of interest from the given cursor.
