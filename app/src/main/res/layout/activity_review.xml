@@ -35,7 +35,7 @@
         android:layout_alignBottom="@id/profile_picture"
         android:layout_alignStart="@id/user_name_text_view"
         android:layout_marginBottom="8dp"
-        android:text="Posting publicly" />
+        android:text="@string/posting_publicly" />
 
     <RatingBar
         android:id="@+id/user_review_rating_bar"
@@ -47,24 +47,42 @@
         android:stepSize="0.5" />
 
     <EditText
-        android:id="@+id/review_edit_text"
+        android:id="@+id/review_title_edit_text"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/user_review_rating_bar"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:background="@drawable/activity_review_border"
-        android:gravity="top"
-        android:hint="Share with us about your feeling"
-        android:paddingEnd="0dp"
-        android:paddingStart="@dimen/activity_vertical_margin"
-        android:paddingTop="8dp" />
+        android:hint="@string/title" />
+
+    <TextView
+        android:id="@+id/description_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/review_title_edit_text"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:text="@string/description"
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/review_description_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/description_title" />
 
     <ImageView
+        android:id="@+id/import_from_photo_gallery"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_below="@id/review_edit_text"
+        android:layout_below="@id/review_description_edit_text"
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:src="@drawable/ic_menu_camera" />
+
+    <ImageView
+        android:id="@+id/photo1"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_below="@id/import_from_photo_gallery" />
 
     <Button
         android:id="@+id/submit_button"

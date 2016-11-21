@@ -20,6 +20,9 @@
     <string name="all_reviews">All reviews</string>
 
     <!-- Review activity -->
+    <string name="posting_publicly">Posting publicly</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
     <string name="submit">Submit</string>
     <string name="review_submitted">Review submitted</string>
 
