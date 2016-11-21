@@ -6,19 +6,23 @@ import android.app.TimePickerDialog;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.ywca.pentref.R;
-import com.ywca.pentref.adapters.TimetableRecyclerAdapter;
+import com.ywca.pentref.adapters.TimetableAdapter;
 import com.ywca.pentref.models.Transport;
 
+import org.joda.time.LocalTime;
+
 import java.util.Calendar;
+import java.util.List;
 
 public class TimetableActivity extends AppCompatActivity {
 
@@ -34,13 +38,16 @@ public class TimetableActivity extends AppCompatActivity {
             mSelectedTransportItem = getIntent().getParcelableExtra("Transport");
         }
 
+        // TODO: Let user dynamically chooses which timetable to show
+        List<LocalTime> localTimes = mSelectedTransportItem.getFromTaiO().getTimetable().getMonToSatTimes();
+
         TextView routeNumberTextView = (TextView) findViewById(R.id.route_number_text_view);
         routeNumberTextView.setText(mSelectedTransportItem.getRouteNumber());
 
+        // Insert a list of times into the adapter for the recycler view, with three columns per row
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.timetable_recycler_view);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new TimetableRecyclerAdapter(R.layout.timetable_row_layout, mSelectedTransportItem));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        recyclerView.setAdapter(new TimetableAdapter(R.layout.timetable_row_layout, localTimes));
 
         Button notifyMeButton = (Button) findViewById(R.id.timetable_notification_button);
         notifyMeButton.setOnClickListener(new View.OnClickListener() {

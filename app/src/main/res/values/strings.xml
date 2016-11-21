@@ -29,6 +29,7 @@
 
     <!-- Timetable activity -->
     <string name="adult_price">Adult price: </string>
+    <string name="notify_me">Notify Me</string>
 
     <!-- Content description for image views -->
     <string name="poi_details_header_image">Details of the Point of Interest</string>
