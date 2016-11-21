@@ -89,9 +89,12 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
 
     @Override
     public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-        Intent intent = new Intent(this, ReviewActivity.class);
-        intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
-        intent.putExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, rating);
-        startActivityForResult(intent, REQUEST_CODE_REVIEW_ACTIVITY);
+        // Only navigate to ReviewActivity if the rating bar is clicked by the user
+        if (fromUser) {
+            Intent intent = new Intent(this, ReviewActivity.class);
+            intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
+            intent.putExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, rating);
+            startActivityForResult(intent, REQUEST_CODE_REVIEW_ACTIVITY);
+        }
     }
 }

@@ -64,14 +64,14 @@ public class PentrefProvider extends ContentProvider {
                 break;
             case POI_ROW:
                 tableName = Contract.Poi.TABLE_NAME;
-                selection = Contract.Poi.COLUMN_ID + " = " + uri.getLastPathSegment();
+                selection = Contract.Poi._ID + " = " + uri.getLastPathSegment();
                 break;
             case TRANSPORT_TABLE:
                 tableName = Contract.Transport.TABLE_NAME;
                 break;
             case TRANSPORT_ROW:
                 tableName = Contract.Transport.TABLE_NAME;
-                selection = Contract.Transport.COLUMN_ID + " = " + uri.getLastPathSegment();
+                selection = Contract.Transport._ID + " = " + uri.getLastPathSegment();
                 break;
             case SEARCH_SUGGESTIONS:
                 tableName = Contract.Poi.TABLE_NAME;
@@ -84,10 +84,10 @@ public class PentrefProvider extends ContentProvider {
                     The column "SUGGEST_COLUMN_INTENT_DATA_ID" records the POI id of each row.
                  */
                 projection = new String[]{
-                        Contract.Poi.COLUMN_ID + " AS " + BaseColumns._ID,
+                        Contract.Poi._ID + " AS " + BaseColumns._ID,
                         Contract.Poi.COLUMN_NAME + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
                         Contract.Poi.COLUMN_ADDRESS + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
-                        Contract.Poi.COLUMN_ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
+                        Contract.Poi._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
 
                 // The two percent signs are used to match the 'LIKE' statements specified in searchable.xml
                 if (selectionArgs.length > 0) {
@@ -170,7 +170,7 @@ public class PentrefProvider extends ContentProvider {
      */
     public static ContentValues getContentValues(Poi poi) {
         ContentValues values = new ContentValues();
-        values.put(Contract.Poi.COLUMN_ID, poi.getId());
+        values.put(Contract.Poi._ID, poi.getId());
         values.put(Contract.Poi.COLUMN_NAME, poi.getName());
         values.put(Contract.Poi.COLUMN_DESCRIPTION, poi.getDescription());
         values.put(Contract.Poi.COLUMN_WEBSITE_URI, poi.getWebsiteUri());
@@ -210,7 +210,7 @@ public class PentrefProvider extends ContentProvider {
         List<Poi> pois = new ArrayList<>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            long id = cursor.getLong(cursor.getColumnIndex(Contract.Poi.COLUMN_ID));
+            long id = cursor.getLong(cursor.getColumnIndex(Contract.Poi._ID));
             String name = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_NAME));
             String description = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_DESCRIPTION));
             String websiteUri = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_WEBSITE_URI));
@@ -256,7 +256,7 @@ public class PentrefProvider extends ContentProvider {
             // Create a table for point of interest
             final String CREATE_POI_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
                     Contract.Poi.TABLE_NAME + " (" +
-                    Contract.Poi.COLUMN_ID + " LONG PRIMARY KEY, " +
+                    Contract.Poi._ID + " LONG PRIMARY KEY, " +
                     Contract.Poi.COLUMN_NAME + " VARCHAR(255), " +
                     Contract.Poi.COLUMN_DESCRIPTION + " VARCHAR(255), " +
                     Contract.Poi.COLUMN_WEBSITE_URI + " VARCHAR(255), " +
@@ -269,7 +269,7 @@ public class PentrefProvider extends ContentProvider {
             // Create a table for transportation
             final String CREATE_TRANSPORT_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
                     Contract.Transport.TABLE_NAME + " (" +
-                    Contract.Transport.COLUMN_ID + " LONG PRIMARY KEY, " +
+                    Contract.Transport._ID + " LONG PRIMARY KEY, " +
                     Contract.Transport.COLUMN_ROUTE_NUMBER + " VARCHAR(255), " +
                     Contract.Transport.COLUMN_TYPE + " INTEGER, " +
                     Contract.Transport.COLUMN_ADULT_PRICE + " FLOAT, " +
