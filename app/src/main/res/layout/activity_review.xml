@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_review"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.ywca.pentref.activities.ReviewActivity">
+
+    <ImageView
+        android:id="@+id/profile_picture"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_menu_gallery" />
+
+    <TextView
+        android:id="@+id/user_name_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/profile_picture"
+        android:layout_marginEnd="0dp"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="2dp"
+        android:layout_toEndOf="@id/profile_picture"
+        android:text="Medium Text"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/profile_picture"
+        android:layout_alignStart="@id/user_name_text_view"
+        android:layout_marginBottom="8dp"
+        android:text="Posting publicly" />
+
+    <RatingBar
+        android:id="@+id/user_review_rating_bar"
+        style="?android:attr/ratingBarStyleIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/profile_picture"
+        android:numStars="5"
+        android:stepSize="0.5" />
+
+    <EditText
+        android:id="@+id/review_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@id/user_review_rating_bar"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:background="@drawable/activity_review_border"
+        android:gravity="top"
+        android:hint="Share with us about your feeling"
+        android:paddingEnd="0dp"
+        android:paddingStart="@dimen/activity_vertical_margin"
+        android:paddingTop="8dp" />
+
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_below="@id/review_edit_text"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:src="@drawable/ic_menu_camera" />
+
+    <Button
+        android:id="@+id/submit_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorPrimary"
+        android:text="@string/submit"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+
+</RelativeLayout>

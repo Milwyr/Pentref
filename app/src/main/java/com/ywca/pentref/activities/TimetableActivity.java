@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.ywca.pentref.R;
@@ -33,10 +34,13 @@ public class TimetableActivity extends AppCompatActivity {
             mSelectedTransportItem = getIntent().getParcelableExtra("Transport");
         }
 
+        TextView routeNumberTextView = (TextView) findViewById(R.id.route_number_text_view);
+        routeNumberTextView.setText(mSelectedTransportItem.getRouteNumber());
+
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.timetable_recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new TimetableRecyclerAdapter(R.layout.timetable_row_layout, null));
+        recyclerView.setAdapter(new TimetableRecyclerAdapter(R.layout.timetable_row_layout, mSelectedTransportItem));
 
         Button notifyMeButton = (Button) findViewById(R.id.timetable_notification_button);
         notifyMeButton.setOnClickListener(new View.OnClickListener() {
@@ -60,12 +64,5 @@ public class TimetableActivity extends AppCompatActivity {
                 timePickerDialog.show();
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
     }
 }

@@ -9,24 +9,25 @@ import android.widget.TextView;
 import com.ywca.pentref.R;
 import com.ywca.pentref.models.Transport;
 
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An adapter that displays a list of POIs (Points of Interest) on a RecyclerView using the given layout.
+ * An adapter that displays the timetable of the given transport on a RecyclerView using the given layout.
  */
 public class TimetableRecyclerAdapter extends
         RecyclerView.Adapter<TimetableRecyclerAdapter.ViewHolder> {
 
     private int mLayoutId;
-    private List<Transport> mTransportItems;
+    private Transport mTransportItem;
 
-    public TimetableRecyclerAdapter(int layoutId, List<Transport> transportItems) {
+    public TimetableRecyclerAdapter(int layoutId, Transport transportItem) {
         mLayoutId = layoutId;
-        mTransportItems = transportItems;
-        if (mTransportItems == null) {
-            mTransportItems = new ArrayList<>();
-        }
+        mTransportItem = transportItem;
     }
 
     @Override
@@ -38,11 +39,15 @@ public class TimetableRecyclerAdapter extends
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         // TODO: should use dynamic data
-        holder.column1.setText("15:00");
-        holder.column2.setText("15:30");
-        holder.column3.setText("16:00");
-        holder.column4.setText("16:30");
-        holder.column5.setText("17:00");
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("HH:mm");
+
+        List<LocalTime> monToSatTimes = mTransportItem.getFromTaiO().getTimetable().getMonToSatTimes();
+
+        holder.column1.setText(formatter.print(monToSatTimes.get(0)));
+        holder.column2.setText(formatter.print(monToSatTimes.get(1)));
+        holder.column3.setText(formatter.print(monToSatTimes.get(2)));
+        holder.column4.setText(formatter.print(monToSatTimes.get(3)));
+        holder.column5.setText(formatter.print(monToSatTimes.get(4)));
     }
 
     @Override

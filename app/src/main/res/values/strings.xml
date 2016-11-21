@@ -19,6 +19,10 @@
     <!-- Poi details activity -->
     <string name="all_reviews">All reviews</string>
 
+    <!-- Review activity -->
+    <string name="submit">Submit</string>
+    <string name="review_submitted">Review submitted</string>
+
     <!-- Transportation fragment -->
     <string name="next_two_transports">Next two: </string>
     <string name="temporary_route_number">11</string>

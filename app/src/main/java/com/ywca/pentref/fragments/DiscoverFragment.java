@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,7 +102,14 @@ public class DiscoverFragment extends Fragment implements
         View rootView = inflater.inflate(R.layout.fragment_discover, container, false);
 
         mMapView = (MapView) rootView.findViewById(R.id.map_view);
-        mMapView.onCreate(savedInstanceState);
+
+        // TODO: Deal with the potential crash
+        try {
+            mMapView.onCreate(savedInstanceState);
+        } catch (Exception e) {
+            Log.e("DiscoverFragment", e.getMessage());
+        }
+
         mMapView.getMapAsync(this);
 
         mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);

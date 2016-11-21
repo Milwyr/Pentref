@@ -30,6 +30,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
@@ -43,6 +44,7 @@ import com.ywca.pentref.fragments.WeatherFragment;
 import com.ywca.pentref.models.Poi;
 import com.ywca.pentref.models.Transport;
 
+import org.joda.time.LocalTime;
 import org.json.JSONArray;
 
 import java.util.Arrays;
@@ -161,16 +163,16 @@ public class MainActivity extends BaseActivity
         // Handle navigation view item clicks here.
         switch (item.getItemId()) {
             case R.id.nav_discover:
-                changeFragment(R.string.discover, DiscoverFragment.newInstance(""));
+                changeFragment(R.string.discover, new DiscoverFragment());
                 break;
             case R.id.nav_bookmarks:
-                changeFragment(R.string.bookmarks, BookmarksFragment.newInstance(""));
+                changeFragment(R.string.bookmarks, new BookmarksFragment());
                 break;
             case R.id.nav_weather:
-                changeFragment(R.string.weather, WeatherFragment.newInstance(""));
+                changeFragment(R.string.weather, new WeatherFragment());
                 break;
             case R.id.nav_transportation:
-                changeFragment(R.string.transportation, TransportationFragment.newInstance(""));
+                changeFragment(R.string.transportation, new TransportationFragment());
                 break;
             case R.id.nav_login:
                 changeFragment(R.string.transportation, new SignInFragment());
@@ -265,26 +267,29 @@ public class MainActivity extends BaseActivity
             }
         });
 
+        // TODO: Save the json file to local storage
         JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                Gson gson = new Gson();
+                Gson gson= new GsonBuilder()
+                        .registerTypeAdapter(LocalTime.class, new Utility.LocalTimeSerializer())
+                        .create();
                 final List<Transport> transports = Arrays.asList(
                         gson.fromJson(response.toString(), Transport[].class));
 
                 new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... params) {
-                        for (Transport transport : transports) {
-                            ContentValues values = PentrefProvider.getContentValues(transport);
-
-                            try {
-                                getContentResolver().insert(Contract.Transport.CONTENT_URI, values);
-                            } catch (Exception e) {
-                                Log.e("MainActivity", e.getMessage());
-                            }
-                        }
+//                        for (Transport transport : transports) {
+//                            ContentValues values = PentrefProvider.getContentValues(transport);
+//
+//                            try {
+//                                getContentResolver().insert(Contract.Transport.CONTENT_URI, values);
+//                            } catch (Exception e) {
+//                                Log.e("MainActivity", e.getMessage());
+//                            }
+//                        }
 
                         return null;
                     }
