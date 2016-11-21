@@ -16,6 +16,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState, persistentState);
     }
 
+    /**
+     * @return True if the device is connected to the internet
+     */
     protected boolean isOnline() {
         ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();

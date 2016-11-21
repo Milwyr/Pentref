@@ -21,6 +21,11 @@ public class Utility {
     public static final String SELECTED_POI_EXTRA_KEY = "SelectedPoi";
     public static final String USER_REVIEW_RATING_EXTRA_KEY = "Rating";
 
+    public static final String TRANSPORTATION_JSON_FILE_NAME = "transports.json";
+
+    /**
+     * A serialiser that helps Gson to parse {@link LocalTime} object.
+     */
     public static class LocalTimeSerializer implements
             JsonDeserializer<LocalTime>, JsonSerializer<LocalTime> {
 

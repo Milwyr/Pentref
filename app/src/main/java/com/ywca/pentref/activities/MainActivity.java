@@ -47,6 +47,10 @@ import com.ywca.pentref.models.Transport;
 import org.joda.time.LocalTime;
 import org.json.JSONArray;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,7 +67,9 @@ public class MainActivity extends BaseActivity
         initialiseComponents();
 
         //TODO: Only execute this method when the items have not been added in the local database
-        fetchJsonFromServer();
+        if (isOnline()) {
+            fetchJsonFromServer();
+        }
 
         // Display the discover fragment only when the app launches as
         // savedInstanceState != null when orientation changes
@@ -239,26 +245,20 @@ public class MainActivity extends BaseActivity
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
+                // Parse the response array into a list of Points of Interest
                 Gson gson = new Gson();
-                final List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
+                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
 
-                new AsyncTask<Void, Void, Void>() {
+                // Insert the pois into the local database
+                for (final Poi poi : pois) {
+                    ContentValues values = PentrefProvider.getContentValues(poi);
 
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        for (final Poi poi : pois) {
-                            ContentValues values = PentrefProvider.getContentValues(poi);
-
-                            try {
-                                getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
-                            } catch (Exception e) {
-                                Log.e("MainActivity", e.getMessage());
-                            }
-                        }
-
-                        return null;
+                    try {
+                        getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
+                    } catch (Exception e) {
+                        Log.e("MainActivity", e.getMessage());
                     }
-                }.execute();
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -267,34 +267,30 @@ public class MainActivity extends BaseActivity
             }
         });
 
-        // TODO: Save the json file to local storage
+        // Fetch the transports json on the server and save it to a local json file
         JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                Gson gson= new GsonBuilder()
-                        .registerTypeAdapter(LocalTime.class, new Utility.LocalTimeSerializer())
-                        .create();
-                final List<Transport> transports = Arrays.asList(
-                        gson.fromJson(response.toString(), Transport[].class));
+                // Terminate if the transportation json file has been stored locally before
+                File transportsFile = new File(getFilesDir(), Utility.TRANSPORTATION_JSON_FILE_NAME);
+                if (transportsFile.exists()) {
+                    return;
+                }
 
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... params) {
-//                        for (Transport transport : transports) {
-//                            ContentValues values = PentrefProvider.getContentValues(transport);
-//
-//                            try {
-//                                getContentResolver().insert(Contract.Transport.CONTENT_URI, values);
-//                            } catch (Exception e) {
-//                                Log.e("MainActivity", e.getMessage());
-//                            }
-//                        }
-
-                        return null;
+                // Create the transportation json file, and write the response json array
+                // that is read from server to the newly created local json file
+                try {
+                    boolean isFileCreated = transportsFile.createNewFile();
+                    if (isFileCreated) {
+                        FileWriter fileWriter = new FileWriter(transportsFile);
+                        fileWriter.write(response.toString());
+                        fileWriter.flush();
+                        fileWriter.close();
                     }
-                }.execute();
-
+                } catch (IOException e) {
+                    Log.e("MainActivity", e.getMessage());
+                }
             }
         }, new Response.ErrorListener() {
             @Override
