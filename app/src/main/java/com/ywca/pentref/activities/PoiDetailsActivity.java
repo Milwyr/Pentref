@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.RatingBar;
 
 import com.ywca.pentref.R;
-import com.ywca.pentref.adapters.ReviewsRecyclerViewAdapter;
+import com.ywca.pentref.adapters.ReviewsAdapter;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 import com.ywca.pentref.models.Review;
@@ -82,7 +82,7 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         reviews.add(new Review(5, "Milton", "Very Good", "Worth visiting", null));
         reviews.add(new Review(3, "Moses", "Very Good", "Worth visiting", null));
         reviews.add(new Review(2, "Peter", "Very Good", "Worth visiting", null));
-        ReviewsRecyclerViewAdapter adapter = new ReviewsRecyclerViewAdapter();
+        ReviewsAdapter adapter = new ReviewsAdapter();
         adapter.setReviews(reviews);
         recyclerView.setAdapter(adapter);
     }

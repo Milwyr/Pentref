@@ -75,7 +75,7 @@ public class MainActivity extends BaseActivity
         // savedInstanceState != null when orientation changes
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction().add(
-                    R.id.frame, DiscoverFragment.newInstance("")).commit();
+                    R.id.frame, new DiscoverFragment()).commit();
         }
     }
 

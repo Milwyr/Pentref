@@ -16,10 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An adapter that displays a list of transportation items on a RecyclerView using the given layout.
+ * An adapter that displays a list of {@link Transport} objects on a {@link RecyclerView} using the given layout.
  */
-public class TransportRecyclerViewAdapter extends
-        RecyclerView.Adapter<TransportRecyclerViewAdapter.ViewHolder> {
+public class TransportAdapter extends RecyclerView.Adapter<TransportAdapter.ViewHolder> {
 
     private Context mContext;
     private int mLayoutId;
@@ -31,7 +30,7 @@ public class TransportRecyclerViewAdapter extends
      * @param layoutId   Layout file id of each row of the RecyclerView
      * @param transports A list of transport items to be displayed on the given layout
      */
-    public TransportRecyclerViewAdapter(int layoutId, List<Transport> transports) {
+    public TransportAdapter(int layoutId, List<Transport> transports) {
         mLayoutId = layoutId;
         mTransports = transports;
 

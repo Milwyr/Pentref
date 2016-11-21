@@ -29,6 +29,7 @@
     <!-- Transportation fragment -->
     <string name="next_two_transports">Next two: </string>
     <string name="temporary_route_number">11</string>
+    <string name="showFullTimetable">Show full timetable</string>
 
     <!-- Timetable activity -->
     <string name="adult_price">Adult price: </string>

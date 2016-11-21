@@ -2,10 +2,7 @@ package com.ywca.pentref.fragments;
 
 import android.Manifest;
 import android.app.Fragment;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -32,7 +29,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
-import com.ywca.pentref.adapters.BookmarksRecyclerViewAdapter;
+import com.ywca.pentref.adapters.BookmarksAdapter;
 import com.ywca.pentref.adapters.CategoryAdapter;
 import com.ywca.pentref.common.CategoryItem;
 import com.ywca.pentref.common.Contract;
@@ -44,22 +41,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Use the {@link DiscoverFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Displays a {@link GoogleMap} instance with the predefined Points of Interest and categories.
  */
 // Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
 public class DiscoverFragment extends Fragment implements
         OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
-    // TODO: Rename parameter arguments, choose names that match
-    private static final String ARG_PARAM1 = "param1";
 
     private final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
+
+    // Request code to launch PoiDetailsActivity
+    private final int RC_POI_ACTIVITY_DETAILS = 9000;
 
     // Request code for requesting for location permission
     private final int RC_LOCATION_PERMISSION = 10000;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
     private GoogleMap mGoogleMap;
 
     private CardView mPoiSummaryCardView;
@@ -71,29 +66,9 @@ public class DiscoverFragment extends Fragment implements
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @return A new instance of fragment DiscoverFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static DiscoverFragment newInstance(String param1) {
-        DiscoverFragment fragment = new DiscoverFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setHasOptionsMenu(true);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-        }
     }
 
     @Override
@@ -134,7 +109,7 @@ public class DiscoverFragment extends Fragment implements
         pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
         pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
         pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-        bottomRecyclerView.setAdapter(new BookmarksRecyclerViewAdapter(R.layout.bookmark_row_layout, pois));
+        bottomRecyclerView.setAdapter(new BookmarksAdapter(R.layout.bookmark_row_layout, pois));
 
         mPoiSummaryCardView = (CardView) rootView.findViewById(R.id.poi_summary_card_view);
         mPoiSummaryCardView.setOnClickListener(this);
@@ -143,23 +118,19 @@ public class DiscoverFragment extends Fragment implements
         return rootView;
     }
 
-//    @Override
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_POI_ACTIVITY_DETAILS) {
+            mPoiSummaryCardView.setVisibility(View.GONE);
+            mBottomSheet.setVisibility(View.VISIBLE);
+        }
+    }
+
+    //    @Override
 //    public void onSaveInstanceState(Bundle outState) {
 //        super.onSaveInstanceState(outState);
 //        mMapView.onSaveInstanceState(outState);
-//    }
-
-//    @Override
-//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//        inflater.inflate(R.menu.main, menu);
-//
-//        // Associate searchable configuration with the SearchView
-//        SearchManager searchManager =
-//                (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-//        SearchView searchView =
-//                (SearchView) menu.findItem(R.id.action_search).getActionView();
-//        searchView.setSearchableInfo(
-//                searchManager.getSearchableInfo(getActivity().getComponentName()));
 //    }
 
     @Override
@@ -259,7 +230,7 @@ public class DiscoverFragment extends Fragment implements
             case R.id.poi_summary_card_view:
                 Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
                 intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
-                startActivity(intent);
+                startActivityForResult(intent, RC_POI_ACTIVITY_DETAILS);
                 break;
         }
     }

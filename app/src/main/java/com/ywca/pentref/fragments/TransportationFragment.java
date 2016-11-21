@@ -10,27 +10,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ywca.pentref.R;
-import com.ywca.pentref.adapters.TransportRecyclerViewAdapter;
+import com.ywca.pentref.adapters.TransportAdapter;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Transport;
 
 import org.joda.time.LocalTime;
-import org.json.JSONArray;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -91,8 +82,8 @@ public class TransportationFragment extends Fragment {
 
             @Override
             protected void onPostExecute(List<Transport> transports) {
-                TransportRecyclerViewAdapter adapter =
-                        new TransportRecyclerViewAdapter(R.layout.transport_card_layout, transports);
+                TransportAdapter adapter =
+                        new TransportAdapter(R.layout.transport_card_layout, transports);
                 recyclerView.setAdapter(adapter);
             }
         }.execute();

@@ -54,6 +54,17 @@ public class TimetableAdapter extends RecyclerView.Adapter<TimetableAdapter.View
         return (mLocalTimes == null) ? 0 : mLocalTimes.size();
     }
 
+    /**
+     * Updates the timetable, i.e. a list of {@link LocalTime} objects.
+     * The method notifyDataSetChanged will be called as well.
+     *
+     * @param localTimes A list of {@link LocalTime} objects
+     */
+    public void updateLocalTimes(List<LocalTime> localTimes) {
+        mLocalTimes = localTimes;
+        notifyDataSetChanged();
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         private TextView timeTextView;
 
