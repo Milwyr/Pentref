@@ -35,6 +35,9 @@
     <string name="adult_price">Adult price: </string>
     <string name="notify_me">Notify Me</string>
 
+    <!-- Sign in fragment -->
+    <string name="visitor">Visitor</string>
+
     <!-- Content description for image views -->
     <string name="poi_details_header_image">Details of the Point of Interest</string>
     <string name="profile_picture">Profile Picture</string>
@@ -45,6 +48,14 @@
         Phone:65871092\n
         Working time: 9:00 - 17:00
     </string>
+
+    <!-- Error messages -->
+    <string name="close">Close</string>
+    <string name="error_not_signed_in">Not signed in</string>
+    <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
+    <string name="error_network_unavailable">Network unavailable</string>
+    <string name="error_message_connect_to_internet_before_posting_review">Please connect to internet before posting your review.</string>
+
 
     <string name="facebook_app_id">195665774189937</string>
     <string name="sign_out">Sign Out</string>

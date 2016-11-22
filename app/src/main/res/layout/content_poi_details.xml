@@ -85,7 +85,7 @@
             android:layout_below="@id/temp"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/activity_vertical_margin"
-            app:srcCompat="@drawable/ic_person_black_24dp" />
+            app:srcCompat="@drawable/ic_person_black" />
 
         <RatingBar
             android:id="@+id/user_review_rating_bar"

@@ -277,7 +277,9 @@ public class DiscoverFragment extends Fragment implements
 
     @Override
     public void onPause() {
-        mMapView.onPause();
+        if (mMapView != null) {
+            mMapView.onPause();
+        }
         super.onPause();
     }
 

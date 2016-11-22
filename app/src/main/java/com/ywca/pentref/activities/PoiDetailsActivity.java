@@ -1,5 +1,7 @@
 package com.ywca.pentref.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -19,6 +21,14 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.FacebookSdk;
+import com.facebook.Profile;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInApi;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
 import com.ywca.pentref.R;
 import com.ywca.pentref.adapters.ReviewsAdapter;
 import com.ywca.pentref.common.Utility;
@@ -33,10 +43,13 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
 
     private Poi mSelectedPoi;
 
+    private GoogleApiClient mGoogleApiClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poi_details);
+        FacebookSdk.sdkInitialize(this);
 
         if (getIntent() != null) {
             mSelectedPoi = getIntent().getParcelableExtra(Utility.SELECTED_POI_EXTRA_KEY);
@@ -66,6 +79,12 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         CollapsingToolbarLayout collapsingToolbar =
                 (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbar.setTitle(mSelectedPoi.getName());
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mGoogleApiClient.disconnect();
     }
 
     private void initialiseComponents() {
@@ -112,16 +131,53 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         ReviewsAdapter adapter = new ReviewsAdapter();
         adapter.setReviews(reviews);
         recyclerView.setAdapter(adapter);
+
+        // Initialise components for Google login
+        GoogleSignInOptions gso = new GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
     }
 
     @Override
     public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
         // Only navigate to ReviewActivity if the rating bar is clicked by the user
         if (fromUser) {
-            Intent intent = new Intent(this, ReviewActivity.class);
-            intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
-            intent.putExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, rating);
-            startActivityForResult(intent, REQUEST_CODE_REVIEW_ACTIVITY);
+            if (isSignedIn()) {
+                Intent intent = new Intent(this, ReviewActivity.class);
+                intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
+                intent.putExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, rating);
+                startActivityForResult(intent, REQUEST_CODE_REVIEW_ACTIVITY);
+            } else {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.error_network_unavailable)
+                        .setMessage(R.string.error_message_sign_in_before_posting_review)
+                        .setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create().show();
+            }
         }
+    }
+
+    // Returns true if the user has signed in with either Facebook or Google
+    private boolean isSignedIn() {
+        return Profile.getCurrentProfile() != null || isSignedInWithGoogle();
+    }
+
+    private boolean isSignedInWithGoogle() {
+        OptionalPendingResult<GoogleSignInResult> opr =
+                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+
+        if (opr.isDone()) {
+            GoogleSignInResult result = opr.get();
+            return result != null;
+        }
+        return false;
     }
 }

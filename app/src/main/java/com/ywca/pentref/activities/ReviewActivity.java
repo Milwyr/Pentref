@@ -1,6 +1,8 @@
 package com.ywca.pentref.activities;
 
+import android.app.AlertDialog;
 import android.content.ClipData;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,7 +21,7 @@ import com.ywca.pentref.models.Poi;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReviewActivity extends AppCompatActivity implements View.OnClickListener {
+public class ReviewActivity extends BaseActivity implements View.OnClickListener {
     // The request code to open photo gallery
     private final int RC_PHOTO_GALLERY = 7000;
 
@@ -39,17 +41,17 @@ public class ReviewActivity extends AppCompatActivity implements View.OnClickLis
             mIncomingIntent = new Intent(this, PoiDetailsActivity.class);
             mIncomingIntent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, poi);
 
-            // Retrieve user's rating from PoiDetailsActivity
-            float rating = getIntent().getFloatExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, 0);
-
-            // Customise the actionbar to show back button in a cross icon
+            //region Customise the actionbar
             final ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setTitle(poi.getName());
                 actionBar.setDisplayHomeAsUpEnabled(true);
                 actionBar.setHomeAsUpIndicator(R.drawable.ic_cross_white_24dp);
             }
+            //endregion
 
+            //region Initialise widgets
+            float rating = getIntent().getFloatExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, 0);
             RatingBar userReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
             userReviewRatingBar.setRating(rating);
 
@@ -58,6 +60,7 @@ public class ReviewActivity extends AppCompatActivity implements View.OnClickLis
 
             Button submitButton = (Button) findViewById(R.id.submit_button);
             submitButton.setOnClickListener(this);
+            //endregion
         }
     }
 
@@ -106,9 +109,21 @@ public class ReviewActivity extends AppCompatActivity implements View.OnClickLis
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), RC_PHOTO_GALLERY);
                 break;
             case R.id.submit_button:
-                // This intent carries the incoming Poi instance so PoiDetailsActivity can receive it
-                setResult(RESULT_OK, mIncomingIntent);
-                finish();
+                if (isConnectedToInternet()) {
+                    // This intent carries the incoming Poi instance so PoiDetailsActivity can receive it
+                    setResult(RESULT_OK, mIncomingIntent);
+                    finish();
+                } else {
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.error_network_unavailable)
+                            .setMessage(R.string.error_message_connect_to_internet_before_posting_review)
+                            .setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            }).create().show();
+                }
                 break;
         }
     }
