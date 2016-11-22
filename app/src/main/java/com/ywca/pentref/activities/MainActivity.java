@@ -174,10 +174,10 @@ public class MainActivity extends BaseActivity
                 changeFragment(R.string.weather, new WeatherFragment());
                 break;
             case R.id.nav_transportation:
-                changeFragment(R.string.transportation, new TransportationFragment());
+                changeFragment(R.string.transport_schedule, new TransportationFragment());
                 break;
             case R.id.nav_login:
-                changeFragment(R.string.transportation, new SignInFragment());
+                changeFragment(R.string.transport_schedule, new SignInFragment());
                 break;
             case R.id.nav_settings:
                 changeFragment(R.string.settings, new SettingsFragment());

@@ -10,11 +10,11 @@
     <string name="search_hint">Enter text</string>
 
     <!-- Navigation drawer headers -->
-    <string name="discover">Discover</string>
-    <string name="bookmarks">Bookmarks</string>
-    <string name="weather">Weather</string>
-    <string name="transport_schedule">Schedule</string>
-    <string name="settings">Settings</string>
+    <string name="discover">發現</string>
+    <string name="bookmarks">收藏</string>
+    <string name="weather">天氣</string>
+    <string name="transport_schedule">交通時間表</string>
+    <string name="settings">設定</string>
 
     <!-- Poi details activity -->
     <string name="all_reviews">All reviews</string>
