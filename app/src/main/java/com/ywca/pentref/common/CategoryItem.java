@@ -1,22 +1,28 @@
 package com.ywca.pentref.common;
 
 /**
- * Created by Milton on 14/11/2016.
+ * Includes an id, a category name and the image resource id.
  */
 public class CategoryItem {
+    private int categoryId;
+    private String categoryName;
     private int imageResourceId;
-    private String categoryDescription;
 
-    public CategoryItem(int imageResourceId, String categoryDescription) {
+    public CategoryItem(int categoryId, String categoryName, int imageResourceId) {
         this.imageResourceId = imageResourceId;
-        this.categoryDescription = categoryDescription;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+    }
+
+    public int getCategoryId() {
+        return this.categoryId;
+    }
+
+    public String getCategoryName() {
+        return this.categoryName;
     }
 
     public int getImageResourceId() {
         return this.imageResourceId;
-    }
-
-    public String getCategoryDescription() {
-        return this.categoryDescription;
     }
 }

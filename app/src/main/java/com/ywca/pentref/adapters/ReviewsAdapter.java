@@ -13,10 +13,10 @@ import com.ywca.pentref.models.Review;
 import java.util.List;
 
 /**
- * An adapter that displays a list of reviews on a RecyclerView.
+ * An adapter that displays a list of reviews on a {@link RecyclerView}.
  */
-public class ReviewsRecyclerViewAdapter extends
-        RecyclerView.Adapter<ReviewsRecyclerViewAdapter.ViewHolder> {
+public class ReviewsAdapter extends
+        RecyclerView.Adapter<ReviewsAdapter.ViewHolder> {
 
     private List<Review> mReviews;
 

@@ -10,16 +10,22 @@ import android.widget.TextView;
 
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.TimetableActivity;
+import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Transport;
+
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An adapter that displays a list of transportation items on a RecyclerView using the given layout.
+ * An adapter that displays a list of {@link Transport} objects on a {@link RecyclerView} using the given layout.
  */
-public class TransportRecyclerViewAdapter extends
-        RecyclerView.Adapter<TransportRecyclerViewAdapter.ViewHolder> {
+public class TransportAdapter extends RecyclerView.Adapter<TransportAdapter.ViewHolder> {
 
     private Context mContext;
     private int mLayoutId;
@@ -31,7 +37,7 @@ public class TransportRecyclerViewAdapter extends
      * @param layoutId   Layout file id of each row of the RecyclerView
      * @param transports A list of transport items to be displayed on the given layout
      */
-    public TransportRecyclerViewAdapter(int layoutId, List<Transport> transports) {
+    public TransportAdapter(int layoutId, List<Transport> transports) {
         mLayoutId = layoutId;
         mTransports = transports;
 
@@ -64,8 +70,37 @@ public class TransportRecyclerViewAdapter extends
         holder.departureStationTextView.setText(transport.getFromTaiO().getStations().get(0));
         holder.destinationStationTextView.setText(transport.getToTaiO().getStations().get(0));
 
-        // TODO: Add fields in the transport object
-        holder.nextTwoTransportsTimeTextView.setText("11:00pm, 11:30pm");
+        List<LocalTime> localTimes;
+        // TODO: Assume the direction is from Tai O
+        if (LocalDate.now().getDayOfWeek() >= DateTimeConstants.MONDAY
+                && LocalDate.now().getDayOfWeek() <= DateTimeConstants.SATURDAY) {
+            localTimes = transport.getFromTaiO().getTimetable().getMonToSatTimes();
+        } else {
+            localTimes = transport.getFromTaiO().getTimetable().getSunAndPublicHolidayTimes();
+        }
+
+        holder.nextTwoTransportsTimeTextView.setText(getNextTwoTransportsMessage(localTimes));
+    }
+
+    // Convert the given list of LocalTime objects to a readable text
+    private String getNextTwoTransportsMessage(List<LocalTime> localTimes) {
+        // Get the next two departure times later than the current time
+        List<LocalTime> nextTwoDepartureTimes = Utility.getTimesAfterNow(localTimes);
+
+        // Convert the list of LocalTime objects to a readable text
+        String message;
+        if (nextTwoDepartureTimes.isEmpty()) {
+            message = "No available transport";
+        } else {
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("HH:mm");
+            message = formatter.print(nextTwoDepartureTimes.get(0));
+
+            if (nextTwoDepartureTimes.size() == 2) {
+                message += ", " + formatter.print(nextTwoDepartureTimes.get(1));
+            }
+        }
+
+        return message;
     }
 
     @Override

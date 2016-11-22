@@ -1,6 +1,9 @@
 package com.ywca.pentref.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
@@ -8,11 +11,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.Toast;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.Volley;
+import com.facebook.FacebookSdk;
+import com.facebook.Profile;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInApi;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
 import com.ywca.pentref.R;
-import com.ywca.pentref.adapters.ReviewsRecyclerViewAdapter;
+import com.ywca.pentref.adapters.ReviewsAdapter;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 import com.ywca.pentref.models.Review;
@@ -25,10 +43,13 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
 
     private Poi mSelectedPoi;
 
+    private GoogleApiClient mGoogleApiClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poi_details);
+        FacebookSdk.sdkInitialize(this);
 
         if (getIntent() != null) {
             mSelectedPoi = getIntent().getParcelableExtra(Utility.SELECTED_POI_EXTRA_KEY);
@@ -60,6 +81,12 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         collapsingToolbar.setTitle(mSelectedPoi.getName());
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mGoogleApiClient.disconnect();
+    }
+
     private void initialiseComponents() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -67,6 +94,25 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        // TODO: Dynamically choose the url
+        // Download the header image from server
+        ImageRequest imageRequest = new ImageRequest(
+                "https://github.com/Milwyr/Temporary/blob/master/poi_photos/29_hwa_kong_temple_landscape.jpg?raw=true",
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap response) {
+                        ImageView headerImageView = (ImageView) findViewById(R.id.header_image);
+                        headerImageView.setImageBitmap(response);
+                    }
+                }, 1280, 720, ImageView.ScaleType.CENTER_CROP, null,
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("PoiDetailsActivity", error.getMessage());
+                    }
+                });
+        Volley.newRequestQueue(this).add(imageRequest);
 
         // TODO: Set data for views (address, website uri, phone number...)
 
@@ -82,19 +128,56 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         reviews.add(new Review(5, "Milton", "Very Good", "Worth visiting", null));
         reviews.add(new Review(3, "Moses", "Very Good", "Worth visiting", null));
         reviews.add(new Review(2, "Peter", "Very Good", "Worth visiting", null));
-        ReviewsRecyclerViewAdapter adapter = new ReviewsRecyclerViewAdapter();
+        ReviewsAdapter adapter = new ReviewsAdapter();
         adapter.setReviews(reviews);
         recyclerView.setAdapter(adapter);
+
+        // Initialise components for Google login
+        GoogleSignInOptions gso = new GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
     }
 
     @Override
     public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
         // Only navigate to ReviewActivity if the rating bar is clicked by the user
         if (fromUser) {
-            Intent intent = new Intent(this, ReviewActivity.class);
-            intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
-            intent.putExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, rating);
-            startActivityForResult(intent, REQUEST_CODE_REVIEW_ACTIVITY);
+            if (isSignedIn()) {
+                Intent intent = new Intent(this, ReviewActivity.class);
+                intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
+                intent.putExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, rating);
+                startActivityForResult(intent, REQUEST_CODE_REVIEW_ACTIVITY);
+            } else {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.error_network_unavailable)
+                        .setMessage(R.string.error_message_sign_in_before_posting_review)
+                        .setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create().show();
+            }
         }
+    }
+
+    // Returns true if the user has signed in with either Facebook or Google
+    private boolean isSignedIn() {
+        return Profile.getCurrentProfile() != null || isSignedInWithGoogle();
+    }
+
+    private boolean isSignedInWithGoogle() {
+        OptionalPendingResult<GoogleSignInResult> opr =
+                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+
+        if (opr.isDone()) {
+            GoogleSignInResult result = opr.get();
+            return result != null;
+        }
+        return false;
     }
 }

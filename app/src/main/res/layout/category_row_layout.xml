@@ -17,7 +17,6 @@
         android:layout_below="@+id/category_icon"
         android:layout_centerHorizontal="true"
         android:text="Medium Text"
-        android:textColor="@color/black"
-        android:textSize="16sp" />
+        android:textColor="@color/black" />
 
 </RelativeLayout>

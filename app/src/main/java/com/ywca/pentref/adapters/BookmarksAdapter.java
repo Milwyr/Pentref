@@ -15,16 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An adapter that a displays a list of POIs (Points of Interest) on a RecyclerView using the given layout.
+ * An adapter that a displays a list of {@link Poi} objects (Points of Interest) on a {@link RecyclerView} using the given layout.
  */
-public class BookmarksRecyclerViewAdapter extends
-        RecyclerView.Adapter<BookmarksRecyclerViewAdapter.ViewHolder> {
+public class BookmarksAdapter extends RecyclerView.Adapter<BookmarksAdapter.ViewHolder> {
 
     private Context mContext;
     private int mLayoutId;
     private List<Poi> mPois;
 
-    public BookmarksRecyclerViewAdapter(int layoutId, List<Poi> pois) {
+    public BookmarksAdapter(int layoutId, List<Poi> pois) {
         mLayoutId = layoutId;
         mPois = pois;
         if (mPois == null) {
@@ -55,12 +54,12 @@ public class BookmarksRecyclerViewAdapter extends
 
     @Override
     public int getItemCount() {
-        return mPois.size();
+        return (mPois == null) ? 0 : mPois.size();
     }
 
     private void removePoi(long poiId) {
         int position = 0;
-        for (Poi poi: mPois) {
+        for (Poi poi : mPois) {
             if (poiId == poi.getId()) {
                 mPois.remove(position);
                 notifyItemRemoved(position);

@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.ywca.pentref.R;
-import com.ywca.pentref.adapters.BookmarksRecyclerViewAdapter;
+import com.ywca.pentref.adapters.BookmarksAdapter;
 import com.ywca.pentref.models.Poi;
 
 import java.util.ArrayList;
@@ -74,7 +74,7 @@ public class BookmarksFragment extends Fragment {
         pois.add(new Poi(1, "Temp", "Description", "www.yahoo.com", "Somewhere in Tai O", new LatLng(1, 2)));
         pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
 
-        recyclerView.setAdapter(new BookmarksRecyclerViewAdapter(R.layout.bookmark_row_layout, pois));
+        recyclerView.setAdapter(new BookmarksAdapter(R.layout.bookmark_row_layout, pois));
 
         return rootVIew;
     }

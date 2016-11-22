@@ -1,6 +1,5 @@
 package com.ywca.pentref.common;
 
-import android.content.UriMatcher;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
@@ -33,6 +32,19 @@ public final class Contract {
                 COLUMN_LATITUDE,
                 COLUMN_LONGITUDE,
                 COLUMN_TIMESTAMP
+        };
+    }
+
+    public static final class Category implements BaseColumns {
+        public static final String TABLE_NAME = "category";
+
+        public static final String COLUMN_NAME = "category_name";
+        public static final String COLUMN_IMAGE_RESOURCE_ID = "image_resource_id";
+
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, TABLE_NAME);
+
+        public static final String[] PROJECTION_ALL = {
+                _ID, COLUMN_NAME, COLUMN_IMAGE_RESOURCE_ID
         };
     }
 
