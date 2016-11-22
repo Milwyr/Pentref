@@ -20,12 +20,6 @@ import java.util.List;
  */
 public class Timetable implements Parcelable {
     //region Fields
-    // Created to parse the incoming json file using Gson
-//    @SerializedName("monToSat")
-//    private List<String> monToSatTimeStrings;
-//    @SerializedName("sunAndPublicHoliday")
-//    private List<String> sunAndPublicHolidayTimeStrings;
-
     @SerializedName("monToSat")
     private List<LocalTime> monToSatTimes;
     @SerializedName("sunAndPublicHoliday")

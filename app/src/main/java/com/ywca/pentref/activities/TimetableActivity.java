@@ -17,6 +17,7 @@ import android.widget.TimePicker;
 
 import com.ywca.pentref.R;
 import com.ywca.pentref.adapters.TimetableAdapter;
+import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Transport;
 
 import org.joda.time.LocalTime;
@@ -46,14 +47,8 @@ public class TimetableActivity extends AppCompatActivity implements
 
         // TODO: Let user dynamically chooses which timetable to show
         List<LocalTime> localTimes = mSelectedTransportItem.getFromTaiO().getTimetable().getMonToSatTimes();
-        List<LocalTime> timesAfterNow = new ArrayList<>();
-
         // Only select the times that are later than now
-        for (LocalTime localTime: localTimes) {
-            if (localTime.isAfter(LocalTime.now())) {
-                timesAfterNow.add(localTime);
-            }
-        }
+        List<LocalTime> timesAfterNow = Utility.getTimesAfterNow(localTimes);
 
         // Insert a list of times into the adapter for the recycler view, with three columns per row
         mAdapter = new TimetableAdapter(R.layout.timetable_row_layout, timesAfterNow);
@@ -100,13 +95,7 @@ public class TimetableActivity extends AppCompatActivity implements
             mAdapter.updateLocalTimes(localTimes);
         } else {
             // Only select the times that are later than now
-            List<LocalTime> timesAfterNow = new ArrayList<>();
-            for (LocalTime localTime: localTimes) {
-                if (localTime.isAfter(LocalTime.now())) {
-                    timesAfterNow.add(localTime);
-                }
-            }
-            mAdapter.updateLocalTimes(timesAfterNow);
+            mAdapter.updateLocalTimes(Utility.getTimesAfterNow(localTimes));
         }
     }
 }
