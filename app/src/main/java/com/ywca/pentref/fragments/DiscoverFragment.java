@@ -1,7 +1,6 @@
 package com.ywca.pentref.fragments;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -24,19 +23,15 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.GeofencingApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -60,7 +55,6 @@ import com.ywca.pentref.models.Poi;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 /**
@@ -170,8 +164,6 @@ public class DiscoverFragment extends Fragment implements
                 if (resultCode == RESULT_OK) {
                     // All required changes were successfully made
                     startLocationUpdates();
-                } else if (resultCode == RESULT_CANCELED) {
-                    // The user was asked to change settings, but chose not to
                 }
                 break;
         }
@@ -188,9 +180,18 @@ public class DiscoverFragment extends Fragment implements
         mGoogleMap = googleMap;
 
         //region Enable locate me button
-        checkLocationPermission();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkLocationPermission();
+            // Check if both coarse location and fine location permissions has been granted
+            if ((ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
+                    (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+
+                // Request coarse location and fine location permissions if not granted
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_PERMISSION);
+            }
         } else {
             // Location permissions have been granted prior to installation before Marshmallow (API 23)
             googleMap.setMyLocationEnabled(true);
@@ -211,6 +212,12 @@ public class DiscoverFragment extends Fragment implements
                 // Retrieve a list of Points of Interest from the local database
                 Cursor cursor = getActivity().getContentResolver().query(
                         Contract.Poi.CONTENT_URI, Contract.Poi.PROJECTION_ALL, null, null, null);
+
+                // This line is used to get rid of the warning
+                if (cursor == null) {
+                    return new ArrayList<>();
+                }
+
                 List<Poi> pois = PentrefProvider.convertToPois(cursor);
                 cursor.close();
                 return pois;
@@ -321,9 +328,15 @@ public class DiscoverFragment extends Fragment implements
     }
 
     private void startLocationUpdates() {
-        checkLocationPermission();
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
+        if ((ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) &&
+                (ContextCompat.checkSelfPermission(getActivity(),
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            // Request location updates only when both course and fine location permissions
+            // have been granted
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    mGoogleApiClient, mLocationRequest, this);
+        }
     }
 
     private void stopLocationUpdates() {
@@ -364,22 +377,6 @@ public class DiscoverFragment extends Fragment implements
                             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
                 mGoogleMap.setMyLocationEnabled(true);
             }
-        }
-    }
-
-    // Request coarse location and fine location permissions if they have not been granted
-    @TargetApi(Build.VERSION_CODES.M)
-    private void checkLocationPermission() {
-        // Check if coarse location and fine location permissions has been granted
-        if ((ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
-                (ContextCompat.checkSelfPermission(getActivity(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-
-            // Request coarse location and fine location permissions if not granted
-            requestPermissions(new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_PERMISSION);
         }
     }
 
