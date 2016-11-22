@@ -53,7 +53,7 @@ public class CategoryAdapter extends BaseAdapter {
             icon.setImageResource(categoryItem.getImageResourceId());
 
             TextView category = (TextView) convertView.findViewById(R.id.category_text_view);
-            category.setText(categoryItem.getCategoryDescription());
+            category.setText(categoryItem.getCategoryName());
         }
 
         return convertView;

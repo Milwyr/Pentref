@@ -91,10 +91,10 @@ public class DiscoverFragment extends Fragment implements
 
         GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
         List<CategoryItem> categories = new ArrayList<>();
-        categories.add(new CategoryItem(R.drawable.ic_ferry_black_36dp, "Restaurants"));
-        categories.add(new CategoryItem(R.drawable.ic_bus_black_36dp, "Bus stops"));
-        categories.add(new CategoryItem(R.drawable.ic_menu_camera, "Toilets"));
-        categories.add(new CategoryItem(R.drawable.ic_bookmark_black_36dp, "Public facilities"));
+        categories.add(new CategoryItem(0, "Points of Interest", R.drawable.ic_menu_camera));
+        categories.add(new CategoryItem(1, "Public Facilities", R.drawable.ic_bus_black_36dp));
+        categories.add(new CategoryItem(2, "Restaurants", R.drawable.ic_menu_share));
+        categories.add(new CategoryItem(3, "Miscellaneous", R.drawable.ic_bookmark_black_36dp));
         gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
 
         // TODO: Potentially create a new layout for this

@@ -1,6 +1,7 @@
 package com.ywca.pentref.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
@@ -8,9 +9,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.Toast;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.Volley;
 import com.ywca.pentref.R;
 import com.ywca.pentref.adapters.ReviewsAdapter;
 import com.ywca.pentref.common.Utility;
@@ -67,6 +75,25 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        // TODO: Dynamically choose the url
+        // Download the header image from server
+        ImageRequest imageRequest = new ImageRequest(
+                "https://github.com/Milwyr/Temporary/blob/master/poi_photos/29_hwa_kong_temple_landscape.jpg?raw=true",
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap response) {
+                        ImageView headerImageView = (ImageView) findViewById(R.id.header_image);
+                        headerImageView.setImageBitmap(response);
+                    }
+                }, 1280, 720, ImageView.ScaleType.CENTER_CROP, null,
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("PoiDetailsActivity", error.getMessage());
+                    }
+                });
+        Volley.newRequestQueue(this).add(imageRequest);
 
         // TODO: Set data for views (address, website uri, phone number...)
 

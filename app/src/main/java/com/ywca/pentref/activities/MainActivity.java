@@ -30,7 +30,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
@@ -42,13 +41,10 @@ import com.ywca.pentref.fragments.SignInFragment;
 import com.ywca.pentref.fragments.TransportationFragment;
 import com.ywca.pentref.fragments.WeatherFragment;
 import com.ywca.pentref.models.Poi;
-import com.ywca.pentref.models.Transport;
 
-import org.joda.time.LocalTime;
 import org.json.JSONArray;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -67,7 +63,7 @@ public class MainActivity extends BaseActivity
         initialiseComponents();
 
         //TODO: Only execute this method when the items have not been added in the local database
-        if (isOnline()) {
+        if (isConnectedToInternet()) {
             fetchJsonFromServer();
         }
 
