@@ -30,7 +30,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedHashTreeMap;
 import com.ywca.pentref.R;
+import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
@@ -49,6 +51,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -233,10 +236,8 @@ public class MainActivity extends BaseActivity
     private void fetchJsonFromServer() {
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
-        String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transport_schedule.json";
-
         // Read all Points of Interest from the server and add them to SQLite database
+        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
         JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
@@ -262,8 +263,38 @@ public class MainActivity extends BaseActivity
                 Log.e("MainActivity", error.getMessage());
             }
         });
+        queue.add(poiJsonArrayRequest);
+
+        String poiTypesUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/poi_categories.json";
+        JsonArrayRequest poiCategoryArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, poiTypesUrl, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                Gson gson = new Gson();
+                List<Category> categories = Arrays.asList(gson.fromJson(response.toString(), Category[].class));
+
+                for (Category item: categories) {
+                    ContentValues values = new ContentValues();
+                    values.put(Contract.Category._ID, item.getId());
+                    values.put(Contract.Category.COLUMN_NAME, item.getName());
+
+                    try {
+                        getContentResolver().insert(Contract.Category.CONTENT_URI, values);
+                    } catch (Exception e) {
+                        Log.e("MainActivity", e.getMessage());
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        queue.add(poiCategoryArrayRequest);
 
         // Fetch the transports json on the server and save it to a local json file
+        String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transport_schedule.json";
         JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
             @Override
@@ -294,8 +325,6 @@ public class MainActivity extends BaseActivity
                 Log.e("MainActivity", error.getMessage());
             }
         });
-
-        queue.add(poiJsonArrayRequest);
         queue.add(transportJsonArrayRequest);
     }
 }

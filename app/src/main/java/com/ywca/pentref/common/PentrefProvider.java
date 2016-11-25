@@ -29,8 +29,8 @@ public class PentrefProvider extends ContentProvider {
     //region URI matcher
     private static final int POI_TABLE = 1;
     private static final int POI_ROW = 2;
-    private static final int TRANSPORT_TABLE = 3;
-    private static final int TRANSPORT_ROW = 4;
+    private static final int CATEGORY_TABLE = 3;
+    private static final int CATEGORY_ROW = 4;
     private static final int SEARCH_SUGGESTIONS = 5;
 
     private static final UriMatcher mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -38,8 +38,8 @@ public class PentrefProvider extends ContentProvider {
     static {
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Poi.TABLE_NAME, POI_TABLE);
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Poi.TABLE_NAME + "/#", POI_ROW);
-        mUriMatcher.addURI(Contract.AUTHORITY, Contract.Transport.TABLE_NAME, TRANSPORT_TABLE);
-        mUriMatcher.addURI(Contract.AUTHORITY, Contract.Transport.TABLE_NAME + "/#", TRANSPORT_ROW);
+        mUriMatcher.addURI(Contract.AUTHORITY, Contract.Category.TABLE_NAME, CATEGORY_TABLE);
+        mUriMatcher.addURI(Contract.AUTHORITY, Contract.Category.TABLE_NAME + "/#", CATEGORY_TABLE);
         mUriMatcher.addURI(Contract.AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGESTIONS);
     }
     //endregion
@@ -66,12 +66,12 @@ public class PentrefProvider extends ContentProvider {
                 tableName = Contract.Poi.TABLE_NAME;
                 selection = Contract.Poi._ID + " = " + uri.getLastPathSegment();
                 break;
-            case TRANSPORT_TABLE:
-                tableName = Contract.Transport.TABLE_NAME;
+            case CATEGORY_TABLE:
+                tableName = Contract.Category.TABLE_NAME;
                 break;
-            case TRANSPORT_ROW:
-                tableName = Contract.Transport.TABLE_NAME;
-                selection = Contract.Transport._ID + " = " + uri.getLastPathSegment();
+            case CATEGORY_ROW:
+                tableName = Contract.Category.TABLE_NAME;
+                selection = Contract.Category._ID + " = " + uri.getLastPathSegment();
                 break;
             case SEARCH_SUGGESTIONS:
                 tableName = Contract.Poi.TABLE_NAME;
@@ -181,25 +181,6 @@ public class PentrefProvider extends ContentProvider {
         return values;
     }
 
-//    /**
-//     * A helper method that initialises a {@link ContentValues}
-//     * with the values of all columns of a {@link Transport} instance.
-//     *
-//     * @param transport An object instance of {@link Transport}
-//     * @return A {@link ContentValues} with the values of a {@link Transport} instance
-//     */
-//    public static ContentValues getContentValues(Transport transport) {
-//        ContentValues values = new ContentValues();
-//        values.put(Contract.Transport.COLUMN_ID, transport.getId());
-//        values.put(Contract.Transport.COLUMN_ROUTE_NUMBER, transport.getRouteNumber());
-//        values.put(Contract.Transport.COLUMN_TYPE, transport.getTypeEnum().getValue());
-//        values.put(Contract.Transport.COLUMN_ADULT_PRICE, transport.getAdultPrice());
-//        values.put(Contract.Transport.COLUMN_CHILD_PRICE, transport.getChildPrice());
-//        values.put(Contract.Transport.COLUMN_DEPARTURE_STATION, transport.getDepartureStation());
-//        values.put(Contract.Transport.COLUMN_DESTINATION_STATION, transport.getDestinationStation());
-//        return values;
-//    }
-
     /**
      * A helper method that returns a list of Points of interest from the given cursor.
      *
@@ -224,18 +205,29 @@ public class PentrefProvider extends ContentProvider {
         cursor.close();
         return pois;
     }
+
+    public static List<Category> convertToCategories(@NonNull Cursor cursor) {
+        List<Category> categories = new ArrayList<>();
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            int id = cursor.getInt(cursor.getColumnIndex(Contract.Category._ID));
+            String name = cursor.getString(cursor.getColumnIndex(Contract.Category.COLUMN_NAME));
+            categories.add(new Category(id, name));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return categories;
+    }
     //endregion
 
     private String convertToTableName(Uri uri) {
         switch (mUriMatcher.match(uri)) {
             case POI_TABLE:
-                return Contract.Poi.TABLE_NAME;
             case POI_ROW:
                 return Contract.Poi.TABLE_NAME;
-            case TRANSPORT_TABLE:
-                return Contract.Transport.TABLE_NAME;
-            case TRANSPORT_ROW:
-                return Contract.Transport.TABLE_NAME;
+            case CATEGORY_TABLE:
+            case CATEGORY_ROW:
+                return Contract.Category.TABLE_NAME;
             default:
                 throw new IllegalArgumentException("Illegal uri: " + uri);
         }
@@ -257,33 +249,28 @@ public class PentrefProvider extends ContentProvider {
             final String CREATE_POI_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
                     Contract.Poi.TABLE_NAME + " (" +
                     Contract.Poi._ID + " LONG PRIMARY KEY, " +
-                    Contract.Poi.COLUMN_NAME + " VARCHAR(255), " +
-                    Contract.Poi.COLUMN_DESCRIPTION + " VARCHAR(255), " +
-                    Contract.Poi.COLUMN_WEBSITE_URI + " VARCHAR(255), " +
-                    Contract.Poi.COLUMN_ADDRESS + " VARCHAR(255), " +
+                    Contract.Poi.COLUMN_NAME + " TEXT, " +
+                    Contract.Poi.COLUMN_DESCRIPTION + " TEXT, " +
+                    Contract.Poi.COLUMN_WEBSITE_URI + " TEXT, " +
+                    Contract.Poi.COLUMN_ADDRESS + " TEXT, " +
                     Contract.Poi.COLUMN_LATITUDE + " DOUBLE, " +
                     Contract.Poi.COLUMN_LONGITUDE + " DOUBLE, " +
-                    Contract.Poi.COLUMN_TIMESTAMP + " VARCHAR(255));";
+                    Contract.Poi.COLUMN_TIMESTAMP + " TEXT);";
             db.execSQL(CREATE_POI_TABLE_SQL_QUERY);
 
-            // Create a table for transportation
-            final String CREATE_TRANSPORT_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
-                    Contract.Transport.TABLE_NAME + " (" +
-                    Contract.Transport._ID + " LONG PRIMARY KEY, " +
-                    Contract.Transport.COLUMN_ROUTE_NUMBER + " VARCHAR(255), " +
-                    Contract.Transport.COLUMN_TYPE + " INTEGER, " +
-                    Contract.Transport.COLUMN_ADULT_PRICE + " FLOAT, " +
-                    Contract.Transport.COLUMN_CHILD_PRICE + " FLOAT, " +
-                    Contract.Transport.COLUMN_DEPARTURE_STATION + " VARCHAR(255), " +
-                    Contract.Transport.COLUMN_DESTINATION_STATION + " VARCHAR(255)); ";
-            db.execSQL(CREATE_TRANSPORT_TABLE_SQL_QUERY);
+            // Create a table for categories
+            final String CREATE_CATEGORY_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
+                    Contract.Category.TABLE_NAME + " (" +
+                    Contract.Category._ID + " INTEGER PRIMARY KEY, " +
+                    Contract.Category.COLUMN_NAME + " TEXT);";
+            db.execSQL(CREATE_CATEGORY_TABLE_SQL_QUERY);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             // The upgrade policy is to simply remove all tables and recreate them
             db.execSQL("DROP TABLE IF EXISTS " + Contract.Poi.TABLE_NAME);
-            db.execSQL("DROP TABLE IF EXISTS " + Contract.Transport.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Contract.Category.TABLE_NAME);
             onCreate(db);
         }
     }

@@ -39,12 +39,11 @@ public final class Contract {
         public static final String TABLE_NAME = "category";
 
         public static final String COLUMN_NAME = "category_name";
-        public static final String COLUMN_IMAGE_RESOURCE_ID = "image_resource_id";
 
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, TABLE_NAME);
 
         public static final String[] PROJECTION_ALL = {
-                _ID, COLUMN_NAME, COLUMN_IMAGE_RESOURCE_ID
+                _ID, COLUMN_NAME
         };
     }
 

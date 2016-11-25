@@ -46,7 +46,7 @@ import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.adapters.BookmarksAdapter;
 import com.ywca.pentref.adapters.CategoryAdapter;
-import com.ywca.pentref.common.CategoryItem;
+import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
@@ -123,13 +123,29 @@ public class DiscoverFragment extends Fragment implements
 
         mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
 
-        GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
-        List<CategoryItem> categories = new ArrayList<>();
-        categories.add(new CategoryItem(0, "Points of Interest", R.drawable.ic_menu_camera));
-        categories.add(new CategoryItem(1, "Public Facilities", R.drawable.ic_bus_black_36dp));
-        categories.add(new CategoryItem(2, "Restaurants", R.drawable.ic_menu_share));
-        categories.add(new CategoryItem(3, "Miscellaneous", R.drawable.ic_bookmark_black_36dp));
-        gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
+        final GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
+        new AsyncTask<Void, Void, List<Category>>() {
+            @Override
+            protected List<Category> doInBackground(Void... voids) {
+                // Retrieve a list of Points of Interest from the local database
+                Cursor cursor = getActivity().getContentResolver().query(
+                        Contract.Category.CONTENT_URI, Contract.Category.PROJECTION_ALL, null, null, null);
+
+                // This line is used to get rid of the warning
+                if (cursor == null) {
+                    return new ArrayList<>();
+                }
+
+                List<Category> categories = PentrefProvider.convertToCategories(cursor);
+                cursor.close();
+                return categories;
+            }
+
+            @Override
+            protected void onPostExecute(List<Category> categories) {
+                gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
+            }
+        }.execute();
 
         // TODO: Potentially create a new layout for this
         RecyclerView bottomRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
@@ -267,33 +283,6 @@ public class DiscoverFragment extends Fragment implements
                 }
             }
         });
-        //endregion
-
-        //region Legacy
-        //        // TODO: Load data offline when available
-//        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
-//        JsonArrayRequest PoiJsonArrayRequest = new JsonArrayRequest(
-//                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
-//            @Override
-//            public void onResponse(JSONArray response) {
-//                Gson gson = new Gson();
-//                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
-//
-//                for (Poi poi : pois) {
-//                    googleMap.addMarker(new MarkerOptions()
-//                            .title(poi.getName())
-//                            .position(poi.getLatLng())).setTag(poi);
-//                }
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("MainActivity", error.getMessage());
-//            }
-//        });
-//
-//        RequestQueue queue = Volley.newRequestQueue(getActivity());
-//        queue.add(PoiJsonArrayRequest);
         //endregion
     }
 
