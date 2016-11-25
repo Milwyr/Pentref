@@ -39,7 +39,7 @@ public class TimetableActivity extends AppCompatActivity implements
 
         // The selected transport item is passed by an intent in TransportRecyclerViewAdapter
         if (getIntent() != null) {
-            mSelectedTransportItem = getIntent().getParcelableExtra("Transport");
+            mSelectedTransportItem = getIntent().getParcelableExtra(Utility.TRANSPORT_EXTRA_KEY);
         }
 
         TextView routeNumberTextView = (TextView) findViewById(R.id.route_number_text_view);
@@ -53,7 +53,7 @@ public class TimetableActivity extends AppCompatActivity implements
         // Insert a list of times into the adapter for the recycler view, with three columns per row
         mAdapter = new TimetableAdapter(R.layout.timetable_row_layout, timesAfterNow);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.timetable_recycler_view);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
         recyclerView.setAdapter(mAdapter);
 
         Switch showFullTimetableSwitch = (Switch) findViewById(R.id.show_full_timetable_switch);

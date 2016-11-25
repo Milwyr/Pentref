@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/activity_horizontal_margin">
+    android:layout_margin="8dp">
 
     <TextView
         android:id="@+id/timetable_time_text_view"
@@ -11,6 +11,6 @@
         android:gravity="center"
         android:text="Medium Text"
         android:textColor="@color/black"
-        android:textSize="22sp" />
+        android:textSize="20sp" />
 
 </RelativeLayout>

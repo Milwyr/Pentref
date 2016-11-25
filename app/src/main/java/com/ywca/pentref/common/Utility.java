@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class Utility {
     public static final String SELECTED_POI_EXTRA_KEY = "SelectedPoi";
+    public static final String TRANSPORT_EXTRA_KEY = "Transport";
     public static final String USER_REVIEW_RATING_EXTRA_KEY = "Rating";
 
     public static final String TRANSPORTATION_JSON_FILE_NAME = "transports.json";
@@ -59,9 +60,22 @@ public class Utility {
      * with the time that are later than the current time.
      *
      * @param localTimes A list of {@link LocalTime} objects
-     * @returnA list of {@link LocalTime} objects that are later than the current time
+     * @return A list of {@link LocalTime} objects that are later than the current time
      */
     public static List<LocalTime> getTimesAfterNow(List<LocalTime> localTimes) {
+        // -1 indicates no restriction of number of returned results
+        return getTimesAfterNow(localTimes, -1);
+    }
+
+    /**
+     * Reads from the given {@link LocalTime} list, and returns a {@link LocalTime} list
+     * with the time that are later than the current time.
+     *
+     * @param localTimes A list of {@link LocalTime} objects
+     * @param max Maximum number of results
+     * @return A list of {@link LocalTime} objects that are later than the current time
+     */
+    public static List<LocalTime> getTimesAfterNow(List<LocalTime> localTimes, int max) {
         List<LocalTime> nextTwoTimes = new ArrayList<>();
         LocalTime now = LocalTime.now();
 
@@ -69,8 +83,8 @@ public class Utility {
             if (localTime.isAfter(now)) {
                 nextTwoTimes.add(localTime);
 
-                // Breaks the loop when there are already two LocalTime objects
-                if (nextTwoTimes.size() == 2) {
+                // Breaks the loop when there number of LocalTime objects reaches maximum
+                if (nextTwoTimes.size() == max) {
                     return nextTwoTimes;
                 }
             }

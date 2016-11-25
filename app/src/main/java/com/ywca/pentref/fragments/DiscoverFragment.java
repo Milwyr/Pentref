@@ -394,7 +394,12 @@ public class DiscoverFragment extends Fragment implements
     public void onStart() {
         super.onStart();
         if (mMapView != null) {
-            mMapView.onStart();
+            // NullPointerException is thrown in certain circumstances
+            try {
+                mMapView.onStart();
+            } catch (Exception e) {
+                Log.e("DiscoverFragment", e.getMessage());
+            }
         }
     }
 

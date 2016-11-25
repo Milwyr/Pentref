@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * A {@link Fragment} that displays a list of {@link android.support.v7.widget.CardView} objects
- * that show the buses/ferries that depart from and arrive at Tai O.
+ * that show the schedule of buses/ferries that depart from and arrive at Tai O.
  */
 public class TransportationFragment extends Fragment {
     public TransportationFragment() {
@@ -40,12 +40,12 @@ public class TransportationFragment extends Fragment {
         View rootVIew = inflater.inflate(R.layout.fragment_transportation, container, false);
         final RecyclerView recyclerView = (RecyclerView) rootVIew.findViewById(R.id.transport_recycler_view);
 
-        // use this setting to improve performance if you know that changes
+        // Use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         recyclerView.setHasFixedSize(true);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
+        // Use a linear layout manager
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         //region Might not be necessary anymore
         // Read transports from online

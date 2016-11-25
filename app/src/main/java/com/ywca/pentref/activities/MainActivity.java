@@ -234,7 +234,7 @@ public class MainActivity extends BaseActivity
         RequestQueue queue = Volley.newRequestQueue(this);
 
         String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
-        String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transports.json";
+        String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transport_schedule.json";
 
         // Read all Points of Interest from the server and add them to SQLite database
         JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
