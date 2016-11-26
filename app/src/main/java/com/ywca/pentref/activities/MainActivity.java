@@ -30,7 +30,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
-import com.google.gson.internal.LinkedHashTreeMap;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
@@ -39,7 +38,7 @@ import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.fragments.BookmarksFragment;
 import com.ywca.pentref.fragments.DiscoverFragment;
 import com.ywca.pentref.fragments.SettingsFragment;
-import com.ywca.pentref.fragments.SignInFragment;
+import com.ywca.pentref.fragments.ProfileFragment;
 import com.ywca.pentref.fragments.TransportationFragment;
 import com.ywca.pentref.fragments.WeatherFragment;
 import com.ywca.pentref.models.Poi;
@@ -51,13 +50,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     // The search view that is inflated as a menu item on the Action Bar
     private MenuItem mActionSearchMenuItem;
+
+    private NavigationView mNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +73,22 @@ public class MainActivity extends BaseActivity
         // Display the discover fragment only when the app launches as
         // savedInstanceState != null when orientation changes
         if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction().add(
-                    R.id.frame, new DiscoverFragment()).commit();
+            int fragmentIndex = getIntent().getIntExtra(Utility.FRAGMENT_INDEX_EXTRA_KEY, -1);
+
+            switch (fragmentIndex) {
+                case 0:
+                    changeFragment(R.string.discover, new DiscoverFragment());
+                    break;
+                case 1:
+                    changeFragment(R.string.bookmarks, new BookmarksFragment());
+                    break;
+                case 2:
+                    changeFragment(R.string.weather, new WeatherFragment());
+                    break;
+                case 3:
+                    changeFragment(R.string.transport_schedule, new TransportationFragment());
+                    break;
+            }
         }
     }
 
@@ -101,6 +115,10 @@ public class MainActivity extends BaseActivity
                 (SearchView) mActionSearchMenuItem.getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
+
+        // The search view is only visible when the current fragment is discover fragment
+        Fragment currentFragment = getFragmentManager().findFragmentById(R.id.frame);
+        updateSearchViewVisibility(currentFragment);
 
         return true;
     }
@@ -179,8 +197,8 @@ public class MainActivity extends BaseActivity
             case R.id.nav_transportation:
                 changeFragment(R.string.transport_schedule, new TransportationFragment());
                 break;
-            case R.id.nav_login:
-                changeFragment(R.string.transport_schedule, new SignInFragment());
+            case R.id.nav_profile:
+                changeFragment(R.string.transport_schedule, new ProfileFragment());
                 break;
             case R.id.nav_settings:
                 changeFragment(R.string.settings, new SettingsFragment());
@@ -199,11 +217,24 @@ public class MainActivity extends BaseActivity
 
         getFragmentManager().beginTransaction().replace(R.id.frame, fragment).commit();
 
-        // The search view is only visible when the current fragment is discover fragment
+        // Highlight the selected item in the Navigation Drawer
         if (fragment instanceof DiscoverFragment) {
-            mActionSearchMenuItem.setVisible(true);
-        } else {
-            mActionSearchMenuItem.setVisible(false);
+            mNavigationView.setCheckedItem(R.id.nav_discover);
+        } else if (fragment instanceof BookmarksFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_bookmarks);
+        } else if (fragment instanceof WeatherFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_weather);
+        } else if (fragment instanceof TransportationFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_transportation);
+        } else if (fragment instanceof ProfileFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_profile);
+        } else if (fragment instanceof SettingsFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_settings);
+        }
+
+        // The search view is only visible when the current fragment is discover fragment
+        if (mActionSearchMenuItem != null) {
+            updateSearchViewVisibility(fragment);
         }
     }
 
@@ -227,10 +258,16 @@ public class MainActivity extends BaseActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Set the first item (Discover) to be checked by default
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationView.getMenu().getItem(0).setChecked(true);
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void updateSearchViewVisibility(Fragment currentFragment) {
+        if (currentFragment instanceof DiscoverFragment) {
+            mActionSearchMenuItem.setVisible(true);
+        } else {
+            mActionSearchMenuItem.setVisible(false);
+        }
     }
 
     private void fetchJsonFromServer() {
@@ -273,7 +310,7 @@ public class MainActivity extends BaseActivity
                 Gson gson = new Gson();
                 List<Category> categories = Arrays.asList(gson.fromJson(response.toString(), Category[].class));
 
-                for (Category item: categories) {
+                for (Category item : categories) {
                     ContentValues values = new ContentValues();
                     values.put(Contract.Category._ID, item.getId());
                     values.put(Contract.Category.COLUMN_NAME, item.getName());

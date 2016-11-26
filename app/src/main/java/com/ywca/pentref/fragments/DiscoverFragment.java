@@ -375,7 +375,12 @@ public class DiscoverFragment extends Fragment implements
     public void onResume() {
         super.onResume();
         if (mMapView != null) {
-            mMapView.onResume();
+            // NullPointerException is thrown in certain circumstances
+            try {
+                mMapView.onResume();
+            } catch (Exception e) {
+                Log.e("DiscoverFragment", e.getMessage());
+            }
         }
     }
 

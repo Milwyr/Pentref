@@ -50,6 +50,7 @@ import java.util.List;
 public class TutorialActivity extends BaseActivity {
 
     private final String PREF_KEY_IS_FIRST_TIME_INSTALLED = "IsFirstTimeInstalled";
+    private final static int REQUEST_CODE_LAUNCHING_ACTIVITY = 10000;
 
     private SharedPreferences mSharedPreferences;
 
@@ -100,7 +101,16 @@ public class TutorialActivity extends BaseActivity {
             }
         } else {
             // Navigate to MainActivity if the app has been launched before
-            startActivity(new Intent(this, MainActivity.class));
+            startActivityForResult(new Intent(this, LaunchingActivity.class), REQUEST_CODE_LAUNCHING_ACTIVITY);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Exit the activity when LaunchingActivity navigates back to this activity,
+        // which is the onBackPress() method propagated from MainActivity.
+        if (requestCode == REQUEST_CODE_LAUNCHING_ACTIVITY) {
+            finish();
         }
     }
 
@@ -269,7 +279,8 @@ public class TutorialActivity extends BaseActivity {
                         getStartedButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                startActivity(new Intent(getActivity(), MainActivity.class));
+                                startActivityForResult(new Intent(getActivity(),
+                                        LaunchingActivity.class), REQUEST_CODE_LAUNCHING_ACTIVITY);
                             }
                         });
                         break;

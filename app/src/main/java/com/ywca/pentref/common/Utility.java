@@ -20,6 +20,7 @@ import java.util.List;
  * A utility class that includes constants and helper methods.
  */
 public class Utility {
+    public static final String FRAGMENT_INDEX_EXTRA_KEY = "FragmentIndex";
     public static final String SELECTED_POI_EXTRA_KEY = "SelectedPoi";
     public static final String TRANSPORT_EXTRA_KEY = "Transport";
     public static final String USER_REVIEW_RATING_EXTRA_KEY = "Rating";
