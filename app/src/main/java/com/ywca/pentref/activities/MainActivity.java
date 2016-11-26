@@ -66,9 +66,9 @@ public class MainActivity extends BaseActivity
         initialiseComponents();
 
         //TODO: Only execute this method when the items have not been added in the local database
-        if (isConnectedToInternet()) {
-            fetchJsonFromServer();
-        }
+//        if (isConnectedToInternet()) {
+//            fetchJsonFromServer();
+//        }
 
         // Display the discover fragment only when the app launches as
         // savedInstanceState != null when orientation changes

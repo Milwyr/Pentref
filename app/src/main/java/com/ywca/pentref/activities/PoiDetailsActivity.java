@@ -35,6 +35,8 @@ import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 import com.ywca.pentref.models.Review;
 
+import org.joda.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,9 +127,9 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
 
         // TODO: Use live data
         List<Review> reviews = new ArrayList<>();
-        reviews.add(new Review(5, "Milton", "Very Good", "Worth visiting", null));
-        reviews.add(new Review(3, "Moses", "Very Good", "Worth visiting", null));
-        reviews.add(new Review(2, "Peter", "Very Good", "Worth visiting", null));
+        reviews.add(new Review(5, "Milton", "Very Good", "Worth visiting", null, LocalDateTime.now()));
+        reviews.add(new Review(3, "Moses", "Very Good", "Worth visiting", null, LocalDateTime.now()));
+        reviews.add(new Review(2, "Peter", "Very Good", "Worth visiting", null, LocalDateTime.now()));
         ReviewsAdapter adapter = new ReviewsAdapter();
         adapter.setReviews(reviews);
         recyclerView.setAdapter(adapter);

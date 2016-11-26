@@ -2,10 +2,13 @@
 
 <!-- Reference: https://developer.android.com/guide/topics/data/autobackup.html -->
 <full-backup-content>
+    <!-- The path must match the SQLite database name -->
     <include
         domain="database"
         path="Pentref.db" />
+
+    <!-- The path must match the corresponding value specified in strings.xml -->
     <include
         domain="sharedpref"
-        path="." />
+        path="user_settings" />
 </full-backup-content>

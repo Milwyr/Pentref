@@ -52,6 +52,7 @@
 
     <!-- Error messages -->
     <string name="close">Close</string>
+    <string name="error_connect_to_internet_to_initialise">Please connect to the internet to initialise the database.</string>
     <string name="error_not_signed_in">Not signed in</string>
     <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
     <string name="error_network_unavailable">Network unavailable</string>

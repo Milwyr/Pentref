@@ -2,6 +2,8 @@ package com.ywca.pentref.models;
 
 import android.net.Uri;
 
+import org.joda.time.LocalDateTime;
+
 import java.util.List;
 
 /**
@@ -13,13 +15,15 @@ public class Review {
     private String title;
     private String description;
     private List<Uri> photoUris;
+    private LocalDateTime localDateTime;
 
-    public Review(int rating, String userName, String title, String description, List<Uri> photoUris) {
+    public Review(int rating, String userName, String title, String description, List<Uri> photoUris, LocalDateTime localDateTime) {
         this.rating = rating;
         this.userName = userName;
         this.title = title;
         this.description = description;
         this.photoUris = photoUris;
+        this.localDateTime = localDateTime;
     }
 
     public int getRating() {
@@ -40,5 +44,9 @@ public class Review {
 
     public List<Uri> getPhotoUris() {
         return this.photoUris;
+    }
+
+    public LocalDateTime getLocalDateTime() {
+        return this.localDateTime;
     }
 }
