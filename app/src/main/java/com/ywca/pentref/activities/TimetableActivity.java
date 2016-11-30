@@ -52,6 +52,13 @@ public class TimetableActivity extends AppCompatActivity implements
 
         // Insert a list of times into the adapter for the recycler view, with three columns per row
         mAdapter = new TimetableAdapter(R.layout.timetable_row_layout, timesAfterNow);
+        mAdapter.setOnItemClickListener(new TimetableAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(LocalTime localTime) {
+                scheduleNotification(localTime);
+            }
+        });
+
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.timetable_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
         recyclerView.setAdapter(mAdapter);
@@ -59,31 +66,22 @@ public class TimetableActivity extends AppCompatActivity implements
         Switch showFullTimetableSwitch = (Switch) findViewById(R.id.show_full_timetable_switch);
         showFullTimetableSwitch.setOnCheckedChangeListener(this);
 
-        Button notifyMeButton = (Button) findViewById(R.id.timetable_notification_button);
-        notifyMeButton.setOnClickListener(this);
+//        Button notifyMeButton = (Button) findViewById(R.id.timetable_notification_button);
+//        notifyMeButton.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.timetable_notification_button) {
-            // Show a time picker to allow the user to choose the time of notification
-            TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-                @Override
-                public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                    Notification.Builder builder = new Notification.Builder(TimetableActivity.this)
-                            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-                            .setSmallIcon(R.mipmap.ic_launcher)
-                            .setContentTitle("Title")
-                            .setContentText("Content")
-                            .setAutoCancel(true);
-
-                    NotificationManager notificationManager =
-                            (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                    notificationManager.notify(1, builder.build());
-                }
-            }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
-            timePickerDialog.show();
-        }
+//        if (v.getId() == R.id.timetable_notification_button) {
+//            // Show a time picker to allow the user to choose the time of notification
+//            TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+//                @Override
+//                public void onTimeSet(TimePicker timePicker, int i, int i1) {
+//
+//                }
+//            }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
+//            timePickerDialog.show();
+//        }
     }
 
     @Override
@@ -97,5 +95,19 @@ public class TimetableActivity extends AppCompatActivity implements
             // Only select the times that are later than now
             mAdapter.updateLocalTimes(Utility.getTimesAfterNow(localTimes));
         }
+    }
+
+    // Schedules a notification 30 minutes before the given time
+    private void scheduleNotification(LocalTime localTime) {
+        Notification.Builder builder = new Notification.Builder(TimetableActivity.this)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("Title")
+                .setContentText("Content")
+                .setAutoCancel(true);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(1, builder.build());
     }
 }

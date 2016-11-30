@@ -22,6 +22,14 @@ import java.util.List;
 public class TimetableAdapter extends RecyclerView.Adapter<TimetableAdapter.ViewHolder> {
     private int mLayoutId;
     private List<LocalTime> mLocalTimes;
+    private OnItemClickListener mOnItemClickListener;
+
+    /**
+     * Interface definition for a callback to be invoked when an item in this {@link RecyclerView} has been clicked.
+     */
+    public interface OnItemClickListener {
+        void onItemClick(LocalTime localTime);
+    }
 
     /**
      * Constructor
@@ -36,8 +44,7 @@ public class TimetableAdapter extends RecyclerView.Adapter<TimetableAdapter.View
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View rootView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.timetable_row_layout, parent, false);
+        View rootView = LayoutInflater.from(parent.getContext()).inflate(mLayoutId, parent, false);
         return new TimetableAdapter.ViewHolder(rootView);
     }
 
@@ -65,12 +72,26 @@ public class TimetableAdapter extends RecyclerView.Adapter<TimetableAdapter.View
         notifyDataSetChanged();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * Registers a callback to be invoked when an item in this {@link RecyclerView} has been clicked.
+     * @param onItemClickListener The callback that will be invoked
+     */
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        mOnItemClickListener = onItemClickListener;
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView timeTextView;
 
         ViewHolder(View view) {
             super(view);
             timeTextView = (TextView) view.findViewById(R.id.timetable_time_text_view);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            mOnItemClickListener.onItemClick(mLocalTimes.get(getAdapterPosition()));
         }
     }
 }
