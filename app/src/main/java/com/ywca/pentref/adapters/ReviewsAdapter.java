@@ -10,6 +10,9 @@ import android.widget.TextView;
 import com.ywca.pentref.R;
 import com.ywca.pentref.models.Review;
 
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.util.List;
 
 /**
@@ -19,6 +22,10 @@ public class ReviewsAdapter extends
         RecyclerView.Adapter<ReviewsAdapter.ViewHolder> {
 
     private List<Review> mReviews;
+
+    public ReviewsAdapter(List<Review> reviews) {
+        mReviews = reviews;
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -31,9 +38,11 @@ public class ReviewsAdapter extends
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Review review = mReviews.get(position);
 
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("HH:mm");
+
         holder.userNameTextView.setText(review.getUserName());
-        holder.ratingBar.setRating(review.getRating());
-        holder.timeTextView.setText("11:59pm");
+        holder.ratingBar.setRating((float) review.getRating());
+        holder.timeTextView.setText(formatter.print(review.getTimestamp()));
         holder.titleTextView.setText(review.getTitle());
         holder.descriptionTextView.setText(review.getDescription());
     }

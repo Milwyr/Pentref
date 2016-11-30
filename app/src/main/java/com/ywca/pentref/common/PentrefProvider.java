@@ -17,7 +17,6 @@ import android.support.annotation.Nullable;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.ywca.pentref.models.Poi;
-import com.ywca.pentref.models.Transport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,10 @@ public class PentrefProvider extends ContentProvider {
     private static final int POI_ROW = 2;
     private static final int CATEGORY_TABLE = 3;
     private static final int CATEGORY_ROW = 4;
-    private static final int SEARCH_SUGGESTIONS = 5;
+    private static final int BOOKMARK_TABLE = 5;
+    private static final int BOOKMARK_ROW = 6;
+    private static final int BOOKMARKED_POIS = 7;
+    private static final int SEARCH_SUGGESTIONS = 8;
 
     private static final UriMatcher mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
@@ -40,6 +42,9 @@ public class PentrefProvider extends ContentProvider {
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Poi.TABLE_NAME + "/#", POI_ROW);
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Category.TABLE_NAME, CATEGORY_TABLE);
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Category.TABLE_NAME + "/#", CATEGORY_TABLE);
+        mUriMatcher.addURI(Contract.AUTHORITY, Contract.Bookmark.TABLE_NAME, BOOKMARK_TABLE);
+        mUriMatcher.addURI(Contract.AUTHORITY, Contract.Bookmark.TABLE_NAME + "/#", BOOKMARK_ROW);
+        mUriMatcher.addURI(Contract.AUTHORITY, Contract.BookmarkedPois.PATH, BOOKMARKED_POIS);
         mUriMatcher.addURI(Contract.AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGESTIONS);
     }
     //endregion
@@ -57,45 +62,92 @@ public class PentrefProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection,
                         String selection, String[] selectionArgs, String sortOrder) {
-        String tableName;
-        switch (mUriMatcher.match(uri)) {
-            case POI_TABLE:
-                tableName = Contract.Poi.TABLE_NAME;
-                break;
-            case POI_ROW:
-                tableName = Contract.Poi.TABLE_NAME;
-                selection = Contract.Poi._ID + " = " + uri.getLastPathSegment();
-                break;
-            case CATEGORY_TABLE:
-                tableName = Contract.Category.TABLE_NAME;
-                break;
-            case CATEGORY_ROW:
-                tableName = Contract.Category.TABLE_NAME;
-                selection = Contract.Category._ID + " = " + uri.getLastPathSegment();
-                break;
-            case SEARCH_SUGGESTIONS:
-                tableName = Contract.Poi.TABLE_NAME;
+        // Join tables Poi and Bookmark
+        if (mUriMatcher.match(uri) == BOOKMARKED_POIS) {
+            String sql = "SELECT * FROM " + Contract.Poi.TABLE_NAME + " WHERE " +
+                    Contract.Poi.TABLE_NAME + "." + Contract.Poi._ID + " IN " +
+                    "(SELECT " + Contract.Bookmark.COLUMN_POI_ID + " FROM " +
+                    Contract.Bookmark.TABLE_NAME + ");";
 
-                /*
-                    The column names "_id", "SUGGEST_COLUMN_TEXT_1", "SUGGEST_COLUMN_TEXT_2"
-                    are used to build a suggestion table and show a list of suggestions when
-                    the user searches for Points of Interest.
+            Cursor cursor = mDbHelper.getReadableDatabase().rawQuery(sql, null);
 
-                    The column "SUGGEST_COLUMN_INTENT_DATA_ID" records the POI id of each row.
-                 */
-                projection = new String[]{
-                        Contract.Poi._ID + " AS " + BaseColumns._ID,
-                        Contract.Poi.COLUMN_NAME + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
-                        Contract.Poi.COLUMN_ADDRESS + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
-                        Contract.Poi._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
+            if (getContext() != null) {
+                cursor.setNotificationUri(getContext().getContentResolver(), uri);
+            }
 
-                // The two percent signs are used to match the 'LIKE' statements specified in searchable.xml
-                if (selectionArgs.length > 0) {
-                    selectionArgs = new String[]{"%" + selectionArgs[0] + "%"};
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Illegal uri: " + uri);
+            return cursor;
+        }
+
+        String tableName = convertToTableName(uri);
+        selection = convertToSelection(uri, selection);
+
+        //region Legacy
+        //        switch (mUriMatcher.match(uri)) {
+//            case POI_TABLE:
+//                tableName = Contract.Poi.TABLE_NAME;
+//                break;
+//            case POI_ROW:
+//                tableName = Contract.Poi.TABLE_NAME;
+//                selection = Contract.Poi._ID + " = " + uri.getLastPathSegment();
+//                break;
+//            case CATEGORY_TABLE:
+//                tableName = Contract.Category.TABLE_NAME;
+//                break;
+//            case CATEGORY_ROW:
+//                tableName = Contract.Category.TABLE_NAME;
+//                selection = Contract.Category._ID + " = " + uri.getLastPathSegment();
+//                break;
+//            case BOOKMARK_TABLE:
+//                tableName = Contract.Bookmark.TABLE_NAME;
+//                break;
+//            case BOOKMARK_ROW:
+//                tableName = Contract.Bookmark.TABLE_NAME;
+//                selection = Contract.Category._ID + " = " + uri.getLastPathSegment();
+//                break;
+//            case SEARCH_SUGGESTIONS:
+//                tableName = Contract.Poi.TABLE_NAME;
+//
+//                /*
+//                    The column names "_id", "SUGGEST_COLUMN_TEXT_1", "SUGGEST_COLUMN_TEXT_2"
+//                    are used to build a suggestion table and show a list of suggestions when
+//                    the user searches for Points of Interest.
+//
+//                    The column "SUGGEST_COLUMN_INTENT_DATA_ID" records the POI id of each row.
+//                 */
+//                projection = new String[]{
+//                        Contract.Poi._ID + " AS " + BaseColumns._ID,
+//                        Contract.Poi.COLUMN_NAME + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
+//                        Contract.Poi.COLUMN_ADDRESS + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
+//                        Contract.Poi._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
+//
+//                // The two percent signs are used to match the 'LIKE' statements specified in searchable.xml
+//                if (selectionArgs.length > 0) {
+//                    selectionArgs = new String[]{"%" + selectionArgs[0] + "%"};
+//                }
+//                break;
+//            default:
+//                throw new IllegalArgumentException("Illegal uri: " + uri);
+//        }
+        //endregion
+
+        if (mUriMatcher.match(uri) == SEARCH_SUGGESTIONS) {
+            /*
+                The column names "_id", "SUGGEST_COLUMN_TEXT_1", "SUGGEST_COLUMN_TEXT_2"
+                are used to build a suggestion table and show a list of suggestions when
+                the user searches for Points of Interest.
+
+                The column "SUGGEST_COLUMN_INTENT_DATA_ID" records the POI id of each row.
+            */
+            projection = new String[]{
+                    Contract.Poi._ID + " AS " + BaseColumns._ID,
+                    Contract.Poi.COLUMN_NAME + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
+                    Contract.Poi.COLUMN_ADDRESS + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
+                    Contract.Poi._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
+
+            // The two percent signs are used to match the 'LIKE' statements specified in searchable.xml
+            if (selectionArgs.length > 0) {
+                selectionArgs = new String[]{"%" + selectionArgs[0] + "%"};
+            }
         }
 
         Cursor cursor = mDbHelper.getReadableDatabase().query(
@@ -130,6 +182,8 @@ public class PentrefProvider extends ContentProvider {
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         String tableName = convertToTableName(uri);
+        selection = convertToSelection(uri, selection);
+
         int count = mDbHelper.getWritableDatabase().delete(tableName, selection, selectionArgs);
 
         if (count > 0 && getContext() != null) {
@@ -142,6 +196,7 @@ public class PentrefProvider extends ContentProvider {
     public int update(@NonNull Uri uri, ContentValues values,
                       String selection, String[] selectionArgs) {
         String tableName = convertToTableName(uri);
+        selection = convertToSelection(uri, selection);
         int count = mDbHelper.getWritableDatabase()
                 .update(tableName, values, selection, selectionArgs);
 
@@ -172,6 +227,7 @@ public class PentrefProvider extends ContentProvider {
         ContentValues values = new ContentValues();
         values.put(Contract.Poi._ID, poi.getId());
         values.put(Contract.Poi.COLUMN_NAME, poi.getName());
+        values.put(Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME, poi.getHeaderImageFileName());
         values.put(Contract.Poi.COLUMN_DESCRIPTION, poi.getDescription());
         values.put(Contract.Poi.COLUMN_WEBSITE_URI, poi.getWebsiteUri());
         values.put(Contract.Poi.COLUMN_ADDRESS, poi.getAddress());
@@ -193,12 +249,14 @@ public class PentrefProvider extends ContentProvider {
         while (!cursor.isAfterLast()) {
             long id = cursor.getLong(cursor.getColumnIndex(Contract.Poi._ID));
             String name = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_NAME));
+            String headerImageFileName = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME));
             String description = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_DESCRIPTION));
             String websiteUri = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_WEBSITE_URI));
             String address = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_ADDRESS));
             double latitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LATITUDE));
             double longitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LONGITUDE));
-            pois.add(new Poi(id, name, description, websiteUri, address, new LatLng(latitude, longitude)));
+            pois.add(new Poi(id, name, headerImageFileName, description,
+                    websiteUri, address, new LatLng(latitude, longitude)));
 
             cursor.moveToNext();
         }
@@ -224,12 +282,31 @@ public class PentrefProvider extends ContentProvider {
         switch (mUriMatcher.match(uri)) {
             case POI_TABLE:
             case POI_ROW:
+            case SEARCH_SUGGESTIONS:
                 return Contract.Poi.TABLE_NAME;
             case CATEGORY_TABLE:
             case CATEGORY_ROW:
                 return Contract.Category.TABLE_NAME;
+            case BOOKMARK_TABLE:
+            case BOOKMARK_ROW:
+                return Contract.Bookmark.TABLE_NAME;
             default:
                 throw new IllegalArgumentException("Illegal uri: " + uri);
+        }
+    }
+
+    // Returns the appropriate selection statement if the uri specifies row number,
+    // or returns the given selection otherwise.
+    private String convertToSelection(Uri uri, String selection) {
+        switch (mUriMatcher.match(uri)) {
+            case POI_ROW:
+                return Contract.Poi._ID + " = " + uri.getLastPathSegment();
+            case CATEGORY_ROW:
+                return Contract.Category._ID + " = " + uri.getLastPathSegment();
+            case BOOKMARK_ROW:
+                return Contract.Category._ID + " = " + uri.getLastPathSegment();
+            default:
+                return selection;
         }
     }
 
@@ -250,6 +327,7 @@ public class PentrefProvider extends ContentProvider {
                     Contract.Poi.TABLE_NAME + " (" +
                     Contract.Poi._ID + " LONG PRIMARY KEY, " +
                     Contract.Poi.COLUMN_NAME + " TEXT, " +
+                    Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME + " TEXT, " +
                     Contract.Poi.COLUMN_DESCRIPTION + " TEXT, " +
                     Contract.Poi.COLUMN_WEBSITE_URI + " TEXT, " +
                     Contract.Poi.COLUMN_ADDRESS + " TEXT, " +
@@ -264,6 +342,13 @@ public class PentrefProvider extends ContentProvider {
                     Contract.Category._ID + " INTEGER PRIMARY KEY, " +
                     Contract.Category.COLUMN_NAME + " TEXT);";
             db.execSQL(CREATE_CATEGORY_TABLE_SQL_QUERY);
+
+            // Create a table for bookmarks
+            final String CREATE_BOOKMARK_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
+                    Contract.Bookmark.TABLE_NAME + " (" +
+                    Contract.Bookmark._ID + " INTEGER PRIMARY KEY, " +
+                    Contract.Bookmark.COLUMN_POI_ID + " LONG)";
+            db.execSQL(CREATE_BOOKMARK_TABLE_SQL_QUERY);
         }
 
         @Override
@@ -271,6 +356,7 @@ public class PentrefProvider extends ContentProvider {
             // The upgrade policy is to simply remove all tables and recreate them
             db.execSQL("DROP TABLE IF EXISTS " + Contract.Poi.TABLE_NAME);
             db.execSQL("DROP TABLE IF EXISTS " + Contract.Category.TABLE_NAME);
+            db.execSQL("DROP TABLE IF EXISTS " + Contract.Bookmark.TABLE_NAME);
             onCreate(db);
         }
     }

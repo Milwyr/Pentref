@@ -14,6 +14,7 @@ public class Poi implements Comparable, Parcelable {
     //region Fields
     private long id;
     private String name;
+    private String headerImageFileName;
     private String description;
     private String websiteUri;
     private String address;
@@ -21,9 +22,10 @@ public class Poi implements Comparable, Parcelable {
     private double longitude;
     //endregion
 
-    public Poi(long id, String name, String description, String websiteUri, String address, LatLng latLng) {
+    public Poi(long id, String name, String headerImageFileName, String description, String websiteUri, String address, LatLng latLng) {
         this.id = id;
         this.name = name;
+        this.headerImageFileName = headerImageFileName;
         this.description = description;
         this.websiteUri = websiteUri;
         this.address = address;
@@ -37,6 +39,10 @@ public class Poi implements Comparable, Parcelable {
 
     public String getName() {
         return this.name;
+    }
+
+    public String getHeaderImageFileName() {
+        return this.headerImageFileName;
     }
 
     public String getDescription() {
@@ -89,6 +95,7 @@ public class Poi implements Comparable, Parcelable {
     public void writeToParcel(Parcel destination, int i) {
         destination.writeLong(this.id);
         destination.writeString(this.name);
+        destination.writeString(this.headerImageFileName);
         destination.writeString(this.description);
         destination.writeString(this.websiteUri);
         destination.writeString(this.address);
@@ -99,6 +106,7 @@ public class Poi implements Comparable, Parcelable {
     private Poi(Parcel source) {
         this.id = source.readLong();
         this.name = source.readString();
+        this.headerImageFileName = source.readString();
         this.description = source.readString();
         this.websiteUri = source.readString();
         this.address = source.readString();

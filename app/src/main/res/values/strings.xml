@@ -51,8 +51,13 @@
         Working time: 9:00 - 17:00
     </string>
 
-    <!-- Error messages -->
+    <!-- Dialog messages -->
+    <string name="keep_editing">Keep editing</string>
+    <string name="discard">Discard</string>
     <string name="close">Close</string>
+    <string name="dialog_message_confirm_discard_changes">Do you want to discard your changes before submitting?</string>
+
+    <!-- Error messages -->
     <string name="error_connect_to_internet_to_initialise">Please connect to the internet to initialise the database.</string>
     <string name="error_not_signed_in">Not signed in</string>
     <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
@@ -63,5 +68,5 @@
     <string name="pref_file_name_local" translatable="false">local</string>
     <string name="pref_file_name_user_settings" translatable="false">user_settings</string>
 
-    <string name="facebook_app_id" translatable="false">195665774189937</string>
+    <string name="facebook_app_id">195665774189937</string>
 </resources>

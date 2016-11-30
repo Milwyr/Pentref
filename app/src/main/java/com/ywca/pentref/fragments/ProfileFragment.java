@@ -179,7 +179,7 @@ public class ProfileFragment extends Fragment implements
         super.onActivityResult(requestCode, resultCode, data);
 
         // Facebook login
-//        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        mCallbackManager.onActivityResult(requestCode, resultCode, data);
 
         // Google login
         if (requestCode == RC_SIGN_IN) {

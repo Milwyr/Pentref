@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -37,11 +38,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.adapters.BookmarksAdapter;
@@ -86,6 +89,7 @@ public class DiscoverFragment extends Fragment implements
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
     private RelativeLayout mBottomSheet;
+    private TextView mSummaryCardTitleTextView;
     private Poi mSelectedPoi;
     //endregion
 
@@ -154,15 +158,17 @@ public class DiscoverFragment extends Fragment implements
         bottomRecyclerView.setLayoutManager(layoutManager);
         // TODO: Has to use read data
         List<Poi> pois = new ArrayList<>();
-        pois.add(new Poi(1, "Temp", "Description", "www.yahoo.com", "Somewhere in Tai O", new LatLng(1, 2)));
-        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
+//        pois.add(new Poi(1, "Temp", "Description", "www.yahoo.com", "Somewhere in Tai O", new LatLng(1, 2)));
+//        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
+//        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
+//        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
+//        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
         bottomRecyclerView.setAdapter(new BookmarksAdapter(R.layout.bookmark_row_layout, pois));
 
         mPoiSummaryCardView = (CardView) rootView.findViewById(R.id.poi_summary_card_view);
         mPoiSummaryCardView.setOnClickListener(this);
+
+        mSummaryCardTitleTextView = (TextView) rootView.findViewById(R.id.discover_poi_name_text_view);
 
         // Inflate the layout for this fragment
         return rootView;
@@ -194,6 +200,7 @@ public class DiscoverFragment extends Fragment implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
+        mGoogleMap.clear();
 
         //region Enable locate me button
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -246,7 +253,6 @@ public class DiscoverFragment extends Fragment implements
                 // Add a list of Points of Interest to the map
                 for (Poi poi : pois) {
                     mGoogleMap.addMarker(new MarkerOptions()
-                            .title(poi.getName())
                             .position(poi.getLatLng())).setTag(poi);
                 }
 
@@ -257,9 +263,9 @@ public class DiscoverFragment extends Fragment implements
 
         //region Initialise location request that is used for continuous location tracking
         mLocationRequest = new LocationRequest()
-                .setInterval(30000) // milliseconds
-                .setFastestInterval(10000) // milliseconds
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                .setInterval(5000) // milliseconds
+                .setFastestInterval(1000) // milliseconds
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest);
         PendingResult<LocationSettingsResult> result =
@@ -289,7 +295,9 @@ public class DiscoverFragment extends Fragment implements
     //region GoogleApiClient connection callback methods
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        startLocationUpdates();
+        if (mGoogleApiClient != null && mLocationRequest != null) {
+            startLocationUpdates();
+        }
     }
 
     @Override
@@ -299,6 +307,8 @@ public class DiscoverFragment extends Fragment implements
     //endregion
 
     //region Geo-fencing API
+    private LatLng mLastLatLng;
+
     @Override
     public void onLocationChanged(Location location) {
         // Remove the circle that has been previously added
@@ -314,6 +324,15 @@ public class DiscoverFragment extends Fragment implements
 
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(
                 new LatLng(location.getLatitude(), location.getLongitude())));
+
+        //TODO: Add this for demo, need to rewrite the code
+        if (mLastLatLng != null) {
+            PolylineOptions polylineOptions = new PolylineOptions()
+                    .visible(true).width(5).color(ContextCompat.getColor(getActivity(), R.color.black))
+                    .add(mLastLatLng, new LatLng(location.getLatitude(), location.getLongitude()));
+            mGoogleMap.addPolyline(polylineOptions);
+        }
+        mLastLatLng = new LatLng(location.getLatitude(), location.getLongitude());
     }
 
     private void startLocationUpdates() {
@@ -352,6 +371,7 @@ public class DiscoverFragment extends Fragment implements
         mBottomSheet.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
+        mSummaryCardTitleTextView.setText(mSelectedPoi.getName());
         return false;
     }
 

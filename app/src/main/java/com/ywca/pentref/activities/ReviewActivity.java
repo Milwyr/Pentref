@@ -91,9 +91,22 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            // This intent carries the incoming Poi instance so PoiDetailsActivity can receive it
-            setResult(RESULT_CANCELED, mIncomingIntent);
-            finish();
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.dialog_message_confirm_discard_changes)
+                    .setPositiveButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Does nothing, and the dialog will be dismissed
+                        }
+                    })
+                    .setNegativeButton(R.string.discard, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Pass the incoming Poi instance to PoiDetailsActivity
+                            setResult(RESULT_CANCELED, mIncomingIntent);
+                            finish();
+                        }
+                    }).show();
         }
         return true;
     }
@@ -106,11 +119,11 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), RC_PHOTO_GALLERY);
+                startActivityForResult(Intent.createChooser(intent, "Select Pictures"), RC_PHOTO_GALLERY);
                 break;
             case R.id.submit_button:
                 if (isConnectedToInternet()) {
-                    // This intent carries the incoming Poi instance so PoiDetailsActivity can receive it
+                    // Pass the incoming Poi instance to PoiDetailsActivity
                     setResult(RESULT_OK, mIncomingIntent);
                     finish();
                 } else {

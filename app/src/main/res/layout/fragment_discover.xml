@@ -42,9 +42,12 @@
 
             <TextView
                 android:id="@+id/discover_poi_name_text_view"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tai O"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:layout_toStartOf="@+id/discover_bookmark_image_view"
+                android:gravity="start"
+                android:text="Large Text"
                 android:textColor="@color/black"
                 android:textSize="30sp" />
 

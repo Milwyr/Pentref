@@ -118,11 +118,8 @@ public class TutorialActivity extends BaseActivity {
     private void downloadDataFromServer() {
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        // Server root directory
-        String baseUrl = "http://comp4521p1.cse.ust.hk/";
-
         // Read all Points of Interest from the server and add them to SQLite database
-        String poiUrl = baseUrl + "pois.json";
+        String poiUrl = Utility.SERVER_URL + "/pois.json";
         JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
@@ -153,7 +150,7 @@ public class TutorialActivity extends BaseActivity {
         queue.add(poiJsonArrayRequest);
 
         // Read all Point of Interest categories from the server and add them to SQLite database
-        String poiCategoriesUrl = baseUrl + "poi_categories.json";
+        String poiCategoriesUrl = Utility.SERVER_URL + "/poi_categories.json";
         JsonArrayRequest poiCategoryArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiCategoriesUrl, null, new Response.Listener<JSONArray>() {
             @Override
@@ -184,7 +181,7 @@ public class TutorialActivity extends BaseActivity {
         queue.add(poiCategoryArrayRequest);
 
         // Fetch the transports json on the server and save it to a local json file
-        String transportUrl = baseUrl + "transport_schedule.json";
+        String transportUrl = Utility.SERVER_URL + "/transport_schedule.json";
         JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
             @Override
@@ -214,7 +211,9 @@ public class TutorialActivity extends BaseActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("TutorialActivity", error.getMessage());
+                if (error != null) {
+                    Log.e("TutorialActivity", error.getMessage());
+                }
             }
         });
         queue.add(transportJsonArrayRequest);
