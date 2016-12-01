@@ -60,6 +60,11 @@
             android:name=".common.PentrefProvider"
             android:authorities="com.ywca.pentref.provider"
             android:exported="false" />
+
+        <receiver
+            android:name=".common.NotificationReceiver"
+            android:enabled="true"
+            android:exported="false"></receiver>
     </application>
 
 </manifest>

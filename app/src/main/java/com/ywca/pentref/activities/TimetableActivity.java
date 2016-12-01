@@ -1,8 +1,13 @@
 package com.ywca.pentref.activities;
 
+import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -17,9 +22,12 @@ import android.widget.TimePicker;
 
 import com.ywca.pentref.R;
 import com.ywca.pentref.adapters.TimetableAdapter;
+import com.ywca.pentref.common.NotificationReceiver;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Transport;
 
+import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
 import java.util.ArrayList;
@@ -27,7 +35,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class TimetableActivity extends AppCompatActivity implements
-        View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+        CompoundButton.OnCheckedChangeListener, TimetableAdapter.OnItemClickListener {
 
     private Transport mSelectedTransportItem;
     private TimetableAdapter mAdapter;
@@ -52,12 +60,7 @@ public class TimetableActivity extends AppCompatActivity implements
 
         // Insert a list of times into the adapter for the recycler view, with three columns per row
         mAdapter = new TimetableAdapter(R.layout.timetable_row_layout, timesAfterNow);
-        mAdapter.setOnItemClickListener(new TimetableAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(LocalTime localTime) {
-                scheduleNotification(localTime);
-            }
-        });
+        mAdapter.setOnItemClickListener(this);
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.timetable_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
@@ -65,23 +68,6 @@ public class TimetableActivity extends AppCompatActivity implements
 
         Switch showFullTimetableSwitch = (Switch) findViewById(R.id.show_full_timetable_switch);
         showFullTimetableSwitch.setOnCheckedChangeListener(this);
-
-//        Button notifyMeButton = (Button) findViewById(R.id.timetable_notification_button);
-//        notifyMeButton.setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-//        if (v.getId() == R.id.timetable_notification_button) {
-//            // Show a time picker to allow the user to choose the time of notification
-//            TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-//                @Override
-//                public void onTimeSet(TimePicker timePicker, int i, int i1) {
-//
-//                }
-//            }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
-//            timePickerDialog.show();
-//        }
     }
 
     @Override
@@ -97,17 +83,50 @@ public class TimetableActivity extends AppCompatActivity implements
         }
     }
 
-    // Schedules a notification 30 minutes before the given time
-    private void scheduleNotification(LocalTime localTime) {
-        Notification.Builder builder = new Notification.Builder(TimetableActivity.this)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("Title")
-                .setContentText("Content")
-                .setAutoCancel(true);
+    @Override
+    public void onItemClick(final LocalTime localTime) {
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.dialog_message_confirm_issue_notification)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        setAlarmToScheduleNotification(localTime);
+                    }
+                })
+                .setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                }).show();
+    }
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(1, builder.build());
+    private void setAlarmToScheduleNotification(LocalTime localTime) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        // Initialise intent and put the necessary data in it
+        Intent intent = new Intent(this, NotificationReceiver.class);
+        intent.putExtra(NotificationReceiver.HOUR_OF_DAY, localTime.getHourOfDay());
+        intent.putExtra(NotificationReceiver.MINUTE_OF_HOUR, localTime.getMinuteOfHour());
+        intent.putExtra(NotificationReceiver.ROUTE_NUMBER, mSelectedTransportItem.getRouteNumber());
+
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(
+                this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
+        // Ensure the notification displays 30 minutes before the bus/ferry departs
+        localTime = localTime.minusMinutes(30);
+
+        // Convert LocalTime to a Calendar object
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH),
+                localTime.getHourOfDay(),
+                localTime.getMinuteOfHour(),
+                0);
+
+        // Set the alarm so the notification will be issued in NotificationReceiver
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
     }
 }
