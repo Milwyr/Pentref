@@ -35,6 +35,7 @@ import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
+import com.ywca.pentref.fragments.AboutFragment;
 import com.ywca.pentref.fragments.BookmarksFragment;
 import com.ywca.pentref.fragments.DiscoverFragment;
 import com.ywca.pentref.fragments.SettingsFragment;
@@ -203,6 +204,9 @@ public class MainActivity extends BaseActivity
             case R.id.nav_settings:
                 changeFragment(R.string.settings, new SettingsFragment());
                 break;
+            case R.id.nav_about:
+                changeFragment(R.string.about, new AboutFragment());
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -226,10 +230,6 @@ public class MainActivity extends BaseActivity
             mNavigationView.setCheckedItem(R.id.nav_weather);
         } else if (fragment instanceof TransportationFragment) {
             mNavigationView.setCheckedItem(R.id.nav_transportation);
-        } else if (fragment instanceof ProfileFragment) {
-            mNavigationView.setCheckedItem(R.id.nav_profile);
-        } else if (fragment instanceof SettingsFragment) {
-            mNavigationView.setCheckedItem(R.id.nav_settings);
         }
 
         // The search view is only visible when the current fragment is discover fragment

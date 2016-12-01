@@ -15,6 +15,7 @@ public class Poi implements Comparable, Parcelable {
     private long id;
     private String name;
     private String headerImageFileName;
+    private int categoryId;
     private String description;
     private String websiteUri;
     private String address;
@@ -22,10 +23,12 @@ public class Poi implements Comparable, Parcelable {
     private double longitude;
     //endregion
 
-    public Poi(long id, String name, String headerImageFileName, String description, String websiteUri, String address, LatLng latLng) {
+    public Poi(long id, String name, String headerImageFileName, int categoryId,
+               String description, String websiteUri, String address, LatLng latLng) {
         this.id = id;
         this.name = name;
         this.headerImageFileName = headerImageFileName;
+        this.categoryId = categoryId;
         this.description = description;
         this.websiteUri = websiteUri;
         this.address = address;
@@ -43,6 +46,10 @@ public class Poi implements Comparable, Parcelable {
 
     public String getHeaderImageFileName() {
         return this.headerImageFileName;
+    }
+
+    public int getCategoryId() {
+        return this.categoryId;
     }
 
     public String getDescription() {
@@ -96,6 +103,7 @@ public class Poi implements Comparable, Parcelable {
         destination.writeLong(this.id);
         destination.writeString(this.name);
         destination.writeString(this.headerImageFileName);
+        destination.writeInt(this.categoryId);
         destination.writeString(this.description);
         destination.writeString(this.websiteUri);
         destination.writeString(this.address);
@@ -107,6 +115,7 @@ public class Poi implements Comparable, Parcelable {
         this.id = source.readLong();
         this.name = source.readString();
         this.headerImageFileName = source.readString();
+        this.categoryId = source.readInt();
         this.description = source.readString();
         this.websiteUri = source.readString();
         this.address = source.readString();

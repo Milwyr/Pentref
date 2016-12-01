@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/group1"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/nav_discover"
             android:icon="@drawable/ic_menu_camera"
             android:title="@string/discover" />
         <item
             android:id="@+id/nav_bookmarks"
-            android:icon="@drawable/ic_menu_gallery"
+            android:icon="@drawable/ic_bookmarked_black_36dp"
             android:title="@string/bookmarks" />
         <item
             android:id="@+id/nav_weather"
@@ -16,21 +18,25 @@
             android:title="@string/weather" />
         <item
             android:id="@+id/nav_transportation"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_bus_black_36dp"
             android:title="@string/transport_schedule" />
     </group>
 
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_profile"
-                android:icon="@drawable/ic_menu_share"
-                android:title="@string/profile" />
-            <item
-                android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_menu_send"
-                android:title="@string/settings" />
-        </menu>
-    </item>
+    <group
+        android:id="@+id/group2"
+        android:checkableBehavior="single">
 
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_person_black"
+            android:title="@string/profile" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/settings" />
+        <item
+            android:id="@+id/nav_about"
+            android:icon="@drawable/ic_info_black_24dp"
+            android:title="@string/about" />
+    </group>
 </menu>

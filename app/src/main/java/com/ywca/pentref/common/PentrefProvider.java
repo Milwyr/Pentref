@@ -179,6 +179,7 @@ public class PentrefProvider extends ContentProvider {
         values.put(Contract.Poi._ID, poi.getId());
         values.put(Contract.Poi.COLUMN_NAME, poi.getName());
         values.put(Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME, poi.getHeaderImageFileName());
+        values.put(Contract.Poi.COLUMN_CATEGORY_ID, poi.getCategoryId());
         values.put(Contract.Poi.COLUMN_DESCRIPTION, poi.getDescription());
         values.put(Contract.Poi.COLUMN_WEBSITE_URI, poi.getWebsiteUri());
         values.put(Contract.Poi.COLUMN_ADDRESS, poi.getAddress());
@@ -201,12 +202,13 @@ public class PentrefProvider extends ContentProvider {
             long id = cursor.getLong(cursor.getColumnIndex(Contract.Poi._ID));
             String name = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_NAME));
             String headerImageFileName = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME));
+            int categoryId = cursor.getInt(cursor.getColumnIndex(Contract.Poi.COLUMN_CATEGORY_ID));
             String description = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_DESCRIPTION));
             String websiteUri = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_WEBSITE_URI));
             String address = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_ADDRESS));
             double latitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LATITUDE));
             double longitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LONGITUDE));
-            pois.add(new Poi(id, name, headerImageFileName, description,
+            pois.add(new Poi(id, name, headerImageFileName, categoryId, description,
                     websiteUri, address, new LatLng(latitude, longitude)));
 
             cursor.moveToNext();
@@ -279,6 +281,7 @@ public class PentrefProvider extends ContentProvider {
                     Contract.Poi._ID + " LONG PRIMARY KEY, " +
                     Contract.Poi.COLUMN_NAME + " TEXT, " +
                     Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME + " TEXT, " +
+                    Contract.Poi.COLUMN_CATEGORY_ID + " LONG, " +
                     Contract.Poi.COLUMN_DESCRIPTION + " TEXT, " +
                     Contract.Poi.COLUMN_WEBSITE_URI + " TEXT, " +
                     Contract.Poi.COLUMN_ADDRESS + " TEXT, " +

@@ -14,12 +14,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -38,7 +37,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -47,7 +45,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
-import com.ywca.pentref.adapters.BookmarksAdapter;
 import com.ywca.pentref.adapters.CategoryAdapter;
 import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
@@ -91,6 +88,9 @@ public class DiscoverFragment extends Fragment implements
     private RelativeLayout mBottomSheet;
     private TextView mSummaryCardTitleTextView;
     private Poi mSelectedPoi;
+
+    // All the Points of Interest read from the local database
+    private List<Poi> mPois;
     //endregion
 
     public DiscoverFragment() {
@@ -100,6 +100,8 @@ public class DiscoverFragment extends Fragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mPois = new ArrayList<>();
 
         // Build Google Api client
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
@@ -127,7 +129,22 @@ public class DiscoverFragment extends Fragment implements
 
         mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
 
+        // Initialises category grid view that is embedded in the bottom sheet
         final GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                // Remove all the existing markers
+                mGoogleMap.clear();
+
+                for (Poi poi: mPois) {
+                    if (poi.getCategoryId() == (i + 1)) {
+                        MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                        mGoogleMap.addMarker(markerOptions).setTag(poi);
+                    }
+                }
+            }
+        });
         new AsyncTask<Void, Void, List<Category>>() {
             @Override
             protected List<Category> doInBackground(Void... voids) {
@@ -150,20 +167,6 @@ public class DiscoverFragment extends Fragment implements
                 gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
             }
         }.execute();
-
-        // TODO: Potentially create a new layout for this
-        RecyclerView bottomRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
-        bottomRecyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        bottomRecyclerView.setLayoutManager(layoutManager);
-        // TODO: Has to use read data
-        List<Poi> pois = new ArrayList<>();
-//        pois.add(new Poi(1, "Temp", "Description", "www.yahoo.com", "Somewhere in Tai O", new LatLng(1, 2)));
-//        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-//        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-//        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-//        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-        bottomRecyclerView.setAdapter(new BookmarksAdapter(R.layout.bookmark_row_layout, pois));
 
         mPoiSummaryCardView = (CardView) rootView.findViewById(R.id.poi_summary_card_view);
         mPoiSummaryCardView.setOnClickListener(this);
@@ -252,9 +255,12 @@ public class DiscoverFragment extends Fragment implements
 
                 // Add a list of Points of Interest to the map
                 for (Poi poi : pois) {
-                    mGoogleMap.addMarker(new MarkerOptions()
-                            .position(poi.getLatLng())).setTag(poi);
+                    MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                    mGoogleMap.addMarker(markerOptions).setTag(poi);
                 }
+
+                // Save all the Points of Interest to the instance variable
+                mPois.addAll(pois);
 
                 // Set a marker click listener
                 mGoogleMap.setOnMarkerClickListener(DiscoverFragment.this);
@@ -389,8 +395,7 @@ public class DiscoverFragment extends Fragment implements
         }
     }
 
-    // Map view requires these lifecycle methods to be forwarded to itself
-    //region Lifecycle methods
+    //region Lifecycle methods for MapView
     @Override
     public void onResume() {
         super.onResume();

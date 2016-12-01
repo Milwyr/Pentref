@@ -15,6 +15,7 @@ public final class Contract {
 
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_HEADER_IMAGE_FILE_NAME = "header_image";
+        public static final String COLUMN_CATEGORY_ID = "category_id";
         public static final String COLUMN_DESCRIPTION = "description";
         public static final String COLUMN_WEBSITE_URI = "website_uri";
         public static final String COLUMN_ADDRESS = "address";
@@ -28,6 +29,7 @@ public final class Contract {
                 _ID,
                 COLUMN_NAME,
                 COLUMN_HEADER_IMAGE_FILE_NAME,
+                COLUMN_CATEGORY_ID,
                 COLUMN_DESCRIPTION,
                 COLUMN_WEBSITE_URI,
                 COLUMN_ADDRESS,
@@ -62,7 +64,7 @@ public final class Contract {
     }
 
     public static final class BookmarkedPois {
-        public static final String PATH = "bookmarked_pois";
+        static final String PATH = "bookmarked_pois";
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH);
     }
 
