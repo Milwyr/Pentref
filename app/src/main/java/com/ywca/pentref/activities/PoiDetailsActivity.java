@@ -1,7 +1,6 @@
 package com.ywca.pentref.activities;
 
 import android.app.AlertDialog;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -20,7 +19,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -31,11 +29,9 @@ import com.android.volley.toolbox.Volley;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInApi;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -48,6 +44,7 @@ import com.google.gson.JsonSerializer;
 import com.ywca.pentref.R;
 import com.ywca.pentref.adapters.ReviewsAdapter;
 import com.ywca.pentref.common.Contract;
+import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 import com.ywca.pentref.models.Review;
@@ -57,7 +54,6 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -120,49 +116,24 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.bookmark_fab:
-                boolean isPreviouslyBookmarked = (boolean) mBookmarkFab.getTag();
-                boolean isNowBookmarked = !isPreviouslyBookmarked;
+                final boolean isPreviouslyBookmarked = (boolean) mBookmarkFab.getTag();
 
-                // Insert or delete the bookmark after the user clicks on the bookmark fab
-                new AsyncTask<Boolean, Void, Boolean>() {
+                // Insert or delete the bookmark from database after the user clicks on the bookmark fab
+                new UpdateBookmarkAsyncTask(this, mSelectedPoi.getId()) {
                     @Override
                     protected void onPreExecute() {
                         mBookmarkFab.setEnabled(false);
                     }
 
                     @Override
-                    protected Boolean doInBackground(Boolean... booleans) {
-                        boolean isBookmarked = booleans[0];
-
-                        long poiId = mSelectedPoi.getId();
-
-                        if (isBookmarked) {
-                            // Add the poi to the bookmark table
-                            ContentValues values = new ContentValues();
-                            values.put(Contract.Bookmark.COLUMN_POI_ID, poiId);
-                            getContentResolver().insert(Contract.Bookmark.CONTENT_URI, values);
-                        } else {
-                            // Delete the poi from the bookmark table
-//                            Uri uriWithPoiId = Uri.withAppendedPath(
-//                                    Contract.Bookmark.CONTENT_URI, Long.toString(poiId));
-                            Uri uri = Contract.Bookmark.CONTENT_URI;
-                            String selection = Contract.Bookmark.COLUMN_POI_ID + " = ?";
-                            String[] selectionArgs = {Long.toString(poiId)};
-
-                            getContentResolver().delete(uri, selection, selectionArgs);
-                        }
-
-                        return isBookmarked;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean isBookmarked) {
-                        super.onPostExecute(isBookmarked);
-                        mBookmarkFab.setTag(isBookmarked);
-                        mBookmarkFab.setImageResource(isBookmarked ? R.drawable.ic_bookmarked_black_36dp : R.drawable.ic_bookmark_black_36dp);
+                    protected void onPostExecute(Void v) {
+                        boolean isNowBookmarked = !isPreviouslyBookmarked;
+                        mBookmarkFab.setTag(isNowBookmarked);
+                        mBookmarkFab.setImageResource(isNowBookmarked ?
+                                R.drawable.ic_bookmarked_black_36dp : R.drawable.ic_bookmark_black_36dp);
                         mBookmarkFab.setEnabled(true);
                     }
-                }.execute(isNowBookmarked);
+                }.execute(isPreviouslyBookmarked);
                 break;
         }
     }
@@ -219,9 +190,10 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
                 });
         Volley.newRequestQueue(this).add(imageRequest);
 
+        // Set the image of the bookmark fab depending on whether the poi is bookmarked
         mBookmarkFab = (FloatingActionButton) findViewById(R.id.bookmark_fab);
         mBookmarkFab.setOnClickListener(this);
-        new updateBookmarkFabAsyncTask().execute(mSelectedPoi.getId());
+        new InitialiseBookmarkFabAsyncTask().execute(mSelectedPoi.getId());
 
         // TODO: Set data for views (address, website uri, phone number...)
 
@@ -277,7 +249,7 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
      * Finds if the given poi id is in table Bookmark of the local SQLite database.
      * After that, updates the image for bookmark fab according to the bookmarked state.
      */
-    private class updateBookmarkFabAsyncTask extends AsyncTask<Long, Void, Boolean> {
+    private class InitialiseBookmarkFabAsyncTask extends AsyncTask<Long, Void, Boolean> {
         @Override
         protected Boolean doInBackground(Long... longs) {
             long poiId = longs[0];

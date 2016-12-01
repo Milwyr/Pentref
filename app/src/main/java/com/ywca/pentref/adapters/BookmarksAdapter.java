@@ -1,6 +1,8 @@
 package com.ywca.pentref.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ywca.pentref.R;
+import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 import com.ywca.pentref.models.Poi;
 
 import java.util.ArrayList;
@@ -44,10 +47,29 @@ public class BookmarksAdapter extends RecyclerView.Adapter<BookmarksAdapter.View
         holder.itemView.setTag(position);
         holder.placeNameTextView.setText(poi.getName());
         holder.addressTextView.setText(poi.getAddress());
+
         holder.bookmarkedIconImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                removePoi(poi.getId());
+                new AlertDialog.Builder(mContext)
+                        .setMessage(R.string.dialog_message_confirm_remove_bookmark)
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                new UpdateBookmarkAsyncTask(mContext, poi.getId()) {
+                                    @Override
+                                    protected void onPostExecute(Void v) {
+                                        removePoi(poi.getId());
+                                    }
+                                }.execute(true);
+                            }
+                        })
+                        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        }).show();
             }
         });
     }

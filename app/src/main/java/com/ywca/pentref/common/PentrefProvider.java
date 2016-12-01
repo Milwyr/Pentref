@@ -81,55 +81,6 @@ public class PentrefProvider extends ContentProvider {
         String tableName = convertToTableName(uri);
         selection = convertToSelection(uri, selection);
 
-        //region Legacy
-        //        switch (mUriMatcher.match(uri)) {
-//            case POI_TABLE:
-//                tableName = Contract.Poi.TABLE_NAME;
-//                break;
-//            case POI_ROW:
-//                tableName = Contract.Poi.TABLE_NAME;
-//                selection = Contract.Poi._ID + " = " + uri.getLastPathSegment();
-//                break;
-//            case CATEGORY_TABLE:
-//                tableName = Contract.Category.TABLE_NAME;
-//                break;
-//            case CATEGORY_ROW:
-//                tableName = Contract.Category.TABLE_NAME;
-//                selection = Contract.Category._ID + " = " + uri.getLastPathSegment();
-//                break;
-//            case BOOKMARK_TABLE:
-//                tableName = Contract.Bookmark.TABLE_NAME;
-//                break;
-//            case BOOKMARK_ROW:
-//                tableName = Contract.Bookmark.TABLE_NAME;
-//                selection = Contract.Category._ID + " = " + uri.getLastPathSegment();
-//                break;
-//            case SEARCH_SUGGESTIONS:
-//                tableName = Contract.Poi.TABLE_NAME;
-//
-//                /*
-//                    The column names "_id", "SUGGEST_COLUMN_TEXT_1", "SUGGEST_COLUMN_TEXT_2"
-//                    are used to build a suggestion table and show a list of suggestions when
-//                    the user searches for Points of Interest.
-//
-//                    The column "SUGGEST_COLUMN_INTENT_DATA_ID" records the POI id of each row.
-//                 */
-//                projection = new String[]{
-//                        Contract.Poi._ID + " AS " + BaseColumns._ID,
-//                        Contract.Poi.COLUMN_NAME + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
-//                        Contract.Poi.COLUMN_ADDRESS + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
-//                        Contract.Poi._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
-//
-//                // The two percent signs are used to match the 'LIKE' statements specified in searchable.xml
-//                if (selectionArgs.length > 0) {
-//                    selectionArgs = new String[]{"%" + selectionArgs[0] + "%"};
-//                }
-//                break;
-//            default:
-//                throw new IllegalArgumentException("Illegal uri: " + uri);
-//        }
-        //endregion
-
         if (mUriMatcher.match(uri) == SEARCH_SUGGESTIONS) {
             /*
                 The column names "_id", "SUGGEST_COLUMN_TEXT_1", "SUGGEST_COLUMN_TEXT_2"
@@ -304,7 +255,7 @@ public class PentrefProvider extends ContentProvider {
             case CATEGORY_ROW:
                 return Contract.Category._ID + " = " + uri.getLastPathSegment();
             case BOOKMARK_ROW:
-                return Contract.Category._ID + " = " + uri.getLastPathSegment();
+                return Contract.Bookmark.COLUMN_POI_ID + " = " + uri.getLastPathSegment();
             default:
                 return selection;
         }
