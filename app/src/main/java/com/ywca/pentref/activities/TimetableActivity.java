@@ -93,7 +93,7 @@ public class TimetableActivity extends AppCompatActivity implements
                         setAlarmToScheduleNotification(localTime);
                     }
                 })
-                .setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();

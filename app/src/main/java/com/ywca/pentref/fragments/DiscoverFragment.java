@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -61,19 +60,17 @@ import static android.app.Activity.RESULT_OK;
  * Displays a {@link GoogleMap} instance with the predefined Points of Interest and categories.
  */
 // Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
-public class DiscoverFragment extends Fragment implements
-        GoogleApiClient.ConnectionCallbacks, LocationListener,
+public class DiscoverFragment extends Fragment implements LocationListener,
         OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
 
     //region Constants
-    private final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
-
     // Request code to launch PoiDetailsActivity
     private final int REQUEST_POI_ACTIVITY_DETAILS = 9000;
 
     // Request code for requesting for location permission
     private final int REQUEST_LOCATION_PERMISSION = 10000;
 
+    // Request code for checking whether GPS is turned on
     private final int REQUEST_CHECK_GPS_SETTINGS = 10001;
     //endregion
 
@@ -82,6 +79,7 @@ public class DiscoverFragment extends Fragment implements
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mGoogleMap;
     private LocationRequest mLocationRequest;
+    private LocationSettingsRequest mLocationSettingsRequest;
 
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
@@ -103,10 +101,9 @@ public class DiscoverFragment extends Fragment implements
 
         mPois = new ArrayList<>();
 
-        // Build Google Api client
+        // Build Google Api client and connect to it
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
                 .build();
         mGoogleApiClient.connect();
     }
@@ -118,7 +115,7 @@ public class DiscoverFragment extends Fragment implements
 
         mMapView = (MapView) rootView.findViewById(R.id.map_view);
 
-        // TODO: Deal with the potential crash
+        // Avoid unexpected crash
         try {
             mMapView.onCreate(savedInstanceState);
         } catch (Exception e) {
@@ -137,7 +134,8 @@ public class DiscoverFragment extends Fragment implements
                 // Remove all the existing markers
                 mGoogleMap.clear();
 
-                for (Poi poi: mPois) {
+                // Add only the markers that match the selected category
+                for (Poi poi : mPois) {
                     if (poi.getCategoryId() == (i + 1)) {
                         MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
                         mGoogleMap.addMarker(markerOptions).setTag(poi);
@@ -148,7 +146,7 @@ public class DiscoverFragment extends Fragment implements
         new AsyncTask<Void, Void, List<Category>>() {
             @Override
             protected List<Category> doInBackground(Void... voids) {
-                // Retrieve a list of Points of Interest from the local database
+                // Retrieve a list of POI categories from the local database
                 Cursor cursor = getActivity().getContentResolver().query(
                         Contract.Category.CONTENT_URI, Contract.Category.PROJECTION_ALL, null, null, null);
 
@@ -164,6 +162,7 @@ public class DiscoverFragment extends Fragment implements
 
             @Override
             protected void onPostExecute(List<Category> categories) {
+                // Add the categories to the grid view at the bottom
                 gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
             }
         }.execute();
@@ -232,6 +231,14 @@ public class DiscoverFragment extends Fragment implements
             }
         });
 
+        googleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                initiateLocationRequest();
+                return false;
+            }
+        });
+
         new AsyncTask<Void, Void, List<Poi>>() {
             @Override
             protected List<Poi> doInBackground(Void... params) {
@@ -266,16 +273,26 @@ public class DiscoverFragment extends Fragment implements
                 mGoogleMap.setOnMarkerClickListener(DiscoverFragment.this);
             }
         }.execute();
+    }
 
-        //region Initialise location request that is used for continuous location tracking
-        mLocationRequest = new LocationRequest()
-                .setInterval(5000) // milliseconds
-                .setFastestInterval(1000) // milliseconds
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
+    // Request for continuous location update using fused location provider
+    private void initiateLocationRequest() {
+        // Instantiate LocationRequest and LocationSettingsRequest instances
+        // if they have not been created
+        if (mLocationRequest == null) {
+            mLocationRequest = new LocationRequest()
+                    .setInterval(5000) // milliseconds
+                    .setFastestInterval(1000) // milliseconds
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            mLocationSettingsRequest = new LocationSettingsRequest.Builder()
+                    .addLocationRequest(mLocationRequest).build();
+        }
+
+        // Check whether GPS is turned on, and show a confirmation dialog to let user
+        // turn on GPS it is currently off.
         PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+                LocationServices.SettingsApi.checkLocationSettings(
+                        mGoogleApiClient, mLocationSettingsRequest);
         result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
             @Override
             public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
@@ -295,22 +312,9 @@ public class DiscoverFragment extends Fragment implements
                 }
             }
         });
-        //endregion
-    }
 
-    //region GoogleApiClient connection callback methods
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (mGoogleApiClient != null && mLocationRequest != null) {
-            startLocationUpdates();
-        }
+        startLocationUpdates();
     }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-    //endregion
 
     //region Geo-fencing API
     private LatLng mLastLatLng;
@@ -331,7 +335,7 @@ public class DiscoverFragment extends Fragment implements
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(
                 new LatLng(location.getLatitude(), location.getLongitude())));
 
-        //TODO: Add this for demo, need to rewrite the code
+        // Draw a line of the route the user has travelled
         if (mLastLatLng != null) {
             PolylineOptions polylineOptions = new PolylineOptions()
                     .visible(true).width(5).color(ContextCompat.getColor(getActivity(), R.color.black))
