@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -170,7 +171,6 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // TODO: Dynamically choose the url
         String baseUrl = Utility.SERVER_URL + "/poi_photos/";
         // Download the header image from server
         ImageRequest imageRequest = new ImageRequest(
@@ -190,15 +190,69 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
                 });
         Volley.newRequestQueue(this).add(imageRequest);
 
+        // A dodgy way to set the category text
+        TextView categoryTextView = (TextView) findViewById(R.id.category_text_view);
+        switch (mSelectedPoi.getCategoryId()) {
+            case 1:
+                categoryTextView.setText("Point of Interest");
+                break;
+            case 2:
+                categoryTextView.setText("Public Facilities");
+                break;
+            case 3:
+                categoryTextView.setText("Restaurants");
+                break;
+            case 4:
+                categoryTextView.setText("Miscellaneous");
+                break;
+            default:
+                categoryTextView.setText("Not categorised");
+                break;
+        }
+
         // Set the image of the bookmark fab depending on whether the poi is bookmarked
         mBookmarkFab = (FloatingActionButton) findViewById(R.id.bookmark_fab);
         mBookmarkFab.setOnClickListener(this);
         new InitialiseBookmarkFabAsyncTask().execute(mSelectedPoi.getId());
 
-        // TODO: Set data for views (address, website uri, phone number...)
+        // Initialise the address text view of Point of Interest
+        TextView poiAddressTextView = (TextView) findViewById(R.id.poi_address_text_view);
+        String address = mSelectedPoi.getAddress();
+        if (address == null || address.isEmpty()) {
+            findViewById(R.id.poi_address_image_view).setVisibility(View.GONE);
+            poiAddressTextView.setVisibility(View.INVISIBLE);
+        } else {
+            poiAddressTextView.setVisibility(View.VISIBLE);
+            poiAddressTextView.setText(address);
+        }
+
+        // Initialise the website url text view of Point of Interest
+        TextView poiWebsiteTextView = (TextView) findViewById(R.id.poi_website_text_view);
+        String websiteUrl = mSelectedPoi.getWebsiteUri();
+        if (websiteUrl == null || websiteUrl.isEmpty()) {
+            findViewById(R.id.poi_website_image_view).setVisibility(View.GONE);
+            poiWebsiteTextView.setVisibility(View.INVISIBLE);
+        } else {
+            poiWebsiteTextView.setVisibility(View.VISIBLE);
+
+            Uri uri = Uri.parse(websiteUrl);
+            String formattedUrl = uri.getAuthority().replace("http://", "").replace("https://", "").replace("www.", "");
+            poiWebsiteTextView.setText(formattedUrl);
+        }
+
+        // Initialise the phone number text view of Point of Interest
+        TextView poiPhoneNumberTextView = (TextView) findViewById(R.id.poi_phone_number_text_view);
+        String phoneNumber = mSelectedPoi.getPhoneNumber();
+        if (phoneNumber == null || phoneNumber.isEmpty()) {
+            findViewById(R.id.poi_phone_number_image_view).setVisibility(View.GONE);
+            poiPhoneNumberTextView.setVisibility(View.INVISIBLE);
+        } else {
+            poiPhoneNumberTextView.setVisibility(View.VISIBLE);
+            poiPhoneNumberTextView.setText(phoneNumber.replace("+852 ", ""));
+        }
 
         // Download reviews from server
-        String url = "http://comp4521p1.cse.ust.hk/reviews/review_30.json";
+        String url = Utility.SERVER_URL + "/reviews/review_30.json";
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override

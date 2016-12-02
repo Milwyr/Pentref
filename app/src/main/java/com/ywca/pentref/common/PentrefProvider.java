@@ -183,6 +183,7 @@ public class PentrefProvider extends ContentProvider {
         values.put(Contract.Poi.COLUMN_DESCRIPTION, poi.getDescription());
         values.put(Contract.Poi.COLUMN_WEBSITE_URI, poi.getWebsiteUri());
         values.put(Contract.Poi.COLUMN_ADDRESS, poi.getAddress());
+        values.put(Contract.Poi.COLUMN_PHONE_NUMBER, poi.getPhoneNumber());
         values.put(Contract.Poi.COLUMN_LATITUDE, poi.getLatLng().latitude);
         values.put(Contract.Poi.COLUMN_LONGITUDE, poi.getLatLng().longitude);
         values.put(Contract.Poi.COLUMN_TIMESTAMP, "To be implemented");
@@ -208,8 +209,9 @@ public class PentrefProvider extends ContentProvider {
             String address = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_ADDRESS));
             double latitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LATITUDE));
             double longitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LONGITUDE));
+            String phoneNumber = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_PHONE_NUMBER));
             pois.add(new Poi(id, name, headerImageFileName, categoryId, description,
-                    websiteUri, address, new LatLng(latitude, longitude)));
+                    websiteUri, address, phoneNumber, new LatLng(latitude, longitude)));
 
             cursor.moveToNext();
         }
@@ -285,6 +287,7 @@ public class PentrefProvider extends ContentProvider {
                     Contract.Poi.COLUMN_DESCRIPTION + " TEXT, " +
                     Contract.Poi.COLUMN_WEBSITE_URI + " TEXT, " +
                     Contract.Poi.COLUMN_ADDRESS + " TEXT, " +
+                    Contract.Poi.COLUMN_PHONE_NUMBER + " TEXT, " +
                     Contract.Poi.COLUMN_LATITUDE + " DOUBLE, " +
                     Contract.Poi.COLUMN_LONGITUDE + " DOUBLE, " +
                     Contract.Poi.COLUMN_TIMESTAMP + " TEXT);";
