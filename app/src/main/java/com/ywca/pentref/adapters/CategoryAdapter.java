@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ywca.pentref.R;
-import com.ywca.pentref.common.CategoryItem;
+import com.ywca.pentref.common.Category;
 
 import java.util.List;
 
@@ -18,21 +18,21 @@ import java.util.List;
  */
 public class CategoryAdapter extends BaseAdapter {
     private Context mContext;
-    private List<CategoryItem> mCategoryItems;
+    private List<Category> mCategories;
 
-    public CategoryAdapter(Context context, List<CategoryItem> categoryItems) {
+    public CategoryAdapter(Context context, List<Category> categories) {
         mContext = context;
-        mCategoryItems = categoryItems;
+        mCategories = categories;
     }
 
     @Override
     public int getCount() {
-        return mCategoryItems.size();
+        return mCategories.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return (mCategoryItems == null) ? 0 : mCategoryItems.get(position);
+        return (mCategories == null) ? 0 : mCategories.get(position);
     }
 
     @Override
@@ -47,13 +47,13 @@ public class CategoryAdapter extends BaseAdapter {
             // Inflate the layout for the grid view
             convertView = LayoutInflater.from(mContext).inflate(R.layout.category_row_layout, parent, false);
 
-            final CategoryItem categoryItem = mCategoryItems.get(position);
+            final Category categoryItem = mCategories.get(position);
 
             ImageView icon = (ImageView) convertView.findViewById(R.id.category_icon);
             icon.setImageResource(categoryItem.getImageResourceId());
 
             TextView category = (TextView) convertView.findViewById(R.id.category_text_view);
-            category.setText(categoryItem.getCategoryName());
+            category.setText(categoryItem.getName());
         }
 
         return convertView;

@@ -11,17 +11,16 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -42,11 +41,11 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.PoiDetailsActivity;
-import com.ywca.pentref.adapters.BookmarksAdapter;
 import com.ywca.pentref.adapters.CategoryAdapter;
-import com.ywca.pentref.common.CategoryItem;
+import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
@@ -61,19 +60,17 @@ import static android.app.Activity.RESULT_OK;
  * Displays a {@link GoogleMap} instance with the predefined Points of Interest and categories.
  */
 // Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
-public class DiscoverFragment extends Fragment implements
-        GoogleApiClient.ConnectionCallbacks, LocationListener,
+public class DiscoverFragment extends Fragment implements LocationListener,
         OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
 
     //region Constants
-    private final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
-
     // Request code to launch PoiDetailsActivity
     private final int REQUEST_POI_ACTIVITY_DETAILS = 9000;
 
     // Request code for requesting for location permission
     private final int REQUEST_LOCATION_PERMISSION = 10000;
 
+    // Request code for checking whether GPS is turned on
     private final int REQUEST_CHECK_GPS_SETTINGS = 10001;
     //endregion
 
@@ -82,11 +79,16 @@ public class DiscoverFragment extends Fragment implements
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mGoogleMap;
     private LocationRequest mLocationRequest;
+    private LocationSettingsRequest mLocationSettingsRequest;
 
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
     private RelativeLayout mBottomSheet;
+    private TextView mSummaryCardTitleTextView;
     private Poi mSelectedPoi;
+
+    // All the Points of Interest read from the local database
+    private List<Poi> mPois;
     //endregion
 
     public DiscoverFragment() {
@@ -97,10 +99,11 @@ public class DiscoverFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Build Google Api client
+        mPois = new ArrayList<>();
+
+        // Build Google Api client and connect to it
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
                 .build();
         mGoogleApiClient.connect();
     }
@@ -112,7 +115,7 @@ public class DiscoverFragment extends Fragment implements
 
         mMapView = (MapView) rootView.findViewById(R.id.map_view);
 
-        // TODO: Deal with the potential crash
+        // Avoid unexpected crash
         try {
             mMapView.onCreate(savedInstanceState);
         } catch (Exception e) {
@@ -123,30 +126,51 @@ public class DiscoverFragment extends Fragment implements
 
         mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
 
-        GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
-        List<CategoryItem> categories = new ArrayList<>();
-        categories.add(new CategoryItem(0, "Points of Interest", R.drawable.ic_menu_camera));
-        categories.add(new CategoryItem(1, "Public Facilities", R.drawable.ic_bus_black_36dp));
-        categories.add(new CategoryItem(2, "Restaurants", R.drawable.ic_menu_share));
-        categories.add(new CategoryItem(3, "Miscellaneous", R.drawable.ic_bookmark_black_36dp));
-        gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
+        // Initialises category grid view that is embedded in the bottom sheet
+        final GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                // Remove all the existing markers
+                mGoogleMap.clear();
 
-        // TODO: Potentially create a new layout for this
-        RecyclerView bottomRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
-        bottomRecyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        bottomRecyclerView.setLayoutManager(layoutManager);
-        // TODO: Has to use read data
-        List<Poi> pois = new ArrayList<>();
-        pois.add(new Poi(1, "Temp", "Description", "www.yahoo.com", "Somewhere in Tai O", new LatLng(1, 2)));
-        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-        pois.add(new Poi(2, "Tai O YWCA", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-        bottomRecyclerView.setAdapter(new BookmarksAdapter(R.layout.bookmark_row_layout, pois));
+                // Add only the markers that match the selected category
+                for (Poi poi : mPois) {
+                    if (poi.getCategoryId() == (i + 1)) {
+                        MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                        mGoogleMap.addMarker(markerOptions).setTag(poi);
+                    }
+                }
+            }
+        });
+        new AsyncTask<Void, Void, List<Category>>() {
+            @Override
+            protected List<Category> doInBackground(Void... voids) {
+                // Retrieve a list of POI categories from the local database
+                Cursor cursor = getActivity().getContentResolver().query(
+                        Contract.Category.CONTENT_URI, Contract.Category.PROJECTION_ALL, null, null, null);
+
+                // This line is used to get rid of the warning
+                if (cursor == null) {
+                    return new ArrayList<>();
+                }
+
+                List<Category> categories = PentrefProvider.convertToCategories(cursor);
+                cursor.close();
+                return categories;
+            }
+
+            @Override
+            protected void onPostExecute(List<Category> categories) {
+                // Add the categories to the grid view at the bottom
+                gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
+            }
+        }.execute();
 
         mPoiSummaryCardView = (CardView) rootView.findViewById(R.id.poi_summary_card_view);
         mPoiSummaryCardView.setOnClickListener(this);
+
+        mSummaryCardTitleTextView = (TextView) rootView.findViewById(R.id.discover_poi_name_text_view);
 
         // Inflate the layout for this fragment
         return rootView;
@@ -178,6 +202,7 @@ public class DiscoverFragment extends Fragment implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
+        mGoogleMap.clear();
 
         //region Enable locate me button
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -206,6 +231,14 @@ public class DiscoverFragment extends Fragment implements
             }
         });
 
+        googleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                initiateLocationRequest();
+                return false;
+            }
+        });
+
         new AsyncTask<Void, Void, List<Poi>>() {
             @Override
             protected List<Poi> doInBackground(Void... params) {
@@ -229,25 +262,37 @@ public class DiscoverFragment extends Fragment implements
 
                 // Add a list of Points of Interest to the map
                 for (Poi poi : pois) {
-                    mGoogleMap.addMarker(new MarkerOptions()
-                            .title(poi.getName())
-                            .position(poi.getLatLng())).setTag(poi);
+                    MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                    mGoogleMap.addMarker(markerOptions).setTag(poi);
                 }
+
+                // Save all the Points of Interest to the instance variable
+                mPois.addAll(pois);
 
                 // Set a marker click listener
                 mGoogleMap.setOnMarkerClickListener(DiscoverFragment.this);
             }
         }.execute();
+    }
 
-        //region Initialise location request that is used for continuous location tracking
-        mLocationRequest = new LocationRequest()
-                .setInterval(30000) // milliseconds
-                .setFastestInterval(10000) // milliseconds
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
+    // Request for continuous location update using fused location provider
+    private void initiateLocationRequest() {
+        // Instantiate LocationRequest and LocationSettingsRequest instances
+        // if they have not been created
+        if (mLocationRequest == null) {
+            mLocationRequest = new LocationRequest()
+                    .setInterval(5000) // milliseconds
+                    .setFastestInterval(1000) // milliseconds
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            mLocationSettingsRequest = new LocationSettingsRequest.Builder()
+                    .addLocationRequest(mLocationRequest).build();
+        }
+
+        // Check whether GPS is turned on, and show a confirmation dialog to let user
+        // turn on GPS it is currently off.
         PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+                LocationServices.SettingsApi.checkLocationSettings(
+                        mGoogleApiClient, mLocationSettingsRequest);
         result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
             @Override
             public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
@@ -267,49 +312,13 @@ public class DiscoverFragment extends Fragment implements
                 }
             }
         });
-        //endregion
 
-        //region Legacy
-        //        // TODO: Load data offline when available
-//        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
-//        JsonArrayRequest PoiJsonArrayRequest = new JsonArrayRequest(
-//                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
-//            @Override
-//            public void onResponse(JSONArray response) {
-//                Gson gson = new Gson();
-//                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
-//
-//                for (Poi poi : pois) {
-//                    googleMap.addMarker(new MarkerOptions()
-//                            .title(poi.getName())
-//                            .position(poi.getLatLng())).setTag(poi);
-//                }
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("MainActivity", error.getMessage());
-//            }
-//        });
-//
-//        RequestQueue queue = Volley.newRequestQueue(getActivity());
-//        queue.add(PoiJsonArrayRequest);
-        //endregion
-    }
-
-    //region GoogleApiClient connection callback methods
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
         startLocationUpdates();
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-    //endregion
-
     //region Geo-fencing API
+    private LatLng mLastLatLng;
+
     @Override
     public void onLocationChanged(Location location) {
         // Remove the circle that has been previously added
@@ -325,6 +334,15 @@ public class DiscoverFragment extends Fragment implements
 
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(
                 new LatLng(location.getLatitude(), location.getLongitude())));
+
+        // Draw a line of the route the user has travelled
+        if (mLastLatLng != null) {
+            PolylineOptions polylineOptions = new PolylineOptions()
+                    .visible(true).width(5).color(ContextCompat.getColor(getActivity(), R.color.black))
+                    .add(mLastLatLng, new LatLng(location.getLatitude(), location.getLongitude()));
+            mGoogleMap.addPolyline(polylineOptions);
+        }
+        mLastLatLng = new LatLng(location.getLatitude(), location.getLongitude());
     }
 
     private void startLocationUpdates() {
@@ -363,6 +381,7 @@ public class DiscoverFragment extends Fragment implements
         mBottomSheet.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
+        mSummaryCardTitleTextView.setText(mSelectedPoi.getName());
         return false;
     }
 
@@ -380,13 +399,17 @@ public class DiscoverFragment extends Fragment implements
         }
     }
 
-    // Map view requires these lifecycle methods to be forwarded to itself
-    //region Lifecycle methods
+    //region Lifecycle methods for MapView
     @Override
     public void onResume() {
         super.onResume();
         if (mMapView != null) {
-            mMapView.onResume();
+            // NullPointerException is thrown in certain circumstances
+            try {
+                mMapView.onResume();
+            } catch (Exception e) {
+                Log.e("DiscoverFragment", e.getMessage());
+            }
         }
     }
 
@@ -394,7 +417,12 @@ public class DiscoverFragment extends Fragment implements
     public void onStart() {
         super.onStart();
         if (mMapView != null) {
-            mMapView.onStart();
+            // NullPointerException is thrown in certain circumstances
+            try {
+                mMapView.onStart();
+            } catch (Exception e) {
+                Log.e("DiscoverFragment", e.getMessage());
+            }
         }
     }
 

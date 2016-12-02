@@ -42,7 +42,7 @@ import com.ywca.pentref.R;
 /**
  * Reference: https://github.com/googlesamples/google-services/blob/master/android/signin/app/src/main/java/com/google/samples/quickstart/signin/SignInActivity.java#L51-L55.
  */
-public class SignInFragment extends Fragment implements
+public class ProfileFragment extends Fragment implements
         GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     private final int RC_SIGN_IN = 9000;
@@ -62,7 +62,7 @@ public class SignInFragment extends Fragment implements
     private Button mGoogleSignOutButton;
     //endregion
 
-    public SignInFragment() {
+    public ProfileFragment() {
         // Required empty public constructor
     }
 
@@ -179,7 +179,7 @@ public class SignInFragment extends Fragment implements
         super.onActivityResult(requestCode, resultCode, data);
 
         // Facebook login
-//        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        mCallbackManager.onActivityResult(requestCode, resultCode, data);
 
         // Google login
         if (requestCode == RC_SIGN_IN) {

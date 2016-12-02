@@ -61,22 +61,43 @@ public class TransportAdapter extends RecyclerView.Adapter<TransportAdapter.View
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, TimetableActivity.class);
-                intent.putExtra("Transport", transport);
+                intent.putExtra(Utility.TRANSPORT_EXTRA_KEY, transport);
                 mContext.startActivity(intent);
             }
         });
 
         holder.routeNumberTextView.setText(transport.getRouteNumber());
-        holder.departureStationTextView.setText(transport.getFromTaiO().getStations().get(0));
-        holder.destinationStationTextView.setText(transport.getToTaiO().getStations().get(0));
+
+        // TODO: Handle null from/to Tai O text view properly
+        if (transport.getFromTaiO() != null) {
+            holder.departureStationTextView.setText(transport.getFromTaiO().getStations().get(0));
+        } else {
+            String departureStation = transport.getToTaiO().getStations().get(transport.getToTaiO().getStations().size() - 1);
+            holder.departureStationTextView.setText(departureStation);
+        }
+
+        if (transport.getToTaiO() != null) {
+            holder.destinationStationTextView.setText(transport.getToTaiO().getStations().get(0));
+        } else {
+            String destinationStation = transport.getFromTaiO().getStations().get(transport.getFromTaiO().getStations().size() - 1);
+            holder.destinationStationTextView.setText(destinationStation);
+        }
 
         List<LocalTime> localTimes;
         // TODO: Assume the direction is from Tai O
         if (LocalDate.now().getDayOfWeek() >= DateTimeConstants.MONDAY
                 && LocalDate.now().getDayOfWeek() <= DateTimeConstants.SATURDAY) {
-            localTimes = transport.getFromTaiO().getTimetable().getMonToSatTimes();
+            if (transport.getFromTaiO() != null) {
+                localTimes = transport.getFromTaiO().getTimetable().getMonToSatTimes();
+            } else {
+                localTimes = transport.getToTaiO().getTimetable().getMonToSatTimes();
+            }
         } else {
-            localTimes = transport.getFromTaiO().getTimetable().getSunAndPublicHolidayTimes();
+            if (transport.getFromTaiO() != null) {
+                localTimes = transport.getFromTaiO().getTimetable().getSunAndPublicHolidayTimes();
+            } else {
+                localTimes = transport.getToTaiO().getTimetable().getSunAndPublicHolidayTimes();
+            }
         }
 
         holder.nextTwoTransportsTimeTextView.setText(getNextTwoTransportsMessage(localTimes));
@@ -85,7 +106,7 @@ public class TransportAdapter extends RecyclerView.Adapter<TransportAdapter.View
     // Convert the given list of LocalTime objects to a readable text
     private String getNextTwoTransportsMessage(List<LocalTime> localTimes) {
         // Get the next two departure times later than the current time
-        List<LocalTime> nextTwoDepartureTimes = Utility.getTimesAfterNow(localTimes);
+        List<LocalTime> nextTwoDepartureTimes = Utility.getTimesAfterNow(localTimes, 2);
 
         // Convert the list of LocalTime objects to a readable text
         String message;

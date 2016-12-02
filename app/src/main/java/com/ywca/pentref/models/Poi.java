@@ -14,19 +14,26 @@ public class Poi implements Comparable, Parcelable {
     //region Fields
     private long id;
     private String name;
+    private String headerImageFileName;
+    private int categoryId;
     private String description;
     private String websiteUri;
     private String address;
+    private String phoneNumber;
     private double latitude;
     private double longitude;
     //endregion
 
-    public Poi(long id, String name, String description, String websiteUri, String address, LatLng latLng) {
+    public Poi(long id, String name, String headerImageFileName, int categoryId, String description,
+               String websiteUri, String address, String phoneNumber, LatLng latLng) {
         this.id = id;
         this.name = name;
+        this.headerImageFileName = headerImageFileName;
+        this.categoryId = categoryId;
         this.description = description;
         this.websiteUri = websiteUri;
         this.address = address;
+        this.phoneNumber = phoneNumber;
         this.latitude = latLng.latitude;
         this.longitude = latLng.longitude;
     }
@@ -39,6 +46,14 @@ public class Poi implements Comparable, Parcelable {
         return this.name;
     }
 
+    public String getHeaderImageFileName() {
+        return this.headerImageFileName;
+    }
+
+    public int getCategoryId() {
+        return this.categoryId;
+    }
+
     public String getDescription() {
         return this.description;
     }
@@ -49,6 +64,10 @@ public class Poi implements Comparable, Parcelable {
 
     public String getAddress() {
         return this.address;
+    }
+
+    public String getPhoneNumber() {
+        return this.phoneNumber;
     }
 
     public LatLng getLatLng() {
@@ -89,9 +108,15 @@ public class Poi implements Comparable, Parcelable {
     public void writeToParcel(Parcel destination, int i) {
         destination.writeLong(this.id);
         destination.writeString(this.name);
+        destination.writeString(this.headerImageFileName);
+        destination.writeInt(this.categoryId);
         destination.writeString(this.description);
         destination.writeString(this.websiteUri);
         destination.writeString(this.address);
+        if (this.phoneNumber == null) {
+            this.phoneNumber = "";
+        }
+        destination.writeString(this.phoneNumber);
         destination.writeDouble(this.latitude);
         destination.writeDouble(this.longitude);
     }
@@ -99,9 +124,12 @@ public class Poi implements Comparable, Parcelable {
     private Poi(Parcel source) {
         this.id = source.readLong();
         this.name = source.readString();
+        this.headerImageFileName = source.readString();
+        this.categoryId = source.readInt();
         this.description = source.readString();
         this.websiteUri = source.readString();
         this.address = source.readString();
+        this.phoneNumber = source.readString();
         this.latitude = source.readDouble();
         this.longitude = source.readDouble();
     }

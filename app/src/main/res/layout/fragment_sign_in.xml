@@ -7,7 +7,7 @@
     android:paddingEnd="@dimen/activity_horizontal_margin"
     android:paddingStart="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.ywca.pentref.fragments.SignInFragment">
+    tools:context="com.ywca.pentref.fragments.ProfileFragment">
 
     <ImageView
         android:id="@+id/profile_picture"

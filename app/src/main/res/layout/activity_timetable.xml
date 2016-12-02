@@ -100,16 +100,6 @@
             android:layout_below="@id/show_all_transports_text_view"
             android:layout_marginTop="8dp" />
 
-        <Button
-            android:id="@+id/timetable_notification_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/timetable_recycler_view"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:background="@color/colorPrimary"
-            android:text="@string/notify_me"
-            android:textColor="@color/white" />
-
         <!--<TextView-->
         <!--android:id="@+id/adult_price_label"-->
         <!--android:layout_width="120dp"-->

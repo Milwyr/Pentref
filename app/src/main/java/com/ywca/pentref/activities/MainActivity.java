@@ -31,13 +31,15 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
+import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
+import com.ywca.pentref.fragments.AboutFragment;
 import com.ywca.pentref.fragments.BookmarksFragment;
 import com.ywca.pentref.fragments.DiscoverFragment;
 import com.ywca.pentref.fragments.SettingsFragment;
-import com.ywca.pentref.fragments.SignInFragment;
+import com.ywca.pentref.fragments.ProfileFragment;
 import com.ywca.pentref.fragments.TransportationFragment;
 import com.ywca.pentref.fragments.WeatherFragment;
 import com.ywca.pentref.models.Poi;
@@ -56,6 +58,8 @@ public class MainActivity extends BaseActivity
     // The search view that is inflated as a menu item on the Action Bar
     private MenuItem mActionSearchMenuItem;
 
+    private NavigationView mNavigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,15 +67,29 @@ public class MainActivity extends BaseActivity
         initialiseComponents();
 
         //TODO: Only execute this method when the items have not been added in the local database
-        if (isConnectedToInternet()) {
-            fetchJsonFromServer();
-        }
+//        if (isConnectedToInternet()) {
+//            fetchJsonFromServer();
+//        }
 
         // Display the discover fragment only when the app launches as
         // savedInstanceState != null when orientation changes
         if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction().add(
-                    R.id.frame, new DiscoverFragment()).commit();
+            int fragmentIndex = getIntent().getIntExtra(Utility.FRAGMENT_INDEX_EXTRA_KEY, -1);
+
+            switch (fragmentIndex) {
+                case 0:
+                    changeFragment(R.string.discover, new DiscoverFragment());
+                    break;
+                case 1:
+                    changeFragment(R.string.bookmarks, new BookmarksFragment());
+                    break;
+                case 2:
+                    changeFragment(R.string.weather, new WeatherFragment());
+                    break;
+                case 3:
+                    changeFragment(R.string.transport_schedule, new TransportationFragment());
+                    break;
+            }
         }
     }
 
@@ -98,6 +116,10 @@ public class MainActivity extends BaseActivity
                 (SearchView) mActionSearchMenuItem.getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
+
+        // The search view is only visible when the current fragment is discover fragment
+        Fragment currentFragment = getFragmentManager().findFragmentById(R.id.frame);
+        updateSearchViewVisibility(currentFragment);
 
         return true;
     }
@@ -176,11 +198,14 @@ public class MainActivity extends BaseActivity
             case R.id.nav_transportation:
                 changeFragment(R.string.transport_schedule, new TransportationFragment());
                 break;
-            case R.id.nav_login:
-                changeFragment(R.string.transport_schedule, new SignInFragment());
+            case R.id.nav_profile:
+                changeFragment(R.string.transport_schedule, new ProfileFragment());
                 break;
             case R.id.nav_settings:
                 changeFragment(R.string.settings, new SettingsFragment());
+                break;
+            case R.id.nav_about:
+                changeFragment(R.string.about, new AboutFragment());
                 break;
         }
 
@@ -196,11 +221,20 @@ public class MainActivity extends BaseActivity
 
         getFragmentManager().beginTransaction().replace(R.id.frame, fragment).commit();
 
-        // The search view is only visible when the current fragment is discover fragment
+        // Highlight the selected item in the Navigation Drawer
         if (fragment instanceof DiscoverFragment) {
-            mActionSearchMenuItem.setVisible(true);
-        } else {
-            mActionSearchMenuItem.setVisible(false);
+            mNavigationView.setCheckedItem(R.id.nav_discover);
+        } else if (fragment instanceof BookmarksFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_bookmarks);
+        } else if (fragment instanceof WeatherFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_weather);
+        } else if (fragment instanceof TransportationFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_transportation);
+        }
+
+        // The search view is only visible when the current fragment is discover fragment
+        if (mActionSearchMenuItem != null) {
+            updateSearchViewVisibility(fragment);
         }
     }
 
@@ -224,19 +258,23 @@ public class MainActivity extends BaseActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Set the first item (Discover) to be checked by default
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationView.getMenu().getItem(0).setChecked(true);
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void updateSearchViewVisibility(Fragment currentFragment) {
+        if (currentFragment instanceof DiscoverFragment) {
+            mActionSearchMenuItem.setVisible(true);
+        } else {
+            mActionSearchMenuItem.setVisible(false);
+        }
     }
 
     private void fetchJsonFromServer() {
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
-        String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transports.json";
-
         // Read all Points of Interest from the server and add them to SQLite database
+        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
         JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
@@ -262,8 +300,38 @@ public class MainActivity extends BaseActivity
                 Log.e("MainActivity", error.getMessage());
             }
         });
+        queue.add(poiJsonArrayRequest);
+
+        String poiTypesUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/poi_categories.json";
+        JsonArrayRequest poiCategoryArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, poiTypesUrl, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                Gson gson = new Gson();
+                List<Category> categories = Arrays.asList(gson.fromJson(response.toString(), Category[].class));
+
+                for (Category item : categories) {
+                    ContentValues values = new ContentValues();
+                    values.put(Contract.Category._ID, item.getId());
+                    values.put(Contract.Category.COLUMN_NAME, item.getName());
+
+                    try {
+                        getContentResolver().insert(Contract.Category.CONTENT_URI, values);
+                    } catch (Exception e) {
+                        Log.e("MainActivity", e.getMessage());
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        queue.add(poiCategoryArrayRequest);
 
         // Fetch the transports json on the server and save it to a local json file
+        String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transport_schedule.json";
         JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
             @Override
@@ -294,8 +362,6 @@ public class MainActivity extends BaseActivity
                 Log.e("MainActivity", error.getMessage());
             }
         });
-
-        queue.add(poiJsonArrayRequest);
         queue.add(transportJsonArrayRequest);
     }
 }

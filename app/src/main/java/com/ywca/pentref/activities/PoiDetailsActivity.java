@@ -3,9 +3,13 @@ package com.ywca.pentref.activities;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,35 +19,54 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
-import android.widget.Toast;
+import android.widget.TextView;
 
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInApi;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.ywca.pentref.R;
 import com.ywca.pentref.adapters.ReviewsAdapter;
+import com.ywca.pentref.common.Contract;
+import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 import com.ywca.pentref.models.Review;
 
-import java.util.ArrayList;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.ISODateTimeFormat;
+import org.json.JSONArray;
+
+import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.List;
 
-public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.OnRatingBarChangeListener {
+public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.OnRatingBarChangeListener, View.OnClickListener {
     private final int REQUEST_CODE_REVIEW_ACTIVITY = 9000;
+    private final int REQUEST_CODE_GOOGLE_SIGN_IN = 9001;
 
     private Poi mSelectedPoi;
-
     private GoogleApiClient mGoogleApiClient;
+    private GoogleSignInResult mGoogleSignInResult;
+
+    private FloatingActionButton mBookmarkFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +90,9 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
                 View rootVIew = findViewById(R.id.main_content);
                 Snackbar.make(rootVIew, getResources().getText(R.string.review_submitted), Snackbar.LENGTH_LONG).show();
             }
+        } else if (requestCode == REQUEST_CODE_GOOGLE_SIGN_IN) {
+            // Retrieve user's Google result (account)
+            mGoogleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
         }
     }
 
@@ -87,59 +113,30 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         mGoogleApiClient.disconnect();
     }
 
-    private void initialiseComponents() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.bookmark_fab:
+                final boolean isPreviouslyBookmarked = (boolean) mBookmarkFab.getTag();
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                // Insert or delete the bookmark from database after the user clicks on the bookmark fab
+                new UpdateBookmarkAsyncTask(this, mSelectedPoi.getId()) {
+                    @Override
+                    protected void onPreExecute() {
+                        mBookmarkFab.setEnabled(false);
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void v) {
+                        boolean isNowBookmarked = !isPreviouslyBookmarked;
+                        mBookmarkFab.setTag(isNowBookmarked);
+                        mBookmarkFab.setImageResource(isNowBookmarked ?
+                                R.drawable.ic_bookmarked_black_36dp : R.drawable.ic_bookmark_black_36dp);
+                        mBookmarkFab.setEnabled(true);
+                    }
+                }.execute(isPreviouslyBookmarked);
+                break;
         }
-
-        // TODO: Dynamically choose the url
-        // Download the header image from server
-        ImageRequest imageRequest = new ImageRequest(
-                "https://github.com/Milwyr/Temporary/blob/master/poi_photos/29_hwa_kong_temple_landscape.jpg?raw=true",
-                new Response.Listener<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap response) {
-                        ImageView headerImageView = (ImageView) findViewById(R.id.header_image);
-                        headerImageView.setImageBitmap(response);
-                    }
-                }, 1280, 720, ImageView.ScaleType.CENTER_CROP, null,
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("PoiDetailsActivity", error.getMessage());
-                    }
-                });
-        Volley.newRequestQueue(this).add(imageRequest);
-
-        // TODO: Set data for views (address, website uri, phone number...)
-
-        RatingBar userReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
-        userReviewRatingBar.setOnRatingBarChangeListener(this);
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        // TODO: Use live data
-        List<Review> reviews = new ArrayList<>();
-        reviews.add(new Review(5, "Milton", "Very Good", "Worth visiting", null));
-        reviews.add(new Review(3, "Moses", "Very Good", "Worth visiting", null));
-        reviews.add(new Review(2, "Peter", "Very Good", "Worth visiting", null));
-        ReviewsAdapter adapter = new ReviewsAdapter();
-        adapter.setReviews(reviews);
-        recyclerView.setAdapter(adapter);
-
-        // Initialise components for Google login
-        GoogleSignInOptions gso = new GoogleSignInOptions
-                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
     }
 
     @Override
@@ -152,8 +149,9 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
                 intent.putExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, rating);
                 startActivityForResult(intent, REQUEST_CODE_REVIEW_ACTIVITY);
             } else {
+                ratingBar.setRating(0);
                 new AlertDialog.Builder(this)
-                        .setTitle(R.string.error_network_unavailable)
+                        .setTitle(R.string.error_not_signed_in)
                         .setMessage(R.string.error_message_sign_in_before_posting_review)
                         .setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
                             @Override
@@ -165,19 +163,192 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         }
     }
 
-    // Returns true if the user has signed in with either Facebook or Google
-    private boolean isSignedIn() {
-        return Profile.getCurrentProfile() != null || isSignedInWithGoogle();
+    private void initialiseComponents() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        String baseUrl = Utility.SERVER_URL + "/poi_photos/";
+        // Download the header image from server
+        ImageRequest imageRequest = new ImageRequest(
+                baseUrl + mSelectedPoi.getHeaderImageFileName(),
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap response) {
+                        ImageView headerImageView = (ImageView) findViewById(R.id.header_image);
+                        headerImageView.setImageBitmap(response);
+                    }
+                }, 1280, 720, ImageView.ScaleType.CENTER_CROP, null,
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("PoiDetailsActivity", "Failed to download header image.");
+                    }
+                });
+        Volley.newRequestQueue(this).add(imageRequest);
+
+        // A dodgy way to set the category text
+        TextView categoryTextView = (TextView) findViewById(R.id.category_text_view);
+        switch (mSelectedPoi.getCategoryId()) {
+            case 1:
+                categoryTextView.setText("Point of Interest");
+                break;
+            case 2:
+                categoryTextView.setText("Public Facilities");
+                break;
+            case 3:
+                categoryTextView.setText("Restaurants");
+                break;
+            case 4:
+                categoryTextView.setText("Miscellaneous");
+                break;
+            default:
+                categoryTextView.setText("Not categorised");
+                break;
+        }
+
+        // Set the image of the bookmark fab depending on whether the poi is bookmarked
+        mBookmarkFab = (FloatingActionButton) findViewById(R.id.bookmark_fab);
+        mBookmarkFab.setOnClickListener(this);
+        new InitialiseBookmarkFabAsyncTask().execute(mSelectedPoi.getId());
+
+        // Initialise the address text view of Point of Interest
+        TextView poiAddressTextView = (TextView) findViewById(R.id.poi_address_text_view);
+        String address = mSelectedPoi.getAddress();
+        if (address == null || address.isEmpty()) {
+            findViewById(R.id.poi_address_image_view).setVisibility(View.GONE);
+            poiAddressTextView.setVisibility(View.INVISIBLE);
+        } else {
+            poiAddressTextView.setVisibility(View.VISIBLE);
+            poiAddressTextView.setText(address);
+        }
+
+        // Initialise the website url text view of Point of Interest
+        TextView poiWebsiteTextView = (TextView) findViewById(R.id.poi_website_text_view);
+        String websiteUrl = mSelectedPoi.getWebsiteUri();
+        if (websiteUrl == null || websiteUrl.isEmpty()) {
+            findViewById(R.id.poi_website_image_view).setVisibility(View.GONE);
+            poiWebsiteTextView.setVisibility(View.INVISIBLE);
+        } else {
+            poiWebsiteTextView.setVisibility(View.VISIBLE);
+
+            Uri uri = Uri.parse(websiteUrl);
+            String formattedUrl = uri.getAuthority().replace("http://", "").replace("https://", "").replace("www.", "");
+            poiWebsiteTextView.setText(formattedUrl);
+        }
+
+        // Initialise the phone number text view of Point of Interest
+        TextView poiPhoneNumberTextView = (TextView) findViewById(R.id.poi_phone_number_text_view);
+        String phoneNumber = mSelectedPoi.getPhoneNumber();
+        if (phoneNumber == null || phoneNumber.isEmpty()) {
+            findViewById(R.id.poi_phone_number_image_view).setVisibility(View.GONE);
+            poiPhoneNumberTextView.setVisibility(View.INVISIBLE);
+        } else {
+            poiPhoneNumberTextView.setVisibility(View.VISIBLE);
+            poiPhoneNumberTextView.setText(phoneNumber.replace("+852 ", ""));
+        }
+
+        // Download reviews from server
+        String url = Utility.SERVER_URL + "/reviews/review_30.json";
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer())
+                        .create();
+                List<Review> reviews = Arrays.asList(gson.fromJson(response.toString(), Review[].class));
+
+                RecyclerView recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setLayoutManager(new LinearLayoutManager(PoiDetailsActivity.this));
+
+                ReviewsAdapter adapter = new ReviewsAdapter(reviews);
+                recyclerView.setAdapter(adapter);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("PoiDetailsActivity", error.getMessage());
+            }
+        });
+        Volley.newRequestQueue(this).add(jsonArrayRequest);
+
+        RatingBar userReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
+        userReviewRatingBar.setOnRatingBarChangeListener(this);
+
+        // Initialise components for Google login
+        GoogleSignInOptions gso = new GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+        // Start the Google sign in intent to retrieve user's Google's profile
+//        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+//        startActivityForResult(signInIntent, REQUEST_CODE_GOOGLE_SIGN_IN);
     }
 
-    private boolean isSignedInWithGoogle() {
-        OptionalPendingResult<GoogleSignInResult> opr =
-                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+    // Returns true if the user has signed in with either Facebook or Google
+    private boolean isSignedIn() {
+        return Profile.getCurrentProfile() != null /*|| mGoogleSignInResult != null*/;
+    }
 
-        if (opr.isDone()) {
-            GoogleSignInResult result = opr.get();
-            return result != null;
+    /**
+     * Finds if the given poi id is in table Bookmark of the local SQLite database.
+     * After that, updates the image for bookmark fab according to the bookmarked state.
+     */
+    private class InitialiseBookmarkFabAsyncTask extends AsyncTask<Long, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Long... longs) {
+            long poiId = longs[0];
+
+            // Query the bookmark table with the given poi id
+            Uri uriWithPoiId = Uri.withAppendedPath(
+                    Contract.Bookmark.CONTENT_URI, Long.toString(poiId));
+            Cursor cursor = getContentResolver().query(uriWithPoiId, null, null, null, null);
+
+            // Return true if the given poi id is found in the bookmark table
+            if (cursor != null) {
+                cursor.close();
+                return cursor.getCount() > 0;
+            }
+            return false;
         }
-        return false;
+
+        @Override
+        protected void onPostExecute(Boolean isBookmarked) {
+            super.onPostExecute(isBookmarked);
+            mBookmarkFab.setTag(isBookmarked);
+            mBookmarkFab.setImageResource(isBookmarked ? R.drawable.ic_bookmarked_black_36dp : R.drawable.ic_bookmark_black_36dp);
+        }
+    }
+
+    // Serialize and deserialize a ISO 8601 DateTime formatted string to a LocalDateTime object
+    private class LocalDateTimeSerializer implements
+            JsonDeserializer<LocalDateTime>, JsonSerializer<LocalDateTime> {
+        @Override
+        public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            final String dateString = json.getAsString();
+
+            if (dateString.length() == 0) {
+                return null;
+            }
+            return ISODateTimeFormat.dateTimeNoMillis().parseLocalDateTime(dateString);
+        }
+
+        @Override
+        public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+            String dateString = "";
+            if (src != null) {
+                dateString = ISODateTimeFormat.dateTimeNoMillis().print(src);
+            }
+            return new JsonPrimitive(dateString);
+        }
     }
 }
