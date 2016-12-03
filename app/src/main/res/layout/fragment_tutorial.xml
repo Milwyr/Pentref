@@ -13,14 +13,27 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <Button
-        android:id="@+id/tutorial_button"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/radio_group"
-        android:layout_centerHorizontal="true"
-        android:text="Get started"
-        android:visibility="gone" />
+        android:layout_above="@+id/radio_group">
+
+        <Button
+            android:id="@+id/tutorial_login_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="login"
+            android:layout_weight="1"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/tutorial_get_started_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Get started"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <RadioGroup
         android:id="@+id/radio_group"

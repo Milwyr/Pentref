@@ -66,11 +66,6 @@ public class MainActivity extends BaseActivity
         setContentView(R.layout.activity_main);
         initialiseComponents();
 
-        //TODO: Only execute this method when the items have not been added in the local database
-//        if (isConnectedToInternet()) {
-//            fetchJsonFromServer();
-//        }
-
         // Display the discover fragment only when the app launches as
         // savedInstanceState != null when orientation changes
         if (savedInstanceState == null) {
@@ -88,6 +83,9 @@ public class MainActivity extends BaseActivity
                     break;
                 case 3:
                     changeFragment(R.string.transport_schedule, new TransportationFragment());
+                    break;
+                case 4:
+                    changeFragment(R.string.profile, new ProfileFragment());
                     break;
             }
         }
@@ -230,6 +228,8 @@ public class MainActivity extends BaseActivity
             mNavigationView.setCheckedItem(R.id.nav_weather);
         } else if (fragment instanceof TransportationFragment) {
             mNavigationView.setCheckedItem(R.id.nav_transportation);
+        } else if (fragment instanceof ProfileFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_profile);
         }
 
         // The search view is only visible when the current fragment is discover fragment
@@ -242,15 +242,6 @@ public class MainActivity extends BaseActivity
     private void initialiseComponents() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -268,100 +259,5 @@ public class MainActivity extends BaseActivity
         } else {
             mActionSearchMenuItem.setVisible(false);
         }
-    }
-
-    private void fetchJsonFromServer() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        // Read all Points of Interest from the server and add them to SQLite database
-        String poiUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/pois.json";
-        JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                // Parse the response array into a list of Points of Interest
-                Gson gson = new Gson();
-                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
-
-                // Insert the pois into the local database
-                for (final Poi poi : pois) {
-                    ContentValues values = PentrefProvider.getContentValues(poi);
-
-                    try {
-                        getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
-                    } catch (Exception e) {
-                        Log.e("MainActivity", e.getMessage());
-                    }
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("MainActivity", error.getMessage());
-            }
-        });
-        queue.add(poiJsonArrayRequest);
-
-        String poiTypesUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/poi_categories.json";
-        JsonArrayRequest poiCategoryArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, poiTypesUrl, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                Gson gson = new Gson();
-                List<Category> categories = Arrays.asList(gson.fromJson(response.toString(), Category[].class));
-
-                for (Category item : categories) {
-                    ContentValues values = new ContentValues();
-                    values.put(Contract.Category._ID, item.getId());
-                    values.put(Contract.Category.COLUMN_NAME, item.getName());
-
-                    try {
-                        getContentResolver().insert(Contract.Category.CONTENT_URI, values);
-                    } catch (Exception e) {
-                        Log.e("MainActivity", e.getMessage());
-                    }
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-        queue.add(poiCategoryArrayRequest);
-
-        // Fetch the transports json on the server and save it to a local json file
-        String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transport_schedule.json";
-        JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                // Terminate if the transportation json file has been stored locally before
-                File transportsFile = new File(getFilesDir(), Utility.TRANSPORTATION_JSON_FILE_NAME);
-                if (transportsFile.exists()) {
-                    return;
-                }
-
-                // Create the transportation json file, and write the response json array
-                // that is read from server to the newly created local json file
-                try {
-                    boolean isFileCreated = transportsFile.createNewFile();
-                    if (isFileCreated) {
-                        FileWriter fileWriter = new FileWriter(transportsFile);
-                        fileWriter.write(response.toString());
-                        fileWriter.flush();
-                        fileWriter.close();
-                    }
-                } catch (IOException e) {
-                    Log.e("MainActivity", e.getMessage());
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("MainActivity", error.getMessage());
-            }
-        });
-        queue.add(transportJsonArrayRequest);
     }
 }

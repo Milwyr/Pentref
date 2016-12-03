@@ -5,4 +5,9 @@
         android:key="checkbox_preference_show_notification"
         android:summary="Do you want to enable notification?"
         android:text="Show notification" />
+
+    <Preference
+        android:key="synchronise_with_server"
+        android:summary="@string/summary_synchronise_now"
+        android:title="@string/synchronise_with_server" />
 </PreferenceScreen>

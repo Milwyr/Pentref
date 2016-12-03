@@ -6,6 +6,10 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <!-- Tutorial activity -->
+    <string name="sign_in">Sign in</string>
+    <string name="get_started">Get started</string>
+
     <!-- Search -->
     <string name="search_hint">Enter text</string>
 
@@ -45,12 +49,9 @@
     <string name="poi_details_header_image">Details of the Point of Interest</string>
     <string name="profile_picture">Profile Picture</string>
 
-    <string name="place_info">
-        Place:Tai O, NT, Hong Kong\n
-        Web  :www.tai-0.com\n
-        Phone:65871092\n
-        Working time: 9:00 - 17:00
-    </string>
+    <!-- Settings fragment -->
+    <string name="synchronise_with_server">Synchronise with server</string>
+    <string name="summary_synchronise_now">Click to synchronise with server now</string>
 
     <!-- Dialog messages -->
     <string name="keep_editing">Keep editing</string>
@@ -58,11 +59,13 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="close">Close</string>
+    <string name="loading">Loading</string>
     <string name="dialog_title_reminder">Reminder</string>
     <string name="dialog_message_scheduled_bus">Your scheduled bus/ferry with route number %1$s will depart at</string>
     <string name="dialog_message_confirm_remove_bookmark">Do you want to remove this bookmarked Point of Interest?</string>
     <string name="dialog_message_confirm_issue_notification">Do you want to schedule a notification?</string>
     <string name="dialog_message_confirm_discard_changes">Do you want to discard your changes before submitting?</string>
+    <string name="dialog_message_synchronising">Synchronising with server</string>
 
     <!-- Error messages -->
     <string name="error_connect_to_internet_to_initialise">Please connect to the internet to initialise the database.</string>
