@@ -6,14 +6,14 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <!-- Tutorial activity -->
+    <!-- Tutorial Activity -->
     <string name="sign_in">Sign in</string>
     <string name="get_started">Get started</string>
 
     <!-- Search -->
     <string name="search_hint">Enter text</string>
 
-    <!-- Navigation drawer headers -->
+    <!-- Navigation Drawer Headers -->
     <string name="discover">Discover</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="weather">Weather</string>
@@ -22,38 +22,41 @@
     <string name="settings">Settings</string>
     <string name="about">About</string>
 
-    <!-- Poi details activity -->
+    <!-- Poi Details Activity -->
     <string name="all_reviews">All reviews</string>
 
-    <!-- Review activity -->
+    <!-- Review Activity -->
     <string name="posting_publicly">Posting publicly</string>
     <string name="title">Title</string>
     <string name="description">Description</string>
     <string name="submit">Submit</string>
     <string name="review_submitted">Review submitted</string>
 
-    <!-- Transportation fragment -->
+    <!-- Discover Fragment -->
+    <string name="more">More</string>
+
+    <!-- Transportation Fragment -->
     <string name="next_two_transports">Next two: </string>
     <string name="temporary_route_number">11</string>
     <string name="showFullTimetable">Show full timetable</string>
 
-    <!-- Timetable activity -->
+    <!-- Timetable Activity -->
     <string name="adult_price">Adult price: </string>
     <string name="notify_me">Notify Me</string>
 
-    <!-- Sign in fragment -->
+    <!-- Sign In Fragment -->
     <string name="visitor">Visitor</string>
     <string name="sign_out">Sign Out</string>
 
-    <!-- Content description for image views -->
+    <!-- Content Description For Image Views -->
     <string name="poi_details_header_image">Details of the Point of Interest</string>
     <string name="profile_picture">Profile Picture</string>
 
-    <!-- Settings fragment -->
+    <!-- Settings Fragment -->
     <string name="synchronise_with_server">Synchronise with server</string>
     <string name="summary_synchronise_now">Click to synchronise with server now</string>
 
-    <!-- Dialog messages -->
+    <!-- Dialog Messages -->
     <string name="keep_editing">Keep editing</string>
     <string name="discard">Discard</string>
     <string name="yes">Yes</string>
@@ -67,14 +70,14 @@
     <string name="dialog_message_confirm_discard_changes">Do you want to discard your changes before submitting?</string>
     <string name="dialog_message_synchronising">Synchronising with server</string>
 
-    <!-- Error messages -->
+    <!-- Error Messages -->
     <string name="error_connect_to_internet_to_initialise">Please connect to the internet to initialise the database.</string>
     <string name="error_not_signed_in">Not signed in</string>
     <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
     <string name="error_network_unavailable">Network unavailable</string>
     <string name="error_message_connect_to_internet_before_posting_review">Please connect to internet before posting your review.</string>
 
-    <!-- SharedPreferences file name -->
+    <!-- SharedPreferences File Name -->
     <string name="pref_file_name_local" translatable="false">local</string>
     <string name="pref_file_name_user_settings" translatable="false">user_settings</string>
 

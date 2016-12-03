@@ -28,7 +28,7 @@
     <android.support.v7.widget.CardView
         android:id="@+id/poi_summary_card_view"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="150dp"
         android:layout_gravity="bottom"
         android:visibility="gone">
 
@@ -49,7 +49,7 @@
                 android:gravity="start"
                 android:text="Large Text"
                 android:textColor="@color/black"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
             <ImageView
                 android:id="@+id/discover_bookmark_image_view"
@@ -58,34 +58,12 @@
                 android:layout_alignParentEnd="true"
                 app:srcCompat="@drawable/ic_bookmark_black_36dp" />
 
-            <RatingBar
-                android:id="@+id/rating_bar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/discover_poi_name_text_view"
-                android:numStars="5"
-                android:rating="3"
-                android:scaleX="0.6"
-                android:scaleY="0.6"
-                android:stepSize="0.5"
-                android:transformPivotX="0dp"
-                android:transformPivotY="0dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/rating_bar"
-                android:layout_toEndOf="@id/rating_bar"
-                android:text="3/5"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:text="More"
+                android:text="@string/more"
                 android:textColor="@color/black"
                 android:textSize="16sp" />
         </RelativeLayout>

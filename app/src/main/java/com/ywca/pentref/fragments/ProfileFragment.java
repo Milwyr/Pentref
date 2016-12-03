@@ -76,6 +76,26 @@ public class ProfileFragment extends Fragment implements
         mProfileTracker = new ProfileTracker() {
             @Override
             protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+                if (currentProfile != null) {
+                    // Download user's profile picture and display it
+                    ImageRequest imageRequest = new ImageRequest(
+                            Profile.getCurrentProfile().getProfilePictureUri(96, 96).toString(),
+                            new Response.Listener<Bitmap>() {
+                                @Override
+                                public void onResponse(Bitmap response) {
+                                    mProfilePicture.setImageBitmap(response);
+                                }
+                            }, 96, 96, ImageView.ScaleType.CENTER_CROP, null,
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.e("SignInFragment", error.getMessage());
+                                }
+                            }
+                    );
+                    Volley.newRequestQueue(getActivity(), null).add(imageRequest);
+                }
+
                 if (currentProfile == null || currentProfile.getName().isEmpty()) {
                     mUserNameTextView.setText(getResources().getString(R.string.visitor));
                 } else {

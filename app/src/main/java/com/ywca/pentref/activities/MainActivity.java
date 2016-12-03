@@ -2,7 +2,6 @@ package com.ywca.pentref.activities;
 
 import android.app.Fragment;
 import android.app.SearchManager;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -10,47 +9,27 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.gson.Gson;
 import com.ywca.pentref.R;
-import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.fragments.AboutFragment;
 import com.ywca.pentref.fragments.BookmarksFragment;
 import com.ywca.pentref.fragments.DiscoverFragment;
-import com.ywca.pentref.fragments.SettingsFragment;
 import com.ywca.pentref.fragments.ProfileFragment;
+import com.ywca.pentref.fragments.SettingsFragment;
 import com.ywca.pentref.fragments.TransportationFragment;
 import com.ywca.pentref.fragments.WeatherFragment;
 import com.ywca.pentref.models.Poi;
-
-import org.json.JSONArray;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {

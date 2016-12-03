@@ -36,6 +36,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -78,6 +79,7 @@ public class DiscoverFragment extends Fragment implements LocationListener,
     private Circle mCircle;
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mGoogleMap;
+    private Marker mPreviousMarker;
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
 
@@ -378,6 +380,13 @@ public class DiscoverFragment extends Fragment implements LocationListener,
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        // Highlight the selected marker
+        if (mPreviousMarker != null) {
+            mPreviousMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+        }
+        marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+        mPreviousMarker = marker;
+
         mBottomSheet.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
@@ -429,7 +438,12 @@ public class DiscoverFragment extends Fragment implements LocationListener,
     @Override
     public void onPause() {
         if (mMapView != null) {
-            mMapView.onPause();
+            try {
+                // NullPointerException is thrown in certain circumstances
+                mMapView.onPause();
+            } catch (Exception e) {
+                Log.e("DiscoverFragment", e.getMessage());
+            }
         }
         stopLocationUpdates();
         super.onPause();
@@ -438,16 +452,27 @@ public class DiscoverFragment extends Fragment implements LocationListener,
     @Override
     public void onStop() {
         super.onStop();
-        mGoogleApiClient.disconnect();
         if (mMapView != null) {
-            mMapView.onStop();
+            try {
+                // NullPointerException is thrown in certain circumstances
+                mMapView.onStop();
+            } catch (Exception e) {
+                Log.e("DiscoverFragment", e.getMessage());
+            }
         }
+        mGoogleApiClient.disconnect();
     }
 
     @Override
     public void onDestroy() {
         if (mMapView != null) {
-            mMapView.onDestroy();
+            try {
+                // NullPointerException is thrown in certain circumstances
+                mMapView.onDestroy();
+            } catch (Exception e) {
+                Log.e("DiscoverFragment", e.getMessage());
+            }
+
         }
         super.onDestroy();
     }

@@ -30,9 +30,11 @@ import com.android.volley.toolbox.Volley;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -60,13 +62,13 @@ import java.util.List;
 
 public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.OnRatingBarChangeListener, View.OnClickListener {
     private final int REQUEST_CODE_REVIEW_ACTIVITY = 9000;
-    private final int REQUEST_CODE_GOOGLE_SIGN_IN = 9001;
 
     private Poi mSelectedPoi;
     private GoogleApiClient mGoogleApiClient;
-    private GoogleSignInResult mGoogleSignInResult;
+    private GoogleSignInAccount mGoogleSignInAccount;
 
     private FloatingActionButton mBookmarkFab;
+    private RatingBar mUserReviewRatingBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +81,16 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         }
 
         initialiseComponents();
+
+        // Retrieve Google account if the user has signed in with Google
+        OptionalPendingResult<GoogleSignInResult> opr =
+                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        if (opr.isDone()) {
+            GoogleSignInResult googleSignInResult = opr.get();
+            if (googleSignInResult != null) {
+                mGoogleSignInAccount = googleSignInResult.getSignInAccount();
+            }
+        }
     }
 
     @Override
@@ -89,10 +101,9 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
             if (resultCode == RESULT_OK) {
                 View rootVIew = findViewById(R.id.main_content);
                 Snackbar.make(rootVIew, getResources().getText(R.string.review_submitted), Snackbar.LENGTH_LONG).show();
+            } else {
+                mUserReviewRatingBar.setRating(0);
             }
-        } else if (requestCode == REQUEST_CODE_GOOGLE_SIGN_IN) {
-            // Retrieve user's Google result (account)
-            mGoogleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
         }
     }
 
@@ -147,6 +158,16 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
                 Intent intent = new Intent(this, ReviewActivity.class);
                 intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
                 intent.putExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, rating);
+
+                // Save user's id and name in the intent's extra
+                if (Profile.getCurrentProfile() != null) {
+                    intent.putExtra(Utility.USER_PROFILE_ID_EXTRA_KEY, Profile.getCurrentProfile().getId());
+                    intent.putExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY, Profile.getCurrentProfile().getName());
+                } else if (mGoogleSignInAccount != null) {
+                    intent.putExtra(Utility.USER_PROFILE_ID_EXTRA_KEY, mGoogleSignInAccount.getIdToken());
+                    intent.putExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY, mGoogleSignInAccount.getDisplayName());
+                }
+
                 startActivityForResult(intent, REQUEST_CODE_REVIEW_ACTIVITY);
             } else {
                 ratingBar.setRating(0);
@@ -277,26 +298,19 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         });
         Volley.newRequestQueue(this).add(jsonArrayRequest);
 
-        RatingBar userReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
-        userReviewRatingBar.setOnRatingBarChangeListener(this);
+        mUserReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
+        mUserReviewRatingBar.setOnRatingBarChangeListener(this);
 
-        // Initialise components for Google login
+        // Initialise Google api client for Google login
         GoogleSignInOptions gso = new GoogleSignInOptions
-                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-        // Start the Google sign in intent to retrieve user's Google's profile
-//        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-//        startActivityForResult(signInIntent, REQUEST_CODE_GOOGLE_SIGN_IN);
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso).enableAutoManage(this, null).build();
     }
 
     // Returns true if the user has signed in with either Facebook or Google
     private boolean isSignedIn() {
-        return Profile.getCurrentProfile() != null /*|| mGoogleSignInResult != null*/;
+        return Profile.getCurrentProfile() != null || mGoogleSignInAccount != null;
     }
 
     /**
