@@ -32,8 +32,7 @@ public class PentrefProvider extends ContentProvider {
     private static final int CATEGORY_ROW = 4;
     private static final int BOOKMARK_TABLE = 5;
     private static final int BOOKMARK_ROW = 6;
-    private static final int BOOKMARKED_POIS = 7;
-    private static final int SEARCH_SUGGESTIONS = 8;
+    private static final int SEARCH_SUGGESTIONS = 7;
 
     private static final UriMatcher mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
@@ -44,7 +43,6 @@ public class PentrefProvider extends ContentProvider {
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Category.TABLE_NAME + "/#", CATEGORY_TABLE);
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Bookmark.TABLE_NAME, BOOKMARK_TABLE);
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Bookmark.TABLE_NAME + "/#", BOOKMARK_ROW);
-        mUriMatcher.addURI(Contract.AUTHORITY, Contract.BookmarkedPois.PATH, BOOKMARKED_POIS);
         mUriMatcher.addURI(Contract.AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGESTIONS);
     }
     //endregion
@@ -62,22 +60,6 @@ public class PentrefProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection,
                         String selection, String[] selectionArgs, String sortOrder) {
-        // Join tables Poi and Bookmark
-        if (mUriMatcher.match(uri) == BOOKMARKED_POIS) {
-            String sql = "SELECT * FROM " + Contract.Poi.TABLE_NAME + " WHERE " +
-                    Contract.Poi.TABLE_NAME + "." + Contract.Poi._ID + " IN " +
-                    "(SELECT " + Contract.Bookmark.COLUMN_POI_ID + " FROM " +
-                    Contract.Bookmark.TABLE_NAME + ");";
-
-            Cursor cursor = mDbHelper.getReadableDatabase().rawQuery(sql, null);
-
-            if (getContext() != null) {
-                cursor.setNotificationUri(getContext().getContentResolver(), uri);
-            }
-
-            return cursor;
-        }
-
         String tableName = convertToTableName(uri);
         selection = convertToSelection(uri, selection);
 

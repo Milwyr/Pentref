@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.android.volley.Request;
@@ -144,7 +143,9 @@ public class TutorialActivity extends BaseActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("TutorialActivity", error.getMessage());
+                if (error != null) {
+                    Log.e("TutorialActivity", error.getMessage());
+                }
             }
         });
         queue.add(poiJsonArrayRequest);
@@ -175,7 +176,9 @@ public class TutorialActivity extends BaseActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                if (error != null) {
+                    Log.e("TutorialActivity", error.getMessage());
+                }
             }
         });
         queue.add(poiCategoryArrayRequest);
@@ -232,7 +235,7 @@ public class TutorialActivity extends BaseActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment implements View.OnClickListener {
 
         // The argument representing the section number for this fragment
         private static final String ARG_SECTION_NUMBER = "section_number";
@@ -258,7 +261,8 @@ public class TutorialActivity extends BaseActivity {
             View rootView = inflater.inflate(R.layout.fragment_tutorial, container, false);
             ImageView imageView = (ImageView) rootView.findViewById(R.id.tutorial_image_view);
             RadioGroup radioGroup = (RadioGroup) rootView.findViewById(R.id.radio_group);
-            Button getStartedButton = (Button) rootView.findViewById(R.id.tutorial_button);
+            Button loginButton = (Button) rootView.findViewById(R.id.tutorial_login_button);
+            Button getStartedButton = (Button) rootView.findViewById(R.id.tutorial_get_started_button);
 
             if (getArguments() != null) {
                 switch (getArguments().getInt(ARG_SECTION_NUMBER)) {
@@ -274,6 +278,9 @@ public class TutorialActivity extends BaseActivity {
                         imageView.setImageResource(R.drawable.ic_bus_black_36dp);
                         radioGroup.check(R.id.radio_button_3);
 
+                        loginButton.setVisibility(View.VISIBLE);
+                        loginButton.setOnClickListener(this);
+
                         getStartedButton.setVisibility(View.VISIBLE);
                         getStartedButton.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -287,6 +294,22 @@ public class TutorialActivity extends BaseActivity {
             }
 
             return rootView;
+        }
+
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                case R.id.tutorial_login_button:
+                    // Navigate to settings fragment (index 4 indicates settings fragment)
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    intent.putExtra(Utility.FRAGMENT_INDEX_EXTRA_KEY, 4);
+                    startActivityForResult(intent, REQUEST_CODE_LAUNCHING_ACTIVITY);
+                    break;
+                case R.id.tutorial_get_started_button:
+                    startActivityForResult(new Intent(getActivity(),
+                            LaunchingActivity.class), REQUEST_CODE_LAUNCHING_ACTIVITY);
+                    break;
+            }
         }
     }
 

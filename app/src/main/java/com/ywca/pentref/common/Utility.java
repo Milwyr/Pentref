@@ -26,6 +26,8 @@ public class Utility {
     public static final String SELECTED_POI_EXTRA_KEY = "SelectedPoi";
     public static final String TRANSPORT_EXTRA_KEY = "Transport";
     public static final String USER_REVIEW_RATING_EXTRA_KEY = "Rating";
+    public static final String USER_PROFILE_ID_EXTRA_KEY = "UserId";
+    public static final String USER_PROFILE_NAME_EXTRA_KEY = "UserName";
 
     public static final String TRANSPORTATION_JSON_FILE_NAME = "transports.json";
 

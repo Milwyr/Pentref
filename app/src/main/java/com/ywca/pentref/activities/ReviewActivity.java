@@ -7,12 +7,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.TextView;
 
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Utility;
@@ -51,6 +51,10 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
             //endregion
 
             //region Initialise widgets
+            String userName = getIntent().getStringExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY);
+            TextView userNameTextView = (TextView) findViewById(R.id.user_name_text_view);
+            userNameTextView.setText(userName);
+
             float rating = getIntent().getFloatExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, 0);
             RatingBar userReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
             userReviewRatingBar.setRating(rating);

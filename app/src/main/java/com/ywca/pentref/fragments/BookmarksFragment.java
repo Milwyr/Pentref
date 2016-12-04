@@ -46,8 +46,13 @@ public class BookmarksFragment extends Fragment {
             protected List<Poi> doInBackground(Void... voids) {
                 List<Poi> pois = new ArrayList<>();
 
+                String selection = Contract.Poi.TABLE_NAME + "." + Contract.Poi._ID + " IN " +
+                        "(SELECT " + Contract.Bookmark.TABLE_NAME + "." +
+                        Contract.Bookmark.COLUMN_POI_ID + " FROM " +
+                        Contract.Bookmark.TABLE_NAME + ")";
+
                 Cursor cursor = getActivity().getContentResolver().query(
-                        Contract.BookmarkedPois.CONTENT_URI, null, null, null, null);
+                        Contract.Poi.CONTENT_URI, null, selection, null, null);
 
                 if (cursor != null) {
                     pois = PentrefProvider.convertToPois(cursor);
@@ -63,11 +68,6 @@ public class BookmarksFragment extends Fragment {
                 mRecyclerView.setAdapter(new BookmarksAdapter(R.layout.bookmark_row_layout, pois));
             }
         }.execute();
-//        List<Poi> pois = new ArrayList<>();
-//        pois.add(new Poi(1, "Temp", "", "Description", "www.yahoo.com", "Somewhere in Tai O", new LatLng(1, 2)));
-//        pois.add(new Poi(2, "Tai O YWCA", "", "Description", "www.yahoo.com", "Tai O YWCA, New Territories", new LatLng(1, 2)));
-//
-//        recyclerView.setAdapter(new BookmarksAdapter(R.layout.bookmark_row_layout, pois));
 
         return rootVIew;
     }
