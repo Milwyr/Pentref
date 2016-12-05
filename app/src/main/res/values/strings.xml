@@ -36,6 +36,8 @@
     <string name="more">More</string>
 
     <!-- Transportation Fragment -->
+    <string name="bus">Bus</string>
+    <string name="ferry">Ferry</string>
     <string name="next_two_transports">Next two: </string>
     <string name="temporary_route_number">11</string>
     <string name="showFullTimetable">Show full timetable</string>
