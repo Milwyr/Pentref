@@ -27,12 +27,12 @@ public class LaunchingActivity extends AppCompatActivity implements AdapterView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launching);
 
-        // TODO: Use the appropriate icons
+        // The icons are decided in the Category class
         List<Category> categories = new ArrayList<>();
         categories.add(new Category(1, getResources().getString(R.string.discover)));
-        categories.add(new Category(2, getResources().getString(R.string.bookmarks)));
-        categories.add(new Category(3, getResources().getString(R.string.weather)));
-        categories.add(new Category(4, getResources().getString(R.string.transport_schedule)));
+        categories.add(new Category(5, getResources().getString(R.string.bookmarks)));
+        categories.add(new Category(6, getResources().getString(R.string.weather)));
+        categories.add(new Category(7, getResources().getString(R.string.transport_schedule)));
 
         GridView gridView = (GridView) findViewById(R.id.grid_view);
         CategoryAdapter adapter = new CategoryAdapter(this, categories);

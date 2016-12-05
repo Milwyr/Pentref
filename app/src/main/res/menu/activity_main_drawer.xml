@@ -14,7 +14,7 @@
             android:title="@string/bookmarks" />
         <item
             android:id="@+id/nav_weather"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_sunny_black"
             android:title="@string/weather" />
         <item
             android:id="@+id/nav_transportation"

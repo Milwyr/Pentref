@@ -228,6 +228,12 @@ public class DiscoverFragment extends Fragment implements LocationListener,
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                // Reset the previously selected marker to the default colour
+                if (mPreviousMarker != null) {
+                    mPreviousMarker.setIcon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                }
+
                 mBottomSheet.setVisibility(View.VISIBLE);
                 mPoiSummaryCardView.setVisibility(View.GONE);
             }

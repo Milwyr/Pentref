@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ywca.pentref.R;
+import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 import com.ywca.pentref.models.Poi;
 
@@ -44,13 +45,18 @@ public class BookmarksAdapter extends RecyclerView.Adapter<BookmarksAdapter.View
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final Poi poi = mPois.get(position);
-        holder.itemView.setTag(position);
+
+        // A dodgy way to retrieve image resource id
+        int imageResourceId = new Category(poi.getCategoryId(), "").getImageResourceId();
+        holder.poiTypeImageView.setImageResource(imageResourceId);
+
         holder.placeNameTextView.setText(poi.getName());
         holder.addressTextView.setText(poi.getAddress());
 
         holder.bookmarkedIconImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Display an alert dialog to confirm whether the user wants to delete the bookmark
                 new AlertDialog.Builder(mContext)
                         .setMessage(R.string.dialog_message_confirm_remove_bookmark)
                         .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {

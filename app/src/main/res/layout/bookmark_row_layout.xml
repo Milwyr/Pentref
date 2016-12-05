@@ -7,8 +7,8 @@
 
     <ImageView
         android:id="@+id/poi_type_row_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         app:srcCompat="@drawable/ic_place_black_36dp" />
 
     <TextView
