@@ -36,13 +36,13 @@
     <string name="more">More</string>
 
     <!-- Transportation Fragment -->
-    <string name="bus">Bus</string>
-    <string name="ferry">Ferry</string>
-    <string name="next_two_transports">Next two: </string>
-    <string name="temporary_route_number">11</string>
+    <string name="tai_o">Tai O</string>
+    <string name="next_transport">Then</string>
     <string name="showFullTimetable">Show full timetable</string>
 
     <!-- Timetable Activity -->
+    <string name="from">From</string>
+    <string name="to">To</string>
     <string name="adult_price">Adult price: </string>
     <string name="notify_me">Notify Me</string>
 

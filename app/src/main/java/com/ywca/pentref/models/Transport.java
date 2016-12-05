@@ -14,16 +14,11 @@ public class Transport implements Comparable, Parcelable {
     //region Instance variables
     private String routeNumber;
     private TypeEnum typeEnum;
-    private Direction fromTaiO;
-    private Direction toTaiO;
+    private String nonTaiODestinationStation;
+    private Price price;
+    private Timetable fromTaiO;
+    private Timetable toTaiO;
     //endregion
-
-    public Transport(String routeNumber, TypeEnum typeEnum, Direction fromTaiO, Direction toTaiO) {
-        this.routeNumber = routeNumber;
-        this.typeEnum = typeEnum;
-        this.fromTaiO = fromTaiO;
-        this.toTaiO = toTaiO;
-    }
 
     //region Getter methods
     public TypeEnum getTypeEnum() {
@@ -34,11 +29,15 @@ public class Transport implements Comparable, Parcelable {
         return this.routeNumber;
     }
 
-    public Direction getFromTaiO() {
+    public String getNonTaiODestinationStation() {
+        return this.nonTaiODestinationStation;
+    }
+
+    public Timetable getFromTaiO() {
         return this.fromTaiO;
     }
 
-    public Direction getToTaiO() {
+    public Timetable getToTaiO() {
         return this.toTaiO;
     }
     //endregion
@@ -80,6 +79,8 @@ public class Transport implements Comparable, Parcelable {
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeString(this.routeNumber);
         destination.writeInt(this.typeEnum.getValue());
+        destination.writeString(this.nonTaiODestinationStation);
+        destination.writeParcelable(this.price, flags);
         destination.writeParcelable(this.fromTaiO, flags);
         destination.writeParcelable(this.toTaiO, flags);
     }
@@ -107,6 +108,8 @@ public class Transport implements Comparable, Parcelable {
             this.typeEnum = TypeEnum.FERRY;
         }
 
+        this.nonTaiODestinationStation = source.readString();
+        this.price = source.readParcelable(getClass().getClassLoader());
         this.fromTaiO = source.readParcelable(getClass().getClassLoader());
         this.toTaiO = source.readParcelable(getClass().getClassLoader());
     }

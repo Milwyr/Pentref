@@ -62,7 +62,6 @@ public class TransportAdapter extends RecyclerView.Adapter<TransportAdapter.View
         // The default icon is bus, and hence the icon is set to ferry only when necessary
         if (transport.getTypeEnum() == Transport.TypeEnum.FERRY) {
             holder.typeIcon.setImageResource(R.drawable.ic_ferry_black_36dp);
-            holder.typeTextView.setText(R.string.ferry);
         }
 
         // Launch Timetable Activity when the CardView is clicked
@@ -76,61 +75,42 @@ public class TransportAdapter extends RecyclerView.Adapter<TransportAdapter.View
         });
 
         holder.routeNumberTextView.setText(transport.getRouteNumber());
+        holder.departureStationTextView.setText(mContext.getString(R.string.tai_o));
+        holder.destinationStationTextView.setText(transport.getNonTaiODestinationStation());
 
-//        // TODO: Handle null from/to Tai O text view properly
-//        if (transport.getFromTaiO() != null) {
-//            holder.departureStationTextView.setText(transport.getFromTaiO().getStations().get(0));
-//        } else {
-//            String departureStation = transport.getToTaiO().getStations().get(transport.getToTaiO().getStations().size() - 1);
-//            holder.departureStationTextView.setText(departureStation);
-//        }
-//
-//        if (transport.getToTaiO() != null) {
-//            holder.destinationStationTextView.setText(transport.getToTaiO().getStations().get(0));
-//        } else {
-//            String destinationStation = transport.getFromTaiO().getStations().get(transport.getFromTaiO().getStations().size() - 1);
-//            holder.destinationStationTextView.setText(destinationStation);
-//        }
-//
-//        List<LocalTime> localTimes;
-//        // TODO: Assume the direction is from Tai O
-//        if (LocalDate.now().getDayOfWeek() >= DateTimeConstants.MONDAY
-//                && LocalDate.now().getDayOfWeek() <= DateTimeConstants.SATURDAY) {
-//            if (transport.getFromTaiO() != null) {
-//                localTimes = transport.getFromTaiO().getTimetable().getMonToSatTimes();
-//            } else {
-//                localTimes = transport.getToTaiO().getTimetable().getMonToSatTimes();
-//            }
-//        } else {
-//            if (transport.getFromTaiO() != null) {
-//                localTimes = transport.getFromTaiO().getTimetable().getSunAndPublicHolidayTimes();
-//            } else {
-//                localTimes = transport.getToTaiO().getTimetable().getSunAndPublicHolidayTimes();
-//            }
-//        }
-
-//        holder.nextTwoTransportsTimeTextView.setText(getNextTwoTransportsMessage(localTimes));
-    }
-
-    // Convert the given list of LocalTime objects to a readable text
-    private String getNextTwoTransportsMessage(List<LocalTime> localTimes) {
-        // Get the next two departure times later than the current time
-        List<LocalTime> nextTwoDepartureTimes = Utility.getTimesAfterNow(localTimes, 2);
-
-        // Convert the list of LocalTime objects to a readable text
-        String message;
-        if (nextTwoDepartureTimes.isEmpty()) {
-            message = "No available transport";
+        List<LocalTime> localTimes;
+        // TODO: Assume the direction is from Tai O
+        if (LocalDate.now().getDayOfWeek() >= DateTimeConstants.MONDAY
+                && LocalDate.now().getDayOfWeek() <= DateTimeConstants.SATURDAY) {
+            if (transport.getFromTaiO() != null) {
+                localTimes = transport.getFromTaiO().getMonToSatTimes();
+            } else {
+                localTimes = transport.getToTaiO().getMonToSatTimes();
+            }
         } else {
-            DateTimeFormatter formatter = DateTimeFormat.forPattern("HH:mm");
-            message = formatter.print(nextTwoDepartureTimes.get(0));
-
-            if (nextTwoDepartureTimes.size() == 2) {
-                message += ", " + formatter.print(nextTwoDepartureTimes.get(1));
+            if (transport.getFromTaiO() != null) {
+                localTimes = transport.getFromTaiO().getSunAndPublicHolidayTimes();
+            } else {
+                localTimes = transport.getToTaiO().getSunAndPublicHolidayTimes();
             }
         }
 
-        return message;
+        List<LocalTime> nextTwoDepartureTimes = Utility.getTimesAfterNow(localTimes, 2);
+        if (nextTwoDepartureTimes.isEmpty()) {
+            holder.nextTransportTimeTextView.setText("N/A");
+            holder.secondNextTransportTimeTextView.setText("N/A");
+        } else {
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("HH:mm");
+            holder.nextTransportTimeTextView.setText(formatter.print(nextTwoDepartureTimes.get(0)));
+
+            if (nextTwoDepartureTimes.size() > 1) {
+                String message = mContext.getResources().getString(R.string.next_transport) + " " +
+                        formatter.print(nextTwoDepartureTimes.get(1));
+                holder.secondNextTransportTimeTextView.setText(message);
+            } else {
+                holder.secondNextTransportTimeTextView.setText("N/A");
+            }
+        }
     }
 
     @Override
@@ -140,22 +120,22 @@ public class TransportAdapter extends RecyclerView.Adapter<TransportAdapter.View
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView typeIcon;
-        private TextView typeTextView;
         private CardView cardView;
         private TextView routeNumberTextView;
         private TextView departureStationTextView;
         private TextView destinationStationTextView;
-        private TextView nextTwoTransportsTimeTextView;
+        private TextView nextTransportTimeTextView;
+        private TextView secondNextTransportTimeTextView;
 
         ViewHolder(View view) {
             super(view);
             typeIcon = (ImageView) view.findViewById(R.id.transport_type_icon);
-            typeTextView = (TextView) view.findViewById(R.id.transport_type_text_view);
             cardView = (CardView) view.findViewById(R.id.transport_card_view);
             routeNumberTextView = (TextView) view.findViewById(R.id.route_number_text_view);
             departureStationTextView = (TextView) view.findViewById(R.id.departure_station_text_view);
             destinationStationTextView = (TextView) view.findViewById(R.id.destination_station_text_view);
-            nextTwoTransportsTimeTextView = (TextView) view.findViewById(R.id.next_two_transports_time_text_view);
+            nextTransportTimeTextView = (TextView) view.findViewById(R.id.next_transport_time_text_view);
+            secondNextTransportTimeTextView = (TextView) view.findViewById(R.id.second_next_transport_time_text_view);
         }
     }
 }

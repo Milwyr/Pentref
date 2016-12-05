@@ -27,7 +27,7 @@
     <string name="review_submitted">Review submitted</string>
 
     <!-- Transportation fragment -->
-    <string name="next_two_transports">Next two: </string>
+    <string name="next_transport">Next two: </string>
     <string name="temporary_route_number">11</string>
     <string name="showFullTimetable">Show full timetable</string>
 

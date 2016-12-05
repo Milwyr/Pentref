@@ -1,6 +1,7 @@
 package com.ywca.pentref.adapters;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +38,7 @@ public class TimetableAdapter extends RecyclerView.Adapter<TimetableAdapter.View
      * @param layoutId   The layout resource id
      * @param localTimes A list of {@link LocalTime} objects
      */
-    public TimetableAdapter(int layoutId, @NonNull List<LocalTime> localTimes) {
+    public TimetableAdapter(int layoutId, @Nullable List<LocalTime> localTimes) {
         mLayoutId = layoutId;
         mLocalTimes = localTimes;
     }

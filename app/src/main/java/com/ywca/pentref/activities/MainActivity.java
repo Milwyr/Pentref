@@ -176,7 +176,7 @@ public class MainActivity extends BaseActivity
                 changeFragment(R.string.transport_schedule, new TransportationFragment());
                 break;
             case R.id.nav_profile:
-                changeFragment(R.string.transport_schedule, new ProfileFragment());
+                changeFragment(R.string.profile, new ProfileFragment());
                 break;
             case R.id.nav_settings:
                 changeFragment(R.string.settings, new SettingsFragment());
