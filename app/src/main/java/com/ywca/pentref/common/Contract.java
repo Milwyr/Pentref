@@ -14,30 +14,30 @@ public final class Contract {
         public static final String TABLE_NAME = "poi";
 
         static final String COLUMN_NAME = "name";
+        static final String COLUMN_CHINESE_NAME = "chinese_name";
         static final String COLUMN_HEADER_IMAGE_FILE_NAME = "header_image";
         static final String COLUMN_CATEGORY_ID = "category_id";
-        static final String COLUMN_DESCRIPTION = "description";
         static final String COLUMN_WEBSITE_URI = "website_uri";
         static final String COLUMN_ADDRESS = "address";
+        static final String COLUMN_CHINESE_ADDRESS = "chinese_address";
         static final String COLUMN_PHONE_NUMBER = "phone_number";
         static final String COLUMN_LATITUDE = "latitude";
         static final String COLUMN_LONGITUDE = "longitude";
-        static final String COLUMN_TIMESTAMP = "timestamp";
 
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, TABLE_NAME);
 
         public static final String[] PROJECTION_ALL = {
                 _ID,
                 COLUMN_NAME,
+                COLUMN_CHINESE_NAME,
                 COLUMN_HEADER_IMAGE_FILE_NAME,
                 COLUMN_CATEGORY_ID,
-                COLUMN_DESCRIPTION,
                 COLUMN_WEBSITE_URI,
                 COLUMN_ADDRESS,
+                COLUMN_CHINESE_ADDRESS,
                 COLUMN_PHONE_NUMBER,
                 COLUMN_LATITUDE,
-                COLUMN_LONGITUDE,
-                COLUMN_TIMESTAMP
+                COLUMN_LONGITUDE
         };
     }
 

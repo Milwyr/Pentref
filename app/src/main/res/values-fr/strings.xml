@@ -28,7 +28,6 @@
 
     <!-- Transportation fragment -->
     <string name="next_transport">Next two: </string>
-    <string name="temporary_route_number">11</string>
     <string name="showFullTimetable">Show full timetable</string>
 
     <!-- Timetable activity -->
@@ -41,13 +40,6 @@
     <!-- Content description for image views -->
     <string name="poi_details_header_image">Details of the Point of Interest</string>
     <string name="profile_picture">Profile Picture</string>
-
-    <string name="place_info">
-        Place:Tai O, NT, Hong Kong\n
-        Web  :www.tai-0.com\n
-        Phone:65871092\n
-        Working time: 9:00 - 17:00
-    </string>
 
     <!-- Error messages -->
     <string name="close">Close</string>

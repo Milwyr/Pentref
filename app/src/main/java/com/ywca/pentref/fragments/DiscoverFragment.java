@@ -135,6 +135,7 @@ public class DiscoverFragment extends Fragment implements LocationListener,
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 // Remove all the existing markers
                 mGoogleMap.clear();
+                mPreviousMarker = null;
 
                 // Add only the markers that match the selected category
                 for (Poi poi : mPois) {
@@ -377,6 +378,13 @@ public class DiscoverFragment extends Fragment implements LocationListener,
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.poi_summary_card_view:
+                // Deselect the currently selected marker (although named previous marker)
+                // by setting the icon to be the default one (which is red)
+                if (mPreviousMarker != null) {
+                    mPreviousMarker.setIcon(BitmapDescriptorFactory.defaultMarker());
+                }
+
+                // Launch PoiDetailsActivity
                 Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
                 intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
                 startActivityForResult(intent, REQUEST_POI_ACTIVITY_DETAILS);

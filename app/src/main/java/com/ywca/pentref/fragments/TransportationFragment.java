@@ -30,6 +30,8 @@ import java.util.List;
  * that show the schedule of buses/ferries that depart from and arrive at Tai O.
  */
 public class TransportationFragment extends Fragment {
+    private RecyclerView mRecyclerView;
+
     public TransportationFragment() {
         // Required empty public constructor
     }
@@ -38,40 +40,10 @@ public class TransportationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootVIew = inflater.inflate(R.layout.fragment_transportation, container, false);
-        final RecyclerView recyclerView = (RecyclerView) rootVIew.findViewById(R.id.transport_recycler_view);
 
-        // Use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        recyclerView.setHasFixedSize(true);
-
-        // Use a linear layout manager
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        //region Might not be necessary anymore
-        // Read transports from online
-//        String transportUrl = "https://raw.githubusercontent.com/Milwyr/Temporary/master/transports.json";
-//        JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
-//                Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
-//            @Override
-//            public void onResponse(JSONArray response) {
-//                Gson gson = new GsonBuilder()
-//                        .registerTypeAdapter(LocalTime.class, new Utility.LocalTimeSerializer())
-//                        .create();
-//                final List<Transport> transports = Arrays.asList(
-//                        gson.fromJson(response.toString(), Transport[].class));
-//
-//                TransportRecyclerViewAdapter adapter =
-//                        new TransportRecyclerViewAdapter(R.layout.transport_card_layout, transports);
-//                recyclerView.setAdapter(adapter);
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("TransportationFragment", error.getMessage());
-//            }
-//        });
-//        Volley.newRequestQueue(getActivity()).add(transportJsonArrayRequest);
-        //endregion
+        mRecyclerView = (RecyclerView) rootVIew.findViewById(R.id.transport_recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         // Insert the transport items into the recycler view
         new AsyncTask<Void, Void, List<Transport>>() {
@@ -84,7 +56,7 @@ public class TransportationFragment extends Fragment {
             protected void onPostExecute(List<Transport> transports) {
                 TransportAdapter adapter =
                         new TransportAdapter(R.layout.transport_card_layout, transports);
-                recyclerView.setAdapter(adapter);
+                mRecyclerView.setAdapter(adapter);
             }
         }.execute();
 
