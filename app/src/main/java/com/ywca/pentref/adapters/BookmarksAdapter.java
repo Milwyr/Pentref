@@ -3,6 +3,7 @@ package com.ywca.pentref.adapters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,12 +12,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ywca.pentref.R;
+import com.ywca.pentref.activities.BaseActivity;
 import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 import com.ywca.pentref.models.Poi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * An adapter that a displays a list of {@link Poi} objects (Points of Interest) on a {@link RecyclerView} using the given layout.
@@ -26,13 +29,15 @@ public class BookmarksAdapter extends RecyclerView.Adapter<BookmarksAdapter.View
     private Context mContext;
     private int mLayoutId;
     private List<Poi> mPois;
+    private Locale mLocale;
 
-    public BookmarksAdapter(int layoutId, List<Poi> pois) {
+    public BookmarksAdapter(int layoutId, List<Poi> pois, @NonNull Locale locale) {
         mLayoutId = layoutId;
         mPois = pois;
         if (mPois == null) {
             mPois = new ArrayList<>();
         }
+        mLocale = locale;
     }
 
     @Override
@@ -50,8 +55,8 @@ public class BookmarksAdapter extends RecyclerView.Adapter<BookmarksAdapter.View
         int imageResourceId = new Category(poi.getCategoryId(), "").getImageResourceId();
         holder.poiTypeImageView.setImageResource(imageResourceId);
 
-        holder.placeNameTextView.setText(poi.getName());
-        holder.addressTextView.setText(poi.getAddress());
+        holder.placeNameTextView.setText(poi.getName(mLocale));
+        holder.addressTextView.setText(poi.getAddress(mLocale));
 
         holder.bookmarkedIconImageView.setOnClickListener(new View.OnClickListener() {
             @Override

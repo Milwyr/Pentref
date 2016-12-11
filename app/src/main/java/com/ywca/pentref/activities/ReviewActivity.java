@@ -44,7 +44,7 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
             //region Customise the actionbar
             final ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
-                actionBar.setTitle(poi.getName());
+                actionBar.setTitle(poi.getName(getDeviceLocale()));
                 actionBar.setDisplayHomeAsUpEnabled(true);
                 actionBar.setHomeAsUpIndicator(R.drawable.ic_cross_white_24dp);
             }

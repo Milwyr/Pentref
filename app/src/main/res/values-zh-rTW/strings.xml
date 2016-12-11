@@ -1,0 +1,86 @@
+<resources>
+    <string name="app_name">Pentref</string>
+    <string name="title_activity_poi_detail">景點詳細資訊</string>
+    <string name="title_activity_timetable">時間表</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!-- Tutorial Activity -->
+    <string name="sign_in">登入</string>
+    <string name="get_started">開始使用</string>
+
+    <!-- Search -->
+    <string name="search_hint">輸入景點</string>
+
+    <!-- Navigation Drawer Headers -->
+    <string name="discover">發現</string>
+    <string name="bookmarks">收藏</string>
+    <string name="weather">天氣</string>
+    <string name="transport_schedule">交通時間表</string>
+    <string name="profile">Profile</string>
+    <string name="settings">設定</string>
+    <string name="about">關於</string>
+
+    <!-- Poi Details Activity -->
+    <string name="all_reviews">所有評論</string>
+
+    <!-- Review Activity -->
+    <string name="posting_publicly">Posting publicly</string>
+    <string name="title">標題</string>
+    <string name="description">詳細評論</string>
+    <string name="submit">提交</string>
+    <string name="review_submitted">評論已提交</string>
+
+    <!-- Discover Fragment -->
+    <string name="more">更多</string>
+
+    <!-- Transportation Fragment -->
+    <string name="tai_o">大澳</string>
+    <string name="next_transport">緊接其後</string>
+    <string name="showFullTimetable">顯示完整的時間表</string>
+
+    <!-- Timetable Activity -->
+    <string name="from">由</string>
+    <string name="to">至</string>
+    <string name="adult_price">大人價錢: </string>
+
+    <!-- Sign In Fragment -->
+    <string name="visitor">訪客</string>
+    <string name="sign_out">登出</string>
+
+    <!-- Content Description For Image Views -->
+    <string name="poi_details_header_image">Details of the Point of Interest</string>
+    <string name="profile_picture">大頭相</string>
+
+    <!-- Settings Fragment -->
+    <string name="synchronise_with_server">與伺服器同步資料</string>
+    <string name="summary_synchronise_now">點擊以啟動與伺服器同步資料</string>
+
+    <!-- Dialog Messages -->
+    <string name="keep_editing">繼續編輯</string>
+    <string name="discard">狠心刪除</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="close">關閉</string>
+    <string name="loading">載入中，請稍候</string>
+    <string name="dialog_title_reminder">提醒</string>
+    <string name="dialog_message_scheduled_bus">你所選的%1$s號巴士/渡輪將開出於</string>
+    <string name="dialog_message_confirm_remove_bookmark">你確定想移除這個景點嗎?</string>
+    <string name="dialog_message_confirm_issue_notification">你想在適當的時間顯示提醒你乘車的通知嗎?</string>
+    <string name="dialog_message_confirm_discard_changes">你想狠心刪除尚未發表的評論嗎?</string>
+    <string name="dialog_message_synchronising">正在與伺服器同步，請稍候</string>
+
+    <!-- Error Messages -->
+    <string name="error_connect_to_internet_to_initialise">請確保網絡已連接以下載初始化數據庫。</string>
+    <string name="error_not_signed_in">未登入</string>
+    <string name="error_message_sign_in_before_posting_review">請登入以發表評論。</string>
+    <string name="error_network_unavailable">網絡連線中斷</string>
+    <string name="error_message_connect_to_internet_before_posting_review">發表評論前請確保網絡已連接。</string>
+
+    <!-- SharedPreferences File Name -->
+    <string name="pref_file_name_local" translatable="false">local</string>
+    <string name="pref_file_name_user_settings" translatable="false">user_settings</string>
+
+    <string name="facebook_app_id">195665774189937</string>
+</resources>

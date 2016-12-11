@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -47,6 +48,7 @@ import com.google.gson.JsonSerializer;
 import com.ywca.pentref.R;
 import com.ywca.pentref.adapters.ReviewsAdapter;
 import com.ywca.pentref.common.Contract;
+import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
@@ -59,10 +61,12 @@ import org.json.JSONArray;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
-public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.OnRatingBarChangeListener, View.OnClickListener {
+public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRatingBarChangeListener, View.OnClickListener {
     private final int REQUEST_CODE_REVIEW_ACTIVITY = 9000;
 
+    private Locale mLocale;
     private Poi mSelectedPoi;
     private GoogleApiClient mGoogleApiClient;
     private GoogleSignInAccount mGoogleSignInAccount;
@@ -115,7 +119,7 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
         // from onActivityResult() method, in which onCreate() method is not called.
         CollapsingToolbarLayout collapsingToolbar =
                 (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        collapsingToolbar.setTitle(mSelectedPoi.getName());
+        collapsingToolbar.setTitle(mSelectedPoi.getName(mLocale));
     }
 
     @Override
@@ -192,6 +196,8 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        mLocale = super.getDeviceLocale();
+
         String baseUrl = Utility.SERVER_URL + "/poi_photos/";
         // Download the header image from server
         ImageRequest imageRequest = new ImageRequest(
@@ -211,25 +217,37 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
                 });
         Volley.newRequestQueue(this).add(imageRequest);
 
-        // A dodgy way to set the category text
-        TextView categoryTextView = (TextView) findViewById(R.id.category_text_view);
-        switch (mSelectedPoi.getCategoryId()) {
-            case 1:
-                categoryTextView.setText("Point of Interest");
-                break;
-            case 2:
-                categoryTextView.setText("Public Facilities");
-                break;
-            case 3:
-                categoryTextView.setText("Restaurants");
-                break;
-            case 4:
-                categoryTextView.setText("Miscellaneous");
-                break;
-            default:
-                categoryTextView.setText("Not categorised");
-                break;
-        }
+        // Read category name that matches the id from database,
+        // and set the name to the category text view
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... voids) {
+                String[] projection = {Contract.Category.COLUMN_NAME};
+                String selection = Contract.Category._ID + "= ?";
+                String[] arguments = {Integer.toString(mSelectedPoi.getCategoryId())};
+
+                Cursor cursor = getContentResolver().query(Contract.Category.CONTENT_URI,
+                        projection, selection, arguments, null);
+
+                // This case should not happen at all
+                if (cursor == null) {
+                    return "Not categorised";
+                }
+
+                cursor.moveToFirst();
+                String categoryName = cursor.getString(cursor.getColumnIndex(Contract.Category.COLUMN_NAME));
+                cursor.close();
+                return categoryName;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+
+                TextView categoryTextView = (TextView) findViewById(R.id.category_text_view);
+                categoryTextView.setText(s);
+            }
+        }.execute();
 
         // Set the image of the bookmark fab depending on whether the poi is bookmarked
         mBookmarkFab = (FloatingActionButton) findViewById(R.id.bookmark_fab);
@@ -238,7 +256,7 @@ public class PoiDetailsActivity extends AppCompatActivity implements RatingBar.O
 
         // Initialise the address text view of Point of Interest
         TextView poiAddressTextView = (TextView) findViewById(R.id.poi_address_text_view);
-        String address = mSelectedPoi.getAddress();
+        String address = mSelectedPoi.getAddress(mLocale);
         if (address == null || address.isEmpty()) {
             findViewById(R.id.poi_address_image_view).setVisibility(View.GONE);
             poiAddressTextView.setVisibility(View.INVISIBLE);

@@ -20,6 +20,7 @@ import com.ywca.pentref.models.Poi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A {@link ContentProvider} that exposes the local {@link SQLiteDatabase} to other applications via content uri.
@@ -159,13 +160,13 @@ public class PentrefProvider extends ContentProvider {
     public static ContentValues getContentValues(Poi poi) {
         ContentValues values = new ContentValues();
         values.put(Contract.Poi._ID, poi.getId());
-        values.put(Contract.Poi.COLUMN_NAME, poi.getName());
-        values.put(Contract.Poi.COLUMN_CHINESE_NAME, poi.getChineseName());
+        values.put(Contract.Poi.COLUMN_NAME, poi.getName(Locale.ENGLISH));
+        values.put(Contract.Poi.COLUMN_CHINESE_NAME, poi.getName(Locale.CHINESE));
         values.put(Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME, poi.getHeaderImageFileName());
         values.put(Contract.Poi.COLUMN_CATEGORY_ID, poi.getCategoryId());
         values.put(Contract.Poi.COLUMN_WEBSITE_URI, poi.getWebsiteUri());
-        values.put(Contract.Poi.COLUMN_ADDRESS, poi.getAddress());
-        values.put(Contract.Poi.COLUMN_CHINESE_ADDRESS, poi.getChineseAddress());
+        values.put(Contract.Poi.COLUMN_ADDRESS, poi.getAddress(Locale.ENGLISH));
+        values.put(Contract.Poi.COLUMN_CHINESE_ADDRESS, poi.getAddress(Locale.CHINESE));
         values.put(Contract.Poi.COLUMN_PHONE_NUMBER, poi.getPhoneNumber());
         values.put(Contract.Poi.COLUMN_LATITUDE, poi.getLatLng().latitude);
         values.put(Contract.Poi.COLUMN_LONGITUDE, poi.getLatLng().longitude);

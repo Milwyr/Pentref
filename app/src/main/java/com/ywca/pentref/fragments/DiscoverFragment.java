@@ -44,6 +44,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.ywca.pentref.R;
+import com.ywca.pentref.activities.BaseActivity;
 import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.adapters.CategoryAdapter;
 import com.ywca.pentref.common.Category;
@@ -54,6 +55,7 @@ import com.ywca.pentref.models.Poi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -61,7 +63,7 @@ import static android.app.Activity.RESULT_OK;
  * Displays a {@link GoogleMap} instance with the predefined Points of Interest and categories.
  */
 // Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
-public class DiscoverFragment extends Fragment implements LocationListener,
+public class DiscoverFragment extends BaseFragment implements LocationListener,
         OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
 
     //region Constants
@@ -404,7 +406,9 @@ public class DiscoverFragment extends Fragment implements LocationListener,
         mBottomSheet.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
-        mSummaryCardTitleTextView.setText(mSelectedPoi.getName());
+
+        Locale locale = super.getDeviceLocale();
+        mSummaryCardTitleTextView.setText(mSelectedPoi.getName(locale));
         return false;
     }
 

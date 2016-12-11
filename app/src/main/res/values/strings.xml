@@ -44,7 +44,6 @@
     <string name="from">From</string>
     <string name="to">To</string>
     <string name="adult_price">Adult price: </string>
-    <string name="notify_me">Notify Me</string>
 
     <!-- Sign In Fragment -->
     <string name="visitor">Visitor</string>
