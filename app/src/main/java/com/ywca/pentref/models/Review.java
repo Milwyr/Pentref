@@ -13,17 +13,17 @@ public class Review {
     private String userName;
     private String title;
     private String description;
-    private List<String> photoUris;
+//    private List<String> photoUris;
     private LocalDateTime timestamp;
 
     public Review(String userId, int rating, String userName, String title,
-                  String description, List<String> photoUris, LocalDateTime timestamp) {
+                  String description/*, List<String> photoUris*/, LocalDateTime timestamp) {
         this.userId = userId;
         this.rating = rating;
         this.userName = userName;
         this.title = title;
         this.description = description;
-        this.photoUris = photoUris;
+        //this.photoUris = photoUris;
         this.timestamp = timestamp;
     }
 
@@ -50,9 +50,9 @@ public class Review {
         return description;
     }
 
-    public List<String> getPhotoUris() {
-        return this.photoUris;
-    }
+//    public List<String> getPhotoUris() {
+//        return this.photoUris;
+//    }
 
     public LocalDateTime getTimestamp() {
         return this.timestamp;

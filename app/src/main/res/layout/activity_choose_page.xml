@@ -4,7 +4,7 @@
     android:id="@+id/activity_launching"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ywca.pentref.activities.LaunchingActivity">
+    tools:context="com.ywca.pentref.activities.ChoosePageActivity">
 
     <GridView
         android:id="@+id/grid_view"

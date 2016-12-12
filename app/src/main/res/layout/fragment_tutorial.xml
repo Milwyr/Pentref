@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.ywca.pentref.activities.TutorialActivity$PlaceholderFragment">
+    tools:context="com.ywca.pentref.activities.LaunchingActivity$PlaceholderFragment">
 
     <ImageView
         android:id="@+id/tutorial_image_view"
