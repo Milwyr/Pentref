@@ -1,82 +1,82 @@
 <resources>
     <string name="app_name">Pentref</string>
-    <string name="title_activity_poi_detail">Poi Details</string>
-    <string name="title_activity_timetable">Timetable</string>
+    <string name="title_activity_poi_detail">景点详细资讯</string>
+    <string name="title_activity_timetable">时间表</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <!-- Tutorial Activity -->
-    <string name="sign_in">Sign in</string>
-    <string name="get_started">Get started</string>
+    <string name="sign_in">登入</string>
+    <string name="get_started">开始使用</string>
 
     <!-- Search -->
-    <string name="search_hint">Enter text</string>
+    <string name="search_hint">输入景点</string>
 
     <!-- Navigation Drawer Headers -->
-    <string name="discover">發現</string>
+    <string name="discover">发现</string>
     <string name="bookmarks">收藏</string>
-    <string name="weather">天氣</string>
-    <string name="transport_schedule">交通時間表</string>
-    <string name="profile">Profile</string>
-    <string name="settings">設定</string>
-    <string name="about">About</string>
+    <string name="weather">天气</string>
+    <string name="transport_schedule">交通时间表</string>
+    <string name="profile">帐户</string>
+    <string name="settings">设定</string>
+    <string name="about">关于</string>
 
     <!-- Poi Details Activity -->
-    <string name="all_reviews">All reviews</string>
+    <string name="all_reviews">所有评论</string>
 
     <!-- Review Activity -->
-    <string name="posting_publicly">Posting publicly</string>
-    <string name="title">Title</string>
-    <string name="description">Description</string>
-    <string name="submit">Submit</string>
-    <string name="review_submitted">Review submitted</string>
+    <string name="posting_publicly">评论将会公开</string>
+    <string name="title">标题</string>
+    <string name="description">详细评论</string>
+    <string name="submit">提交</string>
+    <string name="review_submitted">評論已提交</string>
 
     <!-- Discover Fragment -->
-    <string name="more">More</string>
+    <string name="more">更多</string>
 
     <!-- Transportation Fragment -->
-    <string name="tai_o">Tai O</string>
-    <string name="next_transport">Then</string>
-    <string name="showFullTimetable">Show full timetable</string>
+    <string name="tai_o">大澳</string>
+    <string name="next_transport">紧随其后</string>
+    <string name="showFullTimetable">显示完整的时间表</string>
 
     <!-- Timetable Activity -->
-    <string name="from">From</string>
-    <string name="to">To</string>
-    <string name="adult_price">Adult price: </string>
+    <string name="from">由</string>
+    <string name="to">至</string>
+    <string name="adult_price">大人价钱: </string>
 
     <!-- Sign In Fragment -->
-    <string name="visitor">Visitor</string>
-    <string name="sign_out">Sign Out</string>
+    <string name="visitor">访客</string>
+    <string name="sign_out">登出</string>
 
     <!-- Content Description For Image Views -->
     <string name="poi_details_header_image">Details of the Point of Interest</string>
-    <string name="profile_picture">Profile Picture</string>
+    <string name="profile_picture">大头相</string>
 
     <!-- Settings Fragment -->
-    <string name="synchronise_with_server">Synchronise with server</string>
-    <string name="summary_synchronise_now">Click to synchronise with server now</string>
+    <string name="synchronise_with_server">与伺服器同步资料</string>
+    <string name="summary_synchronise_now">点击以启动与伺服器同步资料</string>
 
     <!-- Dialog Messages -->
-    <string name="keep_editing">Keep editing</string>
-    <string name="discard">Discard</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="close">Close</string>
-    <string name="loading">Loading</string>
-    <string name="dialog_title_reminder">Reminder</string>
-    <string name="dialog_message_scheduled_bus">Your scheduled bus/ferry with route number %1$s will depart at</string>
-    <string name="dialog_message_confirm_remove_bookmark">Do you want to remove this bookmarked Point of Interest?</string>
-    <string name="dialog_message_confirm_issue_notification">Do you want to schedule a notification?</string>
-    <string name="dialog_message_confirm_discard_changes">Do you want to discard your changes before submitting?</string>
-    <string name="dialog_message_synchronising">Synchronising with server</string>
+    <string name="keep_editing">继续编辑</string>
+    <string name="discard">狠心刪除</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="close">关闭</string>
+    <string name="loading">载入中，请稍候</string>
+    <string name="dialog_title_reminder">提醒</string>
+    <string name="dialog_message_scheduled_bus">你所选的%1$s号巴士/渡轮将开出于</string>
+    <string name="dialog_message_confirm_remove_bookmark">你确定想移除这个景点吗?</string>
+    <string name="dialog_message_confirm_issue_notification">你想在适当的时间显示提醒你乘车的通知吗?</string>
+    <string name="dialog_message_confirm_discard_changes">你想狠心删除尚未发表的评论吗?</string>
+    <string name="dialog_message_synchronising">正在与伺服器同步，请稍候</string>
 
     <!-- Error Messages -->
-    <string name="error_connect_to_internet_to_initialise">Please connect to the internet to initialise the database.</string>
-    <string name="error_not_signed_in">Not signed in</string>
-    <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
-    <string name="error_network_unavailable">Network unavailable</string>
-    <string name="error_message_connect_to_internet_before_posting_review">Please connect to internet before posting your review.</string>
+    <string name="error_connect_to_internet_to_initialise">请确保网络已连接以下载初始化数据库。</string>
+    <string name="error_not_signed_in">未登入</string>
+    <string name="error_message_sign_in_before_posting_review">请登入以发表评论。</string>
+    <string name="error_network_unavailable">网络连线中断</string>
+    <string name="error_message_connect_to_internet_before_posting_review">发表评论前请确保网络已连接。</string>
 
     <!-- SharedPreferences File Name -->
     <string name="pref_file_name_local" translatable="false">local</string>

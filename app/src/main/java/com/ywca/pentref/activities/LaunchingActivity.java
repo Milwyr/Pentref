@@ -43,13 +43,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * The first Activity to be launched when this app is launched.
  * The tutorial only appears to the user if the app is installed for the first time.
  * When this Activity is active, it downloads data from server via json files.
  */
 public class LaunchingActivity extends BaseActivity {
 
-    private final String PREF_KEY_IS_FIRST_TIME_INSTALLED = "IsFirstTimeInstalled";
+    private final String PREF_KEY_IS_FIRST_TIME_INSTALLED = Utility.PREF_KEY_IS_FIRST_TIME_INSTALLED;
 
     private SharedPreferences mSharedPreferences;
 
@@ -61,16 +60,20 @@ public class LaunchingActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mSharedPreferences = getSharedPreferences(getResources().getString(R.string.pref_file_name_local), MODE_PRIVATE);
+        // Read this flag stored in SplashScreenActivity as it is more efficient
+        // than reading from shared preferences
+        boolean isFirstTimeInstalled = getIntent().getBooleanExtra(PREF_KEY_IS_FIRST_TIME_INSTALLED, true);
 
         // Show this activity to user if this app is installed for the first time
-        if (mSharedPreferences.getBoolean(PREF_KEY_IS_FIRST_TIME_INSTALLED, true)) {
+        if (isFirstTimeInstalled) {
             if (isConnectedToInternet()) {
                 // Hide action bar and set content view
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().hide();
                 }
                 setContentView(R.layout.activity_tutorial);
+
+                mSharedPreferences = getSharedPreferences(getResources().getString(R.string.pref_file_name_local), MODE_PRIVATE);
 
                 downloadDataFromServer();
 
@@ -99,8 +102,8 @@ public class LaunchingActivity extends BaseActivity {
                         }).show();
             }
         } else {
-            // Navigate to MainActivity if the app has been launched before
-            startActivity(new Intent(this, SplashScreenActivity.class));
+            // Navigate to ChoosePageActivity if the app has been launched before
+            startActivity(new Intent(this, ChoosePageActivity.class));
             finish();
         }
     }
@@ -217,9 +220,9 @@ public class LaunchingActivity extends BaseActivity {
     // Save the app is not installed for the first time in SharedPreferences
     // if all data has been stored from server
     private void updateIsFirstTimeInstalledFlag() {
-        boolean isFirstTimeInstalled = mArePoisDownloaded &&
+        boolean isDownloadFinished = mArePoisDownloaded &&
                 mArePoiCategoriesDownloaded && mIsScheduleFileDownloaded;
-        if (isFirstTimeInstalled) {
+        if (isDownloadFinished) {
             mSharedPreferences.edit().putBoolean(PREF_KEY_IS_FIRST_TIME_INSTALLED, false).apply();
         }
     }

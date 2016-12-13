@@ -21,7 +21,7 @@
             android:value="AIzaSyDguzZCUexPJKuUApa3ZoYIPnOeGUtQPwk" />
 
         <activity
-            android:name=".activities.LaunchingActivity"
+            android:name=".activities.SplashScreenActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.SplashScreenActivity"
+            android:name=".activities.LaunchingActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".activities.ChoosePageActivity" />
         <activity
