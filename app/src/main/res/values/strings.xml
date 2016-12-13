@@ -56,6 +56,15 @@
     <!-- Settings Fragment -->
     <string name="synchronise_with_server">Synchronise with server</string>
     <string name="summary_synchronise_now">Click to synchronise with server now</string>
+    <string name="pref_notification_summary">The notification will appear %1$d minutes before departure.</string>
+    <string-array name="pref_notification_minutes_before_departure_options">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+    </string-array>
 
     <!-- Dialog Messages -->
     <string name="keep_editing">Keep editing</string>
@@ -77,10 +86,10 @@
     <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
     <string name="error_network_unavailable">Network unavailable</string>
     <string name="error_message_connect_to_internet_before_posting_review">Please connect to internet before posting your review.</string>
-
+    
     <!-- SharedPreferences File Name -->
-    <string name="pref_file_name_local" translatable="false">local</string>
-    <string name="pref_file_name_user_settings" translatable="false">user_settings</string>
+    <string name="pref_file_name_local">local</string>
+    <string name="pref_file_name_user_settings">user_settings</string>
 
     <string name="facebook_app_id">195665774189937</string>
 </resources>

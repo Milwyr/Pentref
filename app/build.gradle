@@ -42,8 +42,8 @@ dependencies {
     compile 'joda-time:joda-time:2.9.6'
 
     //Google Play Services needs (as of 4.11.2016) to be be 9.6.0
-    compile 'com.google.android.gms:play-services-auth:9.6.0'
-    compile 'com.google.android.gms:play-services-location:9.6.0'
-    compile 'com.google.android.gms:play-services-maps:9.6.0'
+    compile 'com.google.android.gms:play-services-auth:9.6.1'
+    compile 'com.google.android.gms:play-services-location:9.6.1'
+    compile 'com.google.android.gms:play-services-maps:9.6.1'
     testCompile 'junit:junit:4.12'
 }

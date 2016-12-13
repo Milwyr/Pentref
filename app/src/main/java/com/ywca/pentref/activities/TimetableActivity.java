@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -163,8 +164,12 @@ public class TimetableActivity extends AppCompatActivity implements
         PendingIntent alarmIntent = PendingIntent.getBroadcast(
                 this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
-        // Ensure the notification displays 30 minutes before the bus/ferry departs
-        localTime = localTime.minusMinutes(30);
+        // Read how many minutes the notification is displayed before the transportation departs
+        SharedPreferences sharedPreferences = getSharedPreferences(getResources().getString(R.string.pref_file_name_user_settings), MODE_PRIVATE);
+        int minutes = sharedPreferences.getInt(Utility.PREF_KEY_NOTIFICATION_PREFERENCE, 30);
+
+        // Ensure the notification will display at the specified time before the bus/ferry departs
+        localTime = localTime.minusMinutes(minutes);
 
         // Convert LocalTime to a Calendar object
         Calendar calendar = Calendar.getInstance();

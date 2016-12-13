@@ -1,10 +1,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <CheckBoxPreference
-        android:defaultValue="true"
-        android:key="checkbox_preference_show_notification"
-        android:summary="Do you want to enable notification?"
-        android:text="Show notification" />
+    <ListPreference
+        android:defaultValue="30"
+        android:entries="@array/pref_notification_minutes_before_departure_options"
+        android:entryValues="@array/pref_notification_minutes_before_departure_options"
+        android:key="pref_key_notification_minutes_before_departure"
+        android:summary="@string/pref_notification_summary"
+        android:title="Scheduled notification for transportation" />
 
     <Preference
         android:key="synchronise_with_server"

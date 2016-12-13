@@ -56,6 +56,15 @@
     <!-- Settings Fragment -->
     <string name="synchronise_with_server">与伺服器同步资料</string>
     <string name="summary_synchronise_now">点击以启动与伺服器同步资料</string>
+    <string name="pref_notification_summary">系統將會在所選巴士或渡輪出發前 %1$d 分鐘顯示通知。</string>
+    <string-array name="pref_notification_minutes_before_departure_options">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+    </string-array>
 
     <!-- Dialog Messages -->
     <string name="keep_editing">继续编辑</string>
@@ -79,8 +88,8 @@
     <string name="error_message_connect_to_internet_before_posting_review">发表评论前请确保网络已连接。</string>
 
     <!-- SharedPreferences File Name -->
-    <string name="pref_file_name_local" translatable="false">local</string>
-    <string name="pref_file_name_user_settings" translatable="false">user_settings</string>
+    <string name="pref_file_name_local">local</string>
+    <string name="pref_file_name_user_settings">user_settings</string>
 
     <string name="facebook_app_id">195665774189937</string>
 </resources>

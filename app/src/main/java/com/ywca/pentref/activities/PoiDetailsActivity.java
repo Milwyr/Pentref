@@ -57,6 +57,8 @@ import com.ywca.pentref.models.Review;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -275,8 +277,11 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
             poiWebsiteTextView.setVisibility(View.VISIBLE);
 
             Uri uri = Uri.parse(websiteUrl);
-            String formattedUrl = uri.getAuthority().replace("http://", "").replace("https://", "").replace("www.", "");
-            poiWebsiteTextView.setText(formattedUrl);
+
+            if (uri.getAuthority() != null && !uri.getAuthority().isEmpty()) {
+                String formattedUrl = uri.getAuthority().replace("http://", "").replace("https://", "").replace("www.", "");
+                poiWebsiteTextView.setText(formattedUrl);
+            }
         }
 
         // Initialise the phone number text view of Point of Interest
@@ -291,7 +296,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
         }
 
         // Download reviews from server
-        String url = Utility.SERVER_URL + "/reviews/review_30.json";
+        String url = Utility.SERVER_URL + "/PostReq.php?METHOD=GET&PATH=reviews&poiId=" + mSelectedPoi.getId();
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
