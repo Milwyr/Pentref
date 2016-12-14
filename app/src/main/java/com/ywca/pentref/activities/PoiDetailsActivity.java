@@ -7,12 +7,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -48,7 +46,6 @@ import com.google.gson.JsonSerializer;
 import com.ywca.pentref.R;
 import com.ywca.pentref.adapters.ReviewsAdapter;
 import com.ywca.pentref.common.Contract;
-import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
@@ -57,8 +54,6 @@ import com.ywca.pentref.models.Review;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -105,8 +100,8 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
             mSelectedPoi = data.getParcelableExtra(Utility.SELECTED_POI_EXTRA_KEY);
 
             if (resultCode == RESULT_OK) {
-                View rootVIew = findViewById(R.id.main_content);
-                Snackbar.make(rootVIew, getResources().getText(R.string.review_submitted), Snackbar.LENGTH_LONG).show();
+                View coordinatorLayout = findViewById(R.id.coordinator_layout);
+                Snackbar.make(coordinatorLayout, getResources().getText(R.string.review_submitted), Snackbar.LENGTH_LONG).show();
             } else {
                 mUserReviewRatingBar.setRating(0);
             }

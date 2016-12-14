@@ -11,24 +11,24 @@
     <string name="get_started">Get started</string>
 
     <!-- Search -->
-    <string name="search_hint">Enter text</string>
+    <string name="search_hint">Buscar aquí</string>
 
     <!-- Navigation Drawer Headers -->
     <string name="discover">Descubrir</string>
     <string name="bookmarks">Favoritos</string>
     <string name="weather">Clima</string>
     <string name="transport_schedule">Horario</string>
-    <string name="profile">Profile</string>
+    <string name="profile">Perfil</string>
     <string name="settings">Ajustes</string>
-    <string name="about">About</string>
+    <string name="about">Acerca de</string>
 
     <!-- Poi Details Activity -->
     <string name="all_reviews">All reviews</string>
 
     <!-- Review Activity -->
     <string name="posting_publicly">Posting publicly</string>
-    <string name="title">Title</string>
-    <string name="description">Description</string>
+    <string name="title">Título</string>
+    <string name="description">Descripción</string>
     <string name="submit">Submit</string>
     <string name="review_submitted">Review submitted</string>
 
@@ -41,13 +41,13 @@
     <string name="showFullTimetable">Show full timetable</string>
 
     <!-- Timetable Activity -->
-    <string name="from">From</string>
-    <string name="to">To</string>
+    <string name="from">De</string>
+    <string name="to">A</string>
     <string name="adult_price">Adult price: </string>
 
     <!-- Sign In Fragment -->
     <string name="visitor">Visitor</string>
-    <string name="sign_out">Sign Out</string>
+    <string name="sign_out">Cerrar Sesion</string>
 
     <!-- Content Description For Image Views -->
     <string name="poi_details_header_image">Details of the Point of Interest</string>
@@ -86,10 +86,4 @@
     <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
     <string name="error_network_unavailable">Network unavailable</string>
     <string name="error_message_connect_to_internet_before_posting_review">Please connect to internet before posting your review.</string>
-
-    <!-- SharedPreferences File Name -->
-    <string name="pref_file_name_local">local</string>
-    <string name="pref_file_name_user_settings">user_settings</string>
-
-    <string name="facebook_app_id">195665774189937</string>
 </resources>

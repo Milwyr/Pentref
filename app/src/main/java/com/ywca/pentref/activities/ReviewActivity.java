@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -143,7 +144,6 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
                 break;
             case R.id.submit_button:
                 if (isConnectedToInternet()) {
-                    // Pass the incoming Poi instance to PoiDetailsActivity
                     try {
                         EditText titleEditText = (EditText) findViewById(R.id.review_title_edit_text);
                         EditText descriptionEditText = (EditText) findViewById(R.id.review_description_edit_text);
@@ -159,8 +159,10 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
                         }
 
                         if (title == null || title.isEmpty() || description == null || description.isEmpty()) {
-
+                            View view = findViewById(R.id.relative_layout);
+                            Snackbar.make(view, "Not empty", Snackbar.LENGTH_LONG).show();
                         } else {
+                            // Pass the incoming Poi instance to PoiDetailsActivity
                             postReview(title, description);
                             setResult(RESULT_OK, mIncomingIntent);
                             finish();
