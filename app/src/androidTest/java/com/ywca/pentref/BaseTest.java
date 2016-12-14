@@ -1,15 +1,19 @@
 package com.ywca.pentref;
 
 import android.support.test.espresso.ViewInteraction;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
+import com.ywca.pentref.activities.ChoosePageActivity;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
@@ -26,6 +30,10 @@ import static org.hamcrest.Matchers.allOf;
  */
 @RunWith(AndroidJUnit4.class)
 public abstract class BaseTest {
+    @Rule
+    public ActivityTestRule<ChoosePageActivity> mActivityTestRule =
+            new ActivityTestRule<>(ChoosePageActivity.class);
+
     @Before
     public void initialiseComponents() {
         // Click the settings item in the grid view shown in Launching Activity
@@ -43,8 +51,12 @@ public abstract class BaseTest {
         linearLayout.perform(click());
     }
 
-    // Changes to the fragment with text with the given resource id
-    protected void changeFragment(int resourceId) {
+    /**
+     * Changes to the fragment with text with the given resource id
+     *
+     * @param resourceId Resource id of the title of the fragment
+     */
+    void changeFragment(int resourceId) {
         // Open navigation drawer
         ViewInteraction openNavigationDrawerView = onView(
                 allOf(withContentDescription("Open navigation drawer"),
@@ -58,7 +70,7 @@ public abstract class BaseTest {
         discoverView.perform(click());
     }
 
-    protected Matcher<View> childAtPosition(
+    Matcher<View> childAtPosition(
             final Matcher<View> parentMatcher, final int position) {
 
         return new TypeSafeMatcher<View>() {

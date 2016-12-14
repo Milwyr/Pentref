@@ -9,10 +9,7 @@ import android.support.test.runner.AndroidJUnit4;
 import com.ywca.pentref.activities.ChoosePageActivity;
 import com.ywca.pentref.activities.TimetableActivity;
 import com.ywca.pentref.fragments.TransportationFragment;
-import com.ywca.pentref.BaseTest;
-import com.ywca.pentref.R;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,34 +31,28 @@ import static org.hamcrest.Matchers.anyOf;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class ScheduleTest extends BaseTest {
-    @Rule
-    public ActivityTestRule<ChoosePageActivity> mActivityTestRule =
-            new ActivityTestRule<>(ChoosePageActivity.class);
-
     @Test
     public void scheduleTest() {
         changeFragment(R.string.transport_schedule);
 
-        // The recycler view displays a list of transportation,
-        // and the first transportation is selected
-        ViewInteraction transportationRecyclerView = onView(
-                allOf(withId(R.id.transport_recycler_view), isDisplayed()));
-        transportationRecyclerView.perform(actionOnItemAtPosition(0, click()));
+        // Repeat the test for the first three transportation
+        for (int index = 0; index < 2; index++) {
+            // The recycler view displays a list of transportation,
+            // and the first transportation is selected
+            ViewInteraction transportationRecyclerView = onView(
+                    allOf(withId(R.id.transport_recycler_view), isDisplayed()));
+            transportationRecyclerView.perform(actionOnItemAtPosition(index, click()));
 
-        testTimetable();
+            testTimetable();
 
-        // Navigate to the previous Activity, i.e. TransportationFragment within MainActivity
-        ViewInteraction backNavigationButton = onView(
-                allOf(withContentDescription("Navigate up"),
-                        withParent(allOf(withId(R.id.action_bar),
-                                withParent(withId(R.id.action_bar_container)))),
-                        isDisplayed()));
-        backNavigationButton.perform(click());
-
-        // The recycler view displays a list of transportation,
-        // and the first transportation is selected
-        transportationRecyclerView.perform(actionOnItemAtPosition(1, click()));
-        testTimetable();
+            // Navigate to the previous Activity, i.e. TransportationFragment within MainActivity
+            ViewInteraction backNavigationButton = onView(
+                    allOf(withContentDescription("Navigate up"),
+                            withParent(allOf(withId(R.id.action_bar),
+                                    withParent(withId(R.id.action_bar_container)))),
+                            isDisplayed()));
+            backNavigationButton.perform(click());
+        }
     }
 
     private void testTimetable() {
