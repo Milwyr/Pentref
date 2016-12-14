@@ -20,6 +20,7 @@ import com.ywca.pentref.models.Poi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A {@link ContentProvider} that exposes the local {@link SQLiteDatabase} to other applications via content uri.
@@ -159,16 +160,16 @@ public class PentrefProvider extends ContentProvider {
     public static ContentValues getContentValues(Poi poi) {
         ContentValues values = new ContentValues();
         values.put(Contract.Poi._ID, poi.getId());
-        values.put(Contract.Poi.COLUMN_NAME, poi.getName());
+        values.put(Contract.Poi.COLUMN_NAME, poi.getName(Locale.ENGLISH));
+        values.put(Contract.Poi.COLUMN_CHINESE_NAME, poi.getName(Locale.CHINESE));
         values.put(Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME, poi.getHeaderImageFileName());
         values.put(Contract.Poi.COLUMN_CATEGORY_ID, poi.getCategoryId());
-        values.put(Contract.Poi.COLUMN_DESCRIPTION, poi.getDescription());
         values.put(Contract.Poi.COLUMN_WEBSITE_URI, poi.getWebsiteUri());
-        values.put(Contract.Poi.COLUMN_ADDRESS, poi.getAddress());
+        values.put(Contract.Poi.COLUMN_ADDRESS, poi.getAddress(Locale.ENGLISH));
+        values.put(Contract.Poi.COLUMN_CHINESE_ADDRESS, poi.getAddress(Locale.CHINESE));
         values.put(Contract.Poi.COLUMN_PHONE_NUMBER, poi.getPhoneNumber());
         values.put(Contract.Poi.COLUMN_LATITUDE, poi.getLatLng().latitude);
         values.put(Contract.Poi.COLUMN_LONGITUDE, poi.getLatLng().longitude);
-        values.put(Contract.Poi.COLUMN_TIMESTAMP, "To be implemented");
         return values;
     }
 
@@ -184,16 +185,17 @@ public class PentrefProvider extends ContentProvider {
         while (!cursor.isAfterLast()) {
             long id = cursor.getLong(cursor.getColumnIndex(Contract.Poi._ID));
             String name = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_NAME));
+            String chineseName = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_CHINESE_NAME));
             String headerImageFileName = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME));
             int categoryId = cursor.getInt(cursor.getColumnIndex(Contract.Poi.COLUMN_CATEGORY_ID));
-            String description = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_DESCRIPTION));
             String websiteUri = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_WEBSITE_URI));
             String address = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_ADDRESS));
+            String chineseAddress = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_CHINESE_ADDRESS));
             double latitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LATITUDE));
             double longitude = cursor.getDouble(cursor.getColumnIndex(Contract.Poi.COLUMN_LONGITUDE));
             String phoneNumber = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_PHONE_NUMBER));
-            pois.add(new Poi(id, name, headerImageFileName, categoryId, description,
-                    websiteUri, address, phoneNumber, new LatLng(latitude, longitude)));
+            pois.add(new Poi(id, name, chineseName, headerImageFileName, categoryId, websiteUri,
+                    address, chineseAddress, phoneNumber, new LatLng(latitude, longitude)));
 
             cursor.moveToNext();
         }
@@ -264,15 +266,15 @@ public class PentrefProvider extends ContentProvider {
                     Contract.Poi.TABLE_NAME + " (" +
                     Contract.Poi._ID + " LONG PRIMARY KEY, " +
                     Contract.Poi.COLUMN_NAME + " TEXT, " +
+                    Contract.Poi.COLUMN_CHINESE_NAME + " TEXT, " +
                     Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME + " TEXT, " +
                     Contract.Poi.COLUMN_CATEGORY_ID + " LONG, " +
-                    Contract.Poi.COLUMN_DESCRIPTION + " TEXT, " +
                     Contract.Poi.COLUMN_WEBSITE_URI + " TEXT, " +
                     Contract.Poi.COLUMN_ADDRESS + " TEXT, " +
+                    Contract.Poi.COLUMN_CHINESE_ADDRESS + " TEXT, " +
                     Contract.Poi.COLUMN_PHONE_NUMBER + " TEXT, " +
                     Contract.Poi.COLUMN_LATITUDE + " DOUBLE, " +
-                    Contract.Poi.COLUMN_LONGITUDE + " DOUBLE, " +
-                    Contract.Poi.COLUMN_TIMESTAMP + " TEXT);";
+                    Contract.Poi.COLUMN_LONGITUDE + " DOUBLE);";
             db.execSQL(CREATE_POI_TABLE_SQL_QUERY);
 
             // Create a table for categories

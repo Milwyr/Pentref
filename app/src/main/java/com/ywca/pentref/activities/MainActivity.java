@@ -64,7 +64,7 @@ public class MainActivity extends BaseActivity
                     changeFragment(R.string.transport_schedule, new TransportationFragment());
                     break;
                 case 4:
-                    changeFragment(R.string.profile, new ProfileFragment());
+                    changeFragment(R.string.settings, new SettingsFragment());
                     break;
             }
         }
@@ -176,7 +176,7 @@ public class MainActivity extends BaseActivity
                 changeFragment(R.string.transport_schedule, new TransportationFragment());
                 break;
             case R.id.nav_profile:
-                changeFragment(R.string.transport_schedule, new ProfileFragment());
+                changeFragment(R.string.profile, new ProfileFragment());
                 break;
             case R.id.nav_settings:
                 changeFragment(R.string.settings, new SettingsFragment());
@@ -207,8 +207,8 @@ public class MainActivity extends BaseActivity
             mNavigationView.setCheckedItem(R.id.nav_weather);
         } else if (fragment instanceof TransportationFragment) {
             mNavigationView.setCheckedItem(R.id.nav_transportation);
-        } else if (fragment instanceof ProfileFragment) {
-            mNavigationView.setCheckedItem(R.id.nav_profile);
+        } else if (fragment instanceof SettingsFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_settings);
         }
 
         // The search view is only visible when the current fragment is discover fragment

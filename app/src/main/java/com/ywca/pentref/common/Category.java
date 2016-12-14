@@ -22,7 +22,7 @@ public class Category {
         return this.name;
     }
 
-    // TODO: Add better icons
+    // 5 to 7 is assigned for the Launching Acivity in a dodgy way
     public int getImageResourceId() {
         switch (this.id) {
             case 1:
@@ -30,9 +30,17 @@ public class Category {
             case 2:
                 return R.drawable.ic_bus_black_36dp;
             case 3:
-                return R.drawable.ic_menu_share;
+                return R.drawable.ic_restaurant_black;
             case 4:
-                return R.drawable.ic_bookmark_black_36dp;
+                return R.drawable.ic_store_black;
+            case 5:
+                return R.drawable.ic_bookmarked_black_36dp;
+            case 6:
+                return R.drawable.ic_sunny_black;
+            case 7:
+                return R.drawable.ic_bus_black_36dp;
+            case 8:
+                return R.drawable.ic_settings;
             default:
                 return R.drawable.ic_ferry_black_36dp;
         }

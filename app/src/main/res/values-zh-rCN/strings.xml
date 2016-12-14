@@ -1,62 +1,89 @@
 <resources>
     <string name="app_name">Pentref</string>
-    <string name="title_activity_poi_detail">Poi Details</string>
-    <string name="title_activity_timetable">Timetable</string>
+    <string name="title_activity_poi_detail">景点详细资讯</string>
+    <string name="title_activity_timetable">时间表</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <!-- Tutorial Activity -->
+    <string name="sign_in">登入</string>
+    <string name="get_started">开始使用</string>
+
     <!-- Search -->
-    <string name="search_hint">Enter text</string>
+    <string name="search_hint">输入景点</string>
 
-    <!-- Navigation drawer headers -->
-    <string name="discover">發現</string>
+    <!-- Navigation Drawer Headers -->
+    <string name="discover">发现</string>
     <string name="bookmarks">收藏</string>
-    <string name="weather">天氣</string>
-    <string name="transport_schedule">交通時間表</string>
-    <string name="settings">設定</string>
+    <string name="weather">天气</string>
+    <string name="transport_schedule">交通时间表</string>
+    <string name="profile">帐户</string>
+    <string name="settings">设定</string>
+    <string name="about">关于</string>
 
-    <!-- Poi details activity -->
-    <string name="all_reviews">All reviews</string>
+    <!-- Poi Details Activity -->
+    <string name="all_reviews">所有评论</string>
 
-    <!-- Review activity -->
-    <string name="posting_publicly">Posting publicly</string>
-    <string name="title">Title</string>
-    <string name="description">Description</string>
-    <string name="submit">Submit</string>
-    <string name="review_submitted">Review submitted</string>
+    <!-- Review Activity -->
+    <string name="posting_publicly">评论将会公开</string>
+    <string name="title">标题</string>
+    <string name="description">详细评论</string>
+    <string name="submit">提交</string>
+    <string name="review_submitted">評論已提交</string>
 
-    <!-- Transportation fragment -->
-    <string name="next_two_transports">Next two: </string>
-    <string name="temporary_route_number">11</string>
-    <string name="showFullTimetable">Show full timetable</string>
+    <!-- Discover Fragment -->
+    <string name="more">更多</string>
 
-    <!-- Timetable activity -->
-    <string name="adult_price">Adult price: </string>
-    <string name="notify_me">Notify Me</string>
+    <!-- Transportation Fragment -->
+    <string name="tai_o">大澳</string>
+    <string name="next_transport">紧随其后</string>
+    <string name="showFullTimetable">显示完整的时间表</string>
 
-    <!-- Sign in fragment -->
-    <string name="visitor">Visitor</string>
+    <!-- Timetable Activity -->
+    <string name="from">由</string>
+    <string name="to">至</string>
+    <string name="adult_price">大人价钱: </string>
 
-    <!-- Content description for image views -->
+    <!-- Sign In Fragment -->
+    <string name="visitor">访客</string>
+    <string name="sign_out">登出</string>
+
+    <!-- Content Description For Image Views -->
     <string name="poi_details_header_image">Details of the Point of Interest</string>
-    <string name="profile_picture">Profile Picture</string>
+    <string name="profile_picture">大头相</string>
 
-    <string name="place_info">
-        Place:Tai O, NT, Hong Kong\n
-        Web  :www.tai-0.com\n
-        Phone:65871092\n
-        Working time: 9:00 - 17:00
-    </string>
+    <!-- Settings Fragment -->
+    <string name="synchronise_with_server">与伺服器同步资料</string>
+    <string name="summary_synchronise_now">点击以启动与伺服器同步资料</string>
+    <string name="pref_notification_summary">系統將會在所選巴士或渡輪出發前 %1$d 分鐘顯示通知。</string>
+    <string-array name="pref_notification_minutes_before_departure_options">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+    </string-array>
 
-    <!-- Error messages -->
-    <string name="close">Close</string>
-    <string name="error_not_signed_in">Not signed in</string>
-    <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
-    <string name="error_network_unavailable">Network unavailable</string>
-    <string name="error_message_connect_to_internet_before_posting_review">Please connect to internet before posting your review.</string>
+    <!-- Dialog Messages -->
+    <string name="keep_editing">继续编辑</string>
+    <string name="discard">狠心刪除</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="close">关闭</string>
+    <string name="loading">载入中，请稍候</string>
+    <string name="dialog_title_reminder">提醒</string>
+    <string name="dialog_message_scheduled_bus">你所选的%1$s号巴士/渡轮将开出于</string>
+    <string name="dialog_message_confirm_remove_bookmark">你确定想移除这个景点吗?</string>
+    <string name="dialog_message_confirm_issue_notification">你想在适当的时间显示提醒你乘车的通知吗?</string>
+    <string name="dialog_message_confirm_discard_changes">你想狠心删除尚未发表的评论吗?</string>
+    <string name="dialog_message_synchronising">正在与伺服器同步，请稍候</string>
 
-
-    <string name="facebook_app_id">195665774189937</string>
-    <string name="sign_out">Sign Out</string>
+    <!-- Error Messages -->
+    <string name="error_connect_to_internet_to_initialise">请确保网络已连接以下载初始化数据库。</string>
+    <string name="error_not_signed_in">未登入</string>
+    <string name="error_message_sign_in_before_posting_review">请登入以发表评论。</string>
+    <string name="error_network_unavailable">网络连线中断</string>
+    <string name="error_message_connect_to_internet_before_posting_review">发表评论前请确保网络已连接。</string>
 </resources>

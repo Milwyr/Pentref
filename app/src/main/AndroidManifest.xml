@@ -21,7 +21,7 @@
             android:value="AIzaSyDguzZCUexPJKuUApa3ZoYIPnOeGUtQPwk" />
 
         <activity
-            android:name=".activities.TutorialActivity"
+            android:name=".activities.SplashScreenActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,7 +29,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.LaunchingActivity" />
+        <activity
+            android:name=".activities.LaunchingActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".activities.ChoosePageActivity" />
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
@@ -64,7 +67,7 @@
         <receiver
             android:name=".common.NotificationReceiver"
             android:enabled="true"
-            android:exported="false"></receiver>
+            android:exported="false" />
     </application>
 
 </manifest>

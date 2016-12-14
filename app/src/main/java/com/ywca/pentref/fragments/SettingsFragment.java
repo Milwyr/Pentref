@@ -4,10 +4,12 @@ import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.design.widget.Snackbar;
@@ -21,7 +23,6 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
-import com.ywca.pentref.activities.BaseActivity;
 import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
@@ -39,14 +40,18 @@ import java.util.List;
 /**
  * Displays options for the user to choose and saves user's preferences.
  */
-public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener {
+public class SettingsFragment extends PreferenceFragment implements
+        Preference.OnPreferenceClickListener, Preference.OnPreferenceChangeListener {
     private ProgressDialog mProgressDialog;
+    private ListPreference mNotificationPreference;
+    private SharedPreferences mSharedPreferences;
     private VolleyFinishCallback mVolleyFinishCallback;
 
     private boolean mIsPoiDownloaded;
     private boolean mIsCategoryDownloaded;
     private boolean mIsTransportDownloaded;
 
+    // Called to inform the app that a download process is complete
     private interface VolleyFinishCallback {
         void onPoiFinish();
 
@@ -60,9 +65,19 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
 
+        mSharedPreferences = getActivity()
+                .getSharedPreferences(getResources().getString(R.string.pref_file_name_user_settings), Context.MODE_PRIVATE);
+
         Preference synchroniseWithServerPreference = findPreference("synchronise_with_server");
         synchroniseWithServerPreference.setOnPreferenceClickListener(this);
 
+        // Add listener to notification preference, and update the summary
+        mNotificationPreference = (ListPreference)
+                findPreference(Utility.PREF_KEY_NOTIFICATION_PREFERENCE);
+        mNotificationPreference.setOnPreferenceChangeListener(this);
+        updateNotificationPreferenceSummary();
+
+        // Dismiss the dialog if all the download processes finish
         mVolleyFinishCallback = new VolleyFinishCallback() {
             @Override
             public void onPoiFinish() {
@@ -123,6 +138,19 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 }
         }
 
+        return false;
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object value) {
+        if (preference.getKey().equals(Utility.PREF_KEY_NOTIFICATION_PREFERENCE)) {
+            // Save the selected value for notification preference,
+            // i.e. (how many minutes notification is displayed before departure of transportation)
+            mSharedPreferences.edit().putInt(
+                    Utility.PREF_KEY_NOTIFICATION_PREFERENCE, Integer.valueOf(value.toString())).apply();
+            updateNotificationPreferenceSummary();
+            return true;
+        }
         return false;
     }
 
@@ -244,5 +272,10 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnected();
+    }
+
+    private void updateNotificationPreferenceSummary() {
+        int minutes = mSharedPreferences.getInt(Utility.PREF_KEY_NOTIFICATION_PREFERENCE, 30);
+        mNotificationPreference.setSummary(String.format(getResources().getString(R.string.pref_notification_summary), minutes));
     }
 }

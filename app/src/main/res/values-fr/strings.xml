@@ -1,62 +1,89 @@
 <resources>
     <string name="app_name">Pentref</string>
-    <string name="title_activity_poi_detail">Poi Details</string>
-    <string name="title_activity_timetable">Timetable</string>
+    <string name="title_activity_poi_detail">Détails du point d\'intérêt</string>
+    <string name="title_activity_timetable">Horaires</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <!-- Search -->
-    <string name="search_hint">Enter text</string>
+    <!-- Tutorial Activity -->
+    <string name="sign_in">Se connecter</string>
+    <string name="get_started">Démarrer</string>
 
-    <!-- Navigation drawer headers -->
+    <!-- Search -->
+    <string name="search_hint">Ecrire ici</string>
+
+    <!-- Navigation Drawer Headers -->
     <string name="discover">Découvrir</string>
     <string name="bookmarks">Favoris</string>
     <string name="weather">Météo</string>
-    <string name="transport_schedule">Horario</string>
+    <string name="transport_schedule">Agenda</string>
+    <string name="profile">Profil</string>
     <string name="settings">Paramètres</string>
+    <string name="about">A propos</string>
 
-    <!-- Poi details activity -->
-    <string name="all_reviews">All reviews</string>
+    <!-- Poi Details Activity -->
+    <string name="all_reviews">Tous les avis</string>
 
-    <!-- Review activity -->
-    <string name="posting_publicly">Posting publicly</string>
-    <string name="title">Title</string>
+    <!-- Review Activity -->
+    <string name="posting_publicly">Avis publique</string>
+    <string name="title">Titre</string>
     <string name="description">Description</string>
-    <string name="submit">Submit</string>
-    <string name="review_submitted">Review submitted</string>
+    <string name="submit">Soumettre</string>
+    <string name="review_submitted">Avis soumis</string>
 
-    <!-- Transportation fragment -->
-    <string name="next_two_transports">Next two: </string>
-    <string name="temporary_route_number">11</string>
-    <string name="showFullTimetable">Show full timetable</string>
+    <!-- Discover Fragment -->
+    <string name="more">Plus</string>
 
-    <!-- Timetable activity -->
-    <string name="adult_price">Adult price: </string>
-    <string name="notify_me">Notify Me</string>
+    <!-- Transportation Fragment -->
+    <string name="tai_o">Tai O</string>
+    <string name="next_transport">Suivant</string>
+    <string name="showFullTimetable">Voir tous les horaires</string>
 
-    <!-- Sign in fragment -->
-    <string name="visitor">Visitor</string>
+    <!-- Timetable Activity -->
+    <string name="from">De</string>
+    <string name="to">A</string>
+    <string name="adult_price">Prix adulte: </string>
 
-    <!-- Content description for image views -->
-    <string name="poi_details_header_image">Details of the Point of Interest</string>
-    <string name="profile_picture">Profile Picture</string>
+    <!-- Sign In Fragment -->
+    <string name="visitor">Visiteur</string>
+    <string name="sign_out">Se deconnecter</string>
 
-    <string name="place_info">
-        Place:Tai O, NT, Hong Kong\n
-        Web  :www.tai-0.com\n
-        Phone:65871092\n
-        Working time: 9:00 - 17:00
-    </string>
+    <!-- Content Description For Image Views -->
+    <string name="poi_details_header_image">A propos du point d\'intérêt</string>
+    <string name="profile_picture">Photo de profil</string>
 
-    <!-- Error messages -->
-    <string name="close">Close</string>
-    <string name="error_not_signed_in">Not signed in</string>
-    <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
-    <string name="error_network_unavailable">Network unavailable</string>
-    <string name="error_message_connect_to_internet_before_posting_review">Please connect to internet before posting your review.</string>
+    <!-- Settings Fragment -->
+    <string name="synchronise_with_server">Synchroniser avec le serveur</string>
+    <string name="summary_synchronise_now">Cliquer pour synchroniser avec le serveur</string>
+    <string name="pref_notification_summary">The notification will appear %1$d minutes before departure.</string>
+    <string-array name="pref_notification_minutes_before_departure_options">
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+    </string-array>
 
+    <!-- Dialog Messages -->
+    <string name="keep_editing">Keep editing</string>
+    <string name="discard">Supprimer</string>
+    <string name="yes">Oui</string>
+    <string name="no">No</string>
+    <string name="close">Fermer</string>
+    <string name="loading">Chargement</string>
+    <string name="dialog_title_reminder">Rappel</string>
+    <string name="dialog_message_scheduled_bus">Le bus/ferry numéro %1$s partira à</string>
+    <string name="dialog_message_confirm_remove_bookmark">Souhaitez-vous supprimer ce point d\'intérêt de vos favoris?</string>
+    <string name="dialog_message_confirm_issue_notification">Souhaitez-vous recevoir une notification?</string>
+    <string name="dialog_message_confirm_discard_changes">Souhaitez-vous supprimer vos changements?</string>
+    <string name="dialog_message_synchronising">Synchronisation avec le serveur</string>
 
-    <string name="facebook_app_id">195665774189937</string>
-    <string name="sign_out">Sign Out</string>
+    <!-- Error Messages -->
+    <string name="error_connect_to_internet_to_initialise">Merci de vous connecter à Internet pour initialiser la base de données.</string>
+    <string name="error_not_signed_in">Non connecté</string>
+    <string name="error_message_sign_in_before_posting_review">Merci de vous connecter pour publier votre avis.</string>
+    <string name="error_network_unavailable">Réseau indisponible</string>
+    <string name="error_message_connect_to_internet_before_posting_review">Merci de vous connecter à Interner pour publier votre avis.</string>
 </resources>

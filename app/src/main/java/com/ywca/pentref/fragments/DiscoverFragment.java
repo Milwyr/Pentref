@@ -44,6 +44,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.ywca.pentref.R;
+import com.ywca.pentref.activities.BaseActivity;
 import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.adapters.CategoryAdapter;
 import com.ywca.pentref.common.Category;
@@ -54,6 +55,7 @@ import com.ywca.pentref.models.Poi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -61,7 +63,7 @@ import static android.app.Activity.RESULT_OK;
  * Displays a {@link GoogleMap} instance with the predefined Points of Interest and categories.
  */
 // Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
-public class DiscoverFragment extends Fragment implements LocationListener,
+public class DiscoverFragment extends BaseFragment implements LocationListener,
         OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
 
     //region Constants
@@ -135,6 +137,7 @@ public class DiscoverFragment extends Fragment implements LocationListener,
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 // Remove all the existing markers
                 mGoogleMap.clear();
+                mPreviousMarker = null;
 
                 // Add only the markers that match the selected category
                 for (Poi poi : mPois) {
@@ -228,6 +231,12 @@ public class DiscoverFragment extends Fragment implements LocationListener,
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                // Reset the previously selected marker to the default colour
+                if (mPreviousMarker != null) {
+                    mPreviousMarker.setIcon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                }
+
                 mBottomSheet.setVisibility(View.VISIBLE);
                 mPoiSummaryCardView.setVisibility(View.GONE);
             }
@@ -371,6 +380,13 @@ public class DiscoverFragment extends Fragment implements LocationListener,
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.poi_summary_card_view:
+                // Deselect the currently selected marker (although named previous marker)
+                // by setting the icon to be the default one (which is red)
+                if (mPreviousMarker != null) {
+                    mPreviousMarker.setIcon(BitmapDescriptorFactory.defaultMarker());
+                }
+
+                // Launch PoiDetailsActivity
                 Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
                 intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
                 startActivityForResult(intent, REQUEST_POI_ACTIVITY_DETAILS);
@@ -390,7 +406,9 @@ public class DiscoverFragment extends Fragment implements LocationListener,
         mBottomSheet.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
-        mSummaryCardTitleTextView.setText(mSelectedPoi.getName());
+
+        Locale locale = super.getDeviceLocale();
+        mSummaryCardTitleTextView.setText(mSelectedPoi.getName(locale));
         return false;
     }
 

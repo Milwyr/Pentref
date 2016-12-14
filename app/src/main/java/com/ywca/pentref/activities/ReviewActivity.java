@@ -6,17 +6,30 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +41,10 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
     private Intent mIncomingIntent;
     private List<Uri> mSelectedPhotoUris;
 
+    private Poi mCurrentPoi;
+    private float mRating;
+    private String mUserName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,27 +54,27 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
 
         if (getIntent() != null) {
             // Retrieve Point of Interest from PoiDetailsActivity, and put it in an intent
-            Poi poi = getIntent().getParcelableExtra(Utility.SELECTED_POI_EXTRA_KEY);
+            mCurrentPoi = getIntent().getParcelableExtra(Utility.SELECTED_POI_EXTRA_KEY);
             mIncomingIntent = new Intent(this, PoiDetailsActivity.class);
-            mIncomingIntent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, poi);
+            mIncomingIntent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mCurrentPoi);
 
             //region Customise the actionbar
             final ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
-                actionBar.setTitle(poi.getName());
+                actionBar.setTitle(mCurrentPoi.getName(getDeviceLocale()));
                 actionBar.setDisplayHomeAsUpEnabled(true);
                 actionBar.setHomeAsUpIndicator(R.drawable.ic_cross_white_24dp);
             }
             //endregion
 
             //region Initialise widgets
-            String userName = getIntent().getStringExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY);
+            mUserName = getIntent().getStringExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY);
             TextView userNameTextView = (TextView) findViewById(R.id.user_name_text_view);
-            userNameTextView.setText(userName);
+            userNameTextView.setText(mUserName);
 
-            float rating = getIntent().getFloatExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, 0);
+            mRating = getIntent().getFloatExtra(Utility.USER_REVIEW_RATING_EXTRA_KEY, 0);
             RatingBar userReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
-            userReviewRatingBar.setRating(rating);
+            userReviewRatingBar.setRating(mRating);
 
             ImageView importFromPhotoGallery = (ImageView) findViewById(R.id.import_from_photo_gallery);
             importFromPhotoGallery.setOnClickListener(this);
@@ -127,9 +144,32 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
                 break;
             case R.id.submit_button:
                 if (isConnectedToInternet()) {
-                    // Pass the incoming Poi instance to PoiDetailsActivity
-                    setResult(RESULT_OK, mIncomingIntent);
-                    finish();
+                    try {
+                        EditText titleEditText = (EditText) findViewById(R.id.review_title_edit_text);
+                        EditText descriptionEditText = (EditText) findViewById(R.id.review_description_edit_text);
+
+                        String title = null;
+                        if (titleEditText.getText() != null && titleEditText.getText().length() > 0) {
+                            title = titleEditText.getText().toString();
+                        }
+
+                        String description = null;
+                        if (descriptionEditText.getText() != null && descriptionEditText.getText().length() > 0) {
+                            description = descriptionEditText.getText().toString();
+                        }
+
+                        if (title == null || title.isEmpty() || description == null || description.isEmpty()) {
+                            View view = findViewById(R.id.relative_layout);
+                            Snackbar.make(view, "Not empty", Snackbar.LENGTH_LONG).show();
+                        } else {
+                            // Pass the incoming Poi instance to PoiDetailsActivity
+                            postReview(title, description);
+                            setResult(RESULT_OK, mIncomingIntent);
+                            finish();
+                        }
+                    } catch (JSONException e) {
+                        Log.e("ReviewActivity", e.getMessage());
+                    }
                 } else {
                     new AlertDialog.Builder(this)
                             .setTitle(R.string.error_network_unavailable)
@@ -143,5 +183,33 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
                 }
                 break;
         }
+    }
+
+    // Post review to the server
+    private void postReview(String title, String description) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("poiId", mCurrentPoi.getId());
+        jsonObject.put("userId", getIntent().getStringExtra(Utility.USER_PROFILE_ID_EXTRA_KEY));
+        jsonObject.put("userName", mUserName);
+        jsonObject.put("rating", mRating);
+        jsonObject.put("title", title);
+        jsonObject.put("description", description);
+        jsonObject.put("timestamp", ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now()));
+
+        String url = Utility.SERVER_URL + "/PostReq.php?METHOD=INS&PATH=reviews&";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
+                url, jsonObject,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        Volley.newRequestQueue(this).add(request);
     }
 }

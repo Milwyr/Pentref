@@ -42,7 +42,7 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(context.getString(R.string.dialog_title_reminder))
-                .setContentText("Content")
+                .setContentText(bigTextMessage)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setStyle(new Notification.BigTextStyle().bigText(bigTextMessage))
                 .setAutoCancel(true);
