@@ -31,6 +31,7 @@ public class ChoosePageActivity extends AppCompatActivity implements AdapterView
         categories.add(new Category(5, getResources().getString(R.string.bookmarks)));
         categories.add(new Category(6, getResources().getString(R.string.weather)));
         categories.add(new Category(7, getResources().getString(R.string.transport_schedule)));
+        categories.add(new Category(8, getResources().getString(R.string.settings)));
 
         GridView gridView = (GridView) findViewById(R.id.grid_view);
         CategoryAdapter adapter = new CategoryAdapter(this, categories);

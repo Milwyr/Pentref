@@ -39,6 +39,8 @@ public class Category {
                 return R.drawable.ic_sunny_black;
             case 7:
                 return R.drawable.ic_bus_black_36dp;
+            case 8:
+                return R.drawable.ic_settings;
             default:
                 return R.drawable.ic_ferry_black_36dp;
         }
