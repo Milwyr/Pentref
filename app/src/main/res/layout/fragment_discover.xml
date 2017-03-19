@@ -17,7 +17,7 @@
         map:mapType="normal"
         map:uiCompass="true"
         map:uiRotateGestures="true"
-        map:uiZoomControls="false"
+        map:uiZoomControls="true"
         map:uiZoomGestures="true" />
 
     <include

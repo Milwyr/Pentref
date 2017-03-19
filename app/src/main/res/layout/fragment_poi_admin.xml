@@ -1,0 +1,36 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ywca.pentref.fragments.PoiAdminFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <com.google.android.gms.maps.MapView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        map:cameraTargetLat="22.2574336"
+        map:cameraTargetLng="113.8620642"
+        map:cameraZoom="15"
+        map:mapType="normal"
+        map:uiCompass="true"
+        map:uiRotateGestures="true"
+        map:uiZoomControls="true"
+        map:uiZoomGestures="true"
+        android:id="@+id/mapView" />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/poi_add_card_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:visibility="gone" >
+
+        <Button
+            android:text="OK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/okBtn" />
+    </android.support.v7.widget.CardView>
+</FrameLayout>

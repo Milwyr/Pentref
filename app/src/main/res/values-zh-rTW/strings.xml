@@ -21,6 +21,7 @@
     <string name="profile">帳戶</string>
     <string name="settings">設定</string>
     <string name="about">關於</string>
+    <string name="admin">管理員</string>
 
     <!-- Poi Details Activity -->
     <string name="all_reviews">所有評論</string>

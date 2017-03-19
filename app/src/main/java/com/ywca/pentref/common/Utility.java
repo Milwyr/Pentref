@@ -31,6 +31,9 @@ public class Utility {
     public static final String USER_REVIEW_RATING_EXTRA_KEY = "Rating";
     public static final String USER_PROFILE_ID_EXTRA_KEY = "UserId";
     public static final String USER_PROFILE_NAME_EXTRA_KEY = "UserName";
+    public static final String ADMIN_SELECTED_LOCATION_LATITUDE = "PoiLocationLatitude";
+    public static final String ADMIN_SELECTED_LOCATION_LONGITUDE = "PoiLocationLongitude";
+
 
     public static final String TRANSPORTATION_JSON_FILE_NAME = "transports.json";
 

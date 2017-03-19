@@ -35,6 +35,7 @@ import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -113,11 +114,17 @@ public class LaunchingActivity extends BaseActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
 
         // Read all Points of Interest from the server and add them to SQLite database
-        String poiUrl = Utility.SERVER_URL + "/pois.json";
+        String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=pois";
         JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
+                /*try {
+                    response.get(0).toString();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }*/
+
                 // Parse the response array into a list of Points of Interest
                 Gson gson = new Gson();
                 List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
@@ -131,7 +138,7 @@ public class LaunchingActivity extends BaseActivity {
                         mArePoisDownloaded = true;
                         updateIsFirstTimeInstalledFlag();
                     } catch (Exception e) {
-                        Log.e("TutorialActivity", e.getMessage());
+                        Log.e("TutorialActivity:poi", e.getMessage());
                     }
                 }
             }
@@ -146,7 +153,7 @@ public class LaunchingActivity extends BaseActivity {
         queue.add(poiJsonArrayRequest);
 
         // Read all Point of Interest categories from the server and add them to SQLite database
-        String poiCategoriesUrl = Utility.SERVER_URL + "/poi_categories.json";
+        String poiCategoriesUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=poi_categories";
         JsonArrayRequest poiCategoryArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiCategoriesUrl, null, new Response.Listener<JSONArray>() {
             @Override
@@ -164,7 +171,7 @@ public class LaunchingActivity extends BaseActivity {
                         mArePoiCategoriesDownloaded = true;
                         updateIsFirstTimeInstalledFlag();
                     } catch (Exception e) {
-                        Log.e("TutorialActivity", e.getMessage());
+                        Log.e("TutorialActivity:cat", e.getMessage());
                     }
                 }
             }
@@ -179,7 +186,7 @@ public class LaunchingActivity extends BaseActivity {
         queue.add(poiCategoryArrayRequest);
 
         // Fetch the transports json on the server and save it to a local json file
-        String transportUrl = Utility.SERVER_URL + "/transport_schedule.json";
+        String transportUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=transport_schedule";
         JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
             @Override
@@ -203,7 +210,7 @@ public class LaunchingActivity extends BaseActivity {
                         updateIsFirstTimeInstalledFlag();
                     }
                 } catch (IOException e) {
-                    Log.e("TutorialActivity", e.getMessage());
+                    Log.e("TutorialActivity:trans", e.getMessage());
                 }
             }
         }, new Response.ErrorListener() {

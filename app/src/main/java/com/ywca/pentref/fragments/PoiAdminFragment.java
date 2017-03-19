@@ -1,27 +1,25 @@
 package com.ywca.pentref.fragments;
 
 import android.Manifest;
-import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.Button;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -37,7 +35,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -45,27 +42,21 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.ywca.pentref.R;
-import com.ywca.pentref.activities.BaseActivity;
-import com.ywca.pentref.activities.PoiDetailsActivity;
-import com.ywca.pentref.adapters.CategoryAdapter;
-import com.ywca.pentref.common.Category;
-import com.ywca.pentref.common.Contract;
-import com.ywca.pentref.common.PentrefProvider;
+import com.ywca.pentref.activities.AddPoiActivity;
 import com.ywca.pentref.common.Utility;
-import com.ywca.pentref.models.Poi;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static android.app.Activity.RESULT_OK;
-
 /**
- * Displays a {@link GoogleMap} instance with the predefined Points of Interest and categories.
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * {@link PoiAdminFragment.OnFragmentInteractionListener} interface
+ * to handle interaction events.
+
+
  */
-// Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
-public class DiscoverFragment extends BaseFragment implements LocationListener,
-        OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
+public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback, View.OnClickListener, LocationListener {
 
     //region Constants
     // Request code to launch PoiDetailsActivity
@@ -78,134 +69,65 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     private final int REQUEST_CHECK_GPS_SETTINGS = 10001;
     //endregion
 
-    //region Fields
     private Circle mCircle;
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mGoogleMap;
-    private Marker mPreviousMarker;
+    private Marker mCurrentMarker;
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
-
-    private CardView mPoiSummaryCardView;
     private MapView mMapView;
-    private RelativeLayout mBottomSheet;
-    private TextView mSummaryCardTitleTextView;
-    private Poi mSelectedPoi;
+    private CardView mPoiAddCardView;
 
-    // All the Points of Interest read from the local database
-    private List<Poi> mPois;
-    //endregion
-
-    public DiscoverFragment() {
-        // Required empty public constructor
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mPois = new ArrayList<>();
 
         // Build Google Api client and connect to it
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
                 .build();
         mGoogleApiClient.connect();
-//        ImageButton imgbtn = (ImageButton) getActivity().findViewById(R.id.f_discover_imgbtn_refresh);
-//        imgbtn.setOnClickListener(this);
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_discover, container, false);
+        // Inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_poi_admin, container, false);
 
-        mMapView = (MapView) rootView.findViewById(R.id.map_view);
+        mMapView = (MapView) rootView.findViewById(R.id.mapView);
 
-        // Avoid unexpected crash
         try {
             mMapView.onCreate(savedInstanceState);
         } catch (Exception e) {
-            Log.e("DiscoverFragment", e.getMessage());
+            Log.e("PoiAdminFragment", e.getMessage());
         }
-
         mMapView.getMapAsync(this);
+        mPoiAddCardView = (CardView) rootView.findViewById(R.id.poi_add_card_view);
+        Button okBtn = (Button) rootView.findViewById(R.id.okBtn);
+        okBtn.setOnClickListener(this);
 
-        mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
 
-        // Initialises category grid view that is embedded in the bottom sheet
-        final GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                // Remove all the existing markers
-                mGoogleMap.clear();
-                mPreviousMarker = null;
-
-                // Add only the markers that match the selected category
-                for (Poi poi : mPois) {
-                    if (poi.getCategoryId() == (i + 1)) {
-                        MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
-                        mGoogleMap.addMarker(markerOptions).setTag(poi);
-                    }
-                }
-            }
-        });
-        new AsyncTask<Void, Void, List<Category>>() {
-            @Override
-            protected List<Category> doInBackground(Void... voids) {
-                // Retrieve a list of POI categories from the local database
-                Cursor cursor = getActivity().getContentResolver().query(
-                        Contract.Category.CONTENT_URI, Contract.Category.PROJECTION_ALL, null, null, null);
-
-                // This line is used to get rid of the warning
-                if (cursor == null) {
-                    return new ArrayList<>();
-                }
-
-                List<Category> categories = PentrefProvider.convertToCategories(cursor);
-                cursor.close();
-                return categories;
-            }
-
-            @Override
-            protected void onPostExecute(List<Category> categories) {
-                // Add the categories to the grid view at the bottom
-                gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
-            }
-        }.execute();
-
-        mPoiSummaryCardView = (CardView) rootView.findViewById(R.id.poi_summary_card_view);
-        mPoiSummaryCardView.setOnClickListener(this);
-
-        mSummaryCardTitleTextView = (TextView) rootView.findViewById(R.id.discover_poi_name_text_view);
-
-        // Inflate the layout for this fragment
         return rootView;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case REQUEST_POI_ACTIVITY_DETAILS:
-                mPoiSummaryCardView.setVisibility(View.GONE);
-                mBottomSheet.setVisibility(View.VISIBLE);
-                break;
-            case REQUEST_CHECK_GPS_SETTINGS:
-                if (resultCode == RESULT_OK) {
-                    // All required changes were successfully made
-                    startLocationUpdates();
-                }
-                break;
-        }
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(Uri uri) {
+
     }
 
-    //    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        mMapView.onSaveInstanceState(outState);
-//    }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -231,19 +153,22 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         }
         //endregion
 
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+
+        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                // Reset the previously selected marker to the default colour
-                if (mPreviousMarker != null) {
-                    mPreviousMarker.setIcon(BitmapDescriptorFactory
-                            .defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                if(mCurrentMarker != null){
+                    mCurrentMarker.remove();
+                    mCurrentMarker  = null;
                 }
-
-                mBottomSheet.setVisibility(View.VISIBLE);
-                mPoiSummaryCardView.setVisibility(View.GONE);
+                MarkerOptions makerOption = new MarkerOptions().position(latLng);
+                mCurrentMarker = mGoogleMap.addMarker(makerOption);
+                mPoiAddCardView.setVisibility(View.VISIBLE);
             }
         });
+        Boolean test = mGoogleMap.getUiSettings().isZoomGesturesEnabled();
+        mGoogleMap.getUiSettings().setScrollGesturesEnabled(true);
+
 
         googleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
@@ -253,40 +178,10 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             }
         });
 
-        new AsyncTask<Void, Void, List<Poi>>() {
-            @Override
-            protected List<Poi> doInBackground(Void... params) {
-                // Retrieve a list of Points of Interest from the local database
-                Cursor cursor = getActivity().getContentResolver().query(
-                        Contract.Poi.CONTENT_URI, Contract.Poi.PROJECTION_ALL, null, null, null);
 
-                // This line is used to get rid of the warning
-                if (cursor == null) {
-                    return new ArrayList<>();
-                }
 
-                List<Poi> pois = PentrefProvider.convertToPois(cursor);
-                cursor.close();
-                return pois;
-            }
 
-            @Override
-            protected void onPostExecute(List<Poi> pois) {
-                super.onPostExecute(pois);
 
-                // Add a list of Points of Interest to the map
-                for (Poi poi : pois) {
-                    MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
-                    mGoogleMap.addMarker(markerOptions).setTag(poi);
-                }
-
-                // Save all the Points of Interest to the instance variable
-                mPois.addAll(pois);
-
-                // Set a marker click listener
-                mGoogleMap.setOnMarkerClickListener(DiscoverFragment.this);
-            }
-        }.execute();
     }
 
     // Request for continuous location update using fused location provider
@@ -320,7 +215,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                             // and check the result in onActivityResult()
                             status.startResolutionForResult(getActivity(), REQUEST_CHECK_GPS_SETTINGS);
                         } catch (IntentSender.SendIntentException e) {
-                            Log.e("DiscoverFragment", e.getMessage());
+                            Log.e("PoiAdminFragment", e.getMessage());
                         }
                         break;
                 }
@@ -366,8 +261,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
             // Request location updates only when both course and fine location permissions
             // have been granted
-            LocationServices.FusedLocationApi.requestLocationUpdates(
-                    mGoogleApiClient, mLocationRequest, this);
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
 
@@ -380,58 +274,33 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     //endregion
 
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.poi_summary_card_view:
-                // Deselect the currently selected marker (although named previous marker)
-                // by setting the icon to be the default one (which is red)
-                if (mPreviousMarker != null) {
-                    mPreviousMarker.setIcon(BitmapDescriptorFactory.defaultMarker());
-                }
-
-                // Launch PoiDetailsActivity
-                Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
-                intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
-                startActivityForResult(intent, REQUEST_POI_ACTIVITY_DETAILS);
-                break;
-//            case R.id.f_discover_imgbtn_refresh:
-//                Log.i("DiscoverFragment","Refresh clicked");
-//
-//                //delete all old local poi
-//                break;
+    public void onClick(View v) {
+        Log.i("PoiAdminFragment","Onclick()");
+        switch(v.getId()){
+            case R.id.okBtn:
+                Log.i("PoiAdminFragment","OKpressed");
+                Intent intent = new Intent(getActivity(), AddPoiActivity.class);
+               // String eee = getCompleteAddressString(mCurrentMarker.getPosition().latitude,mCurrentMarker.getPosition().longitude);
+                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LATITUDE,mCurrentMarker.getPosition().latitude);
+                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LONGITUDE,mCurrentMarker.getPosition().longitude);
+                startActivity(intent);
         }
+
     }
 
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        // Highlight the selected marker
-        if (mPreviousMarker != null) {
-            mPreviousMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-        }
-        marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-        mPreviousMarker = marker;
-
-        mBottomSheet.setVisibility(View.GONE);
-        mSelectedPoi = (Poi) marker.getTag();
-        mPoiSummaryCardView.setVisibility(View.VISIBLE);
-
-        Locale locale = super.getDeviceLocale();
-        mSummaryCardTitleTextView.setText(mSelectedPoi.getName(locale));
-        return false;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_LOCATION_PERMISSION) {
-
-            // Enable locate me button if permissions are granted
-            if ((ContextCompat.checkSelfPermission(getActivity(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) &&
-                    (ContextCompat.checkSelfPermission(getActivity(),
-                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
-                mGoogleMap.setMyLocationEnabled(true);
-            }
-        }
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
     }
 
     //region Lifecycle methods for MapView
@@ -443,7 +312,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             try {
                 mMapView.onResume();
             } catch (Exception e) {
-                Log.e("DiscoverFragment", e.getMessage());
+                Log.e("PoiAdminFragment", e.getMessage());
             }
         }
     }
@@ -456,7 +325,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             try {
                 mMapView.onStart();
             } catch (Exception e) {
-                Log.e("DiscoverFragment", e.getMessage());
+                Log.e("PoiAdminFragment", e.getMessage());
             }
         }
     }
@@ -468,7 +337,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 // NullPointerException is thrown in certain circumstances
                 mMapView.onPause();
             } catch (Exception e) {
-                Log.e("DiscoverFragment", e.getMessage());
+                Log.e("PoiAdminFragment", e.getMessage());
             }
         }
         stopLocationUpdates();
@@ -483,7 +352,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 // NullPointerException is thrown in certain circumstances
                 mMapView.onStop();
             } catch (Exception e) {
-                Log.e("DiscoverFragment", e.getMessage());
+                Log.e("PoiAdminFragment", e.getMessage());
             }
         }
         mGoogleApiClient.disconnect();
@@ -496,7 +365,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 // NullPointerException is thrown in certain circumstances
                 mMapView.onDestroy();
             } catch (Exception e) {
-                Log.e("DiscoverFragment", e.getMessage());
+                Log.e("PoiAdminFragment", e.getMessage());
             }
 
         }
@@ -511,4 +380,29 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         }
     }
     //endregion
+
+    //get full address
+    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+            if (addresses != null) {
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
+
+                for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
+                }
+                strAdd = strReturnedAddress.toString();
+               //Log.w("My Current loction address", "" + strReturnedAddress.toString());
+            } else {
+                //Log.i("My Current loction address", "No Address returned!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            //Log.w("My Current loction address", "Canont get Address!");
+        }
+        return strAdd;
+    }
 }

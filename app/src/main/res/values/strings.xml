@@ -21,6 +21,7 @@
     <string name="profile">Profile</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
+    <string name="admin">Admin</string>
 
     <!-- Poi Details Activity -->
     <string name="all_reviews">All reviews</string>
@@ -92,4 +93,7 @@
     <string name="pref_file_name_user_settings" translatable="false">user_settings</string>
 
     <string name="facebook_app_id" translatable="false">195665774189937</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

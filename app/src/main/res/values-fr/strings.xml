@@ -21,6 +21,7 @@
     <string name="profile">Profil</string>
     <string name="settings">Paramètres</string>
     <string name="about">A propos</string>
+    <string name="admin">Admin</string>
 
     <!-- Poi Details Activity -->
     <string name="all_reviews">Tous les avis</string>
