@@ -1,14 +1,19 @@
 package com.ywca.pentref.fragments;
 
 import android.Manifest;
+import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -21,6 +26,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -35,16 +47,27 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.AddPoiActivity;
+import com.ywca.pentref.common.Contract;
+import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
+import com.ywca.pentref.models.Poi;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,7 +79,7 @@ import java.util.Locale;
 
 
  */
-public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback, View.OnClickListener, LocationListener {
+public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback, View.OnClickListener, LocationListener,GoogleMap.OnMarkerClickListener{
 
     //region Constants
     // Request code to launch PoiDetailsActivity
@@ -73,16 +96,28 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mGoogleMap;
     private Marker mCurrentMarker;
+    private Poi mSelectedDeletePoi;
+    private Marker mSelectedDeleteMarker;
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
     private MapView mMapView;
     private CardView mPoiAddCardView;
+    private CardView mPoiDelCardView;
+    private ArrayList<Poi> mPois;
+    private ProgressDialog progress;
+
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+        mPois = new ArrayList<>();
+        progress = new ProgressDialog(getActivity());
+        progress.setTitle("Loading");
+        progress.setMessage("Deleting POI");
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         // Build Google Api client and connect to it
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
@@ -108,6 +143,10 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
         mPoiAddCardView = (CardView) rootView.findViewById(R.id.poi_add_card_view);
         Button okBtn = (Button) rootView.findViewById(R.id.okBtn);
         okBtn.setOnClickListener(this);
+
+        mPoiDelCardView = (CardView) rootView.findViewById(R.id.poi_del_card_view);
+        Button delBtn = (Button) rootView.findViewById(R.id.poi_btn_del);
+        delBtn.setOnClickListener(this);
 
 
         return rootView;
@@ -153,6 +192,42 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
         }
         //endregion
 
+        new AsyncTask<Void, Void, List<Poi>>() {
+            @Override
+            protected List<Poi> doInBackground(Void... params) {
+                // Retrieve a list of Points of Interest from the local database
+                Cursor cursor = getActivity().getContentResolver().query(
+                        Contract.Poi.CONTENT_URI, Contract.Poi.PROJECTION_ALL, null, null, null);
+
+                // This line is used to get rid of the warning
+                if (cursor == null) {
+                    return new ArrayList<>();
+                }
+
+                List<Poi> pois = PentrefProvider.convertToPois(cursor);
+                cursor.close();
+                return pois;
+            }
+
+            @Override
+            protected void onPostExecute(List<Poi> pois) {
+                super.onPostExecute(pois);
+
+                // Add a list of Points of Interest to the map
+                for (Poi poi : pois) {
+                    MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                    mGoogleMap.addMarker(markerOptions).setTag(poi);
+                }
+
+                // Save all the Points of Interest to the instance variable
+                mPois.addAll(pois);
+
+                // Set a marker click listener
+               mGoogleMap.setOnMarkerClickListener(PoiAdminFragment.this);
+
+            }
+        }.execute();
+
 
         mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -161,9 +236,13 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                     mCurrentMarker.remove();
                     mCurrentMarker  = null;
                 }
-                MarkerOptions makerOption = new MarkerOptions().position(latLng);
+                MarkerOptions makerOption = new MarkerOptions()
+                        .position(latLng)
+                        .icon(BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                 mCurrentMarker = mGoogleMap.addMarker(makerOption);
                 mPoiAddCardView.setVisibility(View.VISIBLE);
+                mPoiDelCardView.setVisibility(View.GONE);
             }
         });
         Boolean test = mGoogleMap.getUiSettings().isZoomGesturesEnabled();
@@ -284,8 +363,97 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                 intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LATITUDE,mCurrentMarker.getPosition().latitude);
                 intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LONGITUDE,mCurrentMarker.getPosition().longitude);
                 startActivity(intent);
+                break;
+            case R.id.poi_btn_del:
+
+                Log.i("PoiAdminFragment","DELpressed");
+                Log.i("PoiAdminFragment",""+mSelectedDeletePoi.getId());
+                progress.show();
+                RequestQueue queue = Volley.newRequestQueue(getActivity());
+                String delUrl = Utility.SERVER_URL + "/PostReq.php?Method=DEL&PATH=pois&UID=20161217";
+                JSONObject delPoijsonObject = new JSONObject();
+                try {
+                    delPoijsonObject.put("id",mSelectedDeletePoi.getId());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                        Request.Method.POST, delUrl, delPoijsonObject, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        int a = 1;
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    //Server side error
+                    public void onErrorResponse(VolleyError error) {
+                        int b = 1;
+                    }
+
+                });
+                queue.add(jsonObjectRequest);
+
+                // Remove all poi from the database
+                ContentResolver contentResolver = getActivity().getContentResolver();
+                contentResolver.delete(Contract.Poi.CONTENT_URI, null, null);
+
+                //Download poi from server
+                String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=pois";
+                JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
+                        Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        // Parse the response array into a list of Points of Interest
+                        Gson gson = new Gson();
+                        List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
+
+                        // Insert the pois into the local database
+                        for (final Poi poi : pois) {
+                            ContentValues values = PentrefProvider.getContentValues(poi);
+
+                            try {
+                                getActivity().getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
+
+                            } catch (Exception e) {
+                                Log.e("Poi_admin_Fragment", e.getMessage());
+                            }
+                        }
+
+                        mSelectedDeleteMarker.remove();
+                       // mSelectedDeleteMarker = null;
+                        progress.dismiss();
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (error != null) {
+                            progress.dismiss();
+                            Log.e("Poi_admin_Fragment", error.getMessage());
+                        }
+                    }
+                });
+                queue.add(poiJsonArrayRequest);
+
+                break;
         }
 
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        if (marker == mCurrentMarker){
+            mPoiAddCardView.setVisibility(View.VISIBLE);
+            mPoiDelCardView.setVisibility(View.GONE);
+        }else{
+            mPoiAddCardView.setVisibility(View.GONE);
+            mPoiDelCardView.setVisibility(View.VISIBLE);
+            mSelectedDeletePoi = (Poi) marker.getTag();
+            mSelectedDeleteMarker = marker;
+        }
+
+
+        return false;
     }
 
     /**

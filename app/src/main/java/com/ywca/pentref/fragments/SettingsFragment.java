@@ -159,7 +159,7 @@ public class SettingsFragment extends PreferenceFragment implements
         RequestQueue queue = Volley.newRequestQueue(getActivity());
 
         // Read all Points of Interest from the server and add them to SQLite database
-        String poiUrl = Utility.SERVER_URL + "/pois.json";
+        String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=pois";
         JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override

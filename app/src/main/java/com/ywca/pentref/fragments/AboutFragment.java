@@ -52,7 +52,8 @@ public class AboutFragment extends Fragment {
         test_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=INS&PATH=pois&UID=20161217";
+                //poiUrl for delete
+                String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=DEL&PATH=pois&UID=20161217";
 //                //TODO: implement json object
                 JSONObject poiJsonObject = new JSONObject();
 //                try {
@@ -77,14 +78,11 @@ public class AboutFragment extends Fragment {
 //                } catch (JSONException e) {
 //                    e.printStackTrace();
 //                }
-                Poi poi = new Poi(1002, "dddddddd", "", "", 1, "", "", "", "", new LatLng(0, 0));
-                String test = new GsonBuilder().create().toJson(poi);
                 try {
-                    poiJsonObject = new JSONObject(test);
+                    poiJsonObject.put("id","34");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                         Request.Method.POST, poiUrl, poiJsonObject, new Response.Listener<JSONObject>() {
                     @Override
@@ -130,6 +128,7 @@ public class AboutFragment extends Fragment {
                 Volley.newRequestQueue(getActivity()).add(jsonObjectRequest);
             }
         });
+
 
         // Inflate the layout for this fragment
         return root_view;
