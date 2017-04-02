@@ -140,6 +140,7 @@ public class LaunchingActivity extends BaseActivity {
                     } catch (Exception e) {
                         Log.e("TutorialActivity:poi", e.getMessage());
                     }
+
                 }
             }
         }, new Response.ErrorListener() {

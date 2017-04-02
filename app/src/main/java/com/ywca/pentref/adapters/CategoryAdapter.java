@@ -50,6 +50,7 @@ public class CategoryAdapter extends BaseAdapter {
             final Category categoryItem = mCategories.get(position);
 
             ImageView icon = (ImageView) convertView.findViewById(R.id.category_icon);
+            //icon.setVisibility(View.INVISIBLE);
             icon.setImageResource(categoryItem.getImageResourceId());
 
             TextView category = (TextView) convertView.findViewById(R.id.category_text_view);

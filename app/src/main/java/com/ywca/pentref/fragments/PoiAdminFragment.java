@@ -104,7 +104,10 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     private CardView mPoiAddCardView;
     private CardView mPoiDelCardView;
     private ArrayList<Poi> mPois;
-    private ProgressDialog progress;
+    private ProgressDialog mProgress;
+    private RequestQueue mQueue;
+
+    public static final String TAG = "PoiAdminFragment";
 
 
 
@@ -114,10 +117,10 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
 
 
         mPois = new ArrayList<>();
-        progress = new ProgressDialog(getActivity());
-        progress.setTitle("Loading");
-        progress.setMessage("Deleting POI");
-        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        mProgress = new ProgressDialog(getActivity());
+        mProgress.setTitle("Loading");
+        mProgress.setMessage("Deleting POI");
+        mProgress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         // Build Google Api client and connect to it
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
@@ -368,8 +371,12 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
 
                 Log.i("PoiAdminFragment","DELpressed");
                 Log.i("PoiAdminFragment",""+mSelectedDeletePoi.getId());
-                progress.show();
-                RequestQueue queue = Volley.newRequestQueue(getActivity());
+
+
+                //Delete the selected poi from server
+                if(mQueue == null) {
+                    mQueue = Volley.newRequestQueue(getActivity());
+                }
                 String delUrl = Utility.SERVER_URL + "/PostReq.php?Method=DEL&PATH=pois&UID=20161217";
                 JSONObject delPoijsonObject = new JSONObject();
                 try {
@@ -391,52 +398,77 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                     }
 
                 });
-                queue.add(jsonObjectRequest);
 
-                // Remove all poi from the database
-                ContentResolver contentResolver = getActivity().getContentResolver();
-                contentResolver.delete(Contract.Poi.CONTENT_URI, null, null);
+                jsonObjectRequest.setTag(TAG);
+                mQueue.add(jsonObjectRequest);
 
-                //Download poi from server
-                String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=pois";
-                JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
-                        Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        // Parse the response array into a list of Points of Interest
-                        Gson gson = new Gson();
-                        List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
+//                //Delete the selected poi from local table
+//                // Defines selection criteria for the rows you want to delete
+//                String mSelectionClause = Contract.Poi._ID + " = ?";
+//                String[] mSelectionArgs = {mSelectedDeletePoi.getId()+""};
+//                getActivity().getContentResolver().delete(Contract.Poi.CONTENT_URI,mSelectionClause,mSelectionArgs);
 
-                        // Insert the pois into the local database
-                        for (final Poi poi : pois) {
-                            ContentValues values = PentrefProvider.getContentValues(poi);
+                syncWithServer();
 
-                            try {
-                                getActivity().getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
+                //delete the SelectedDeleteMarker marker from the map
+                mSelectedDeleteMarker.remove();
+                mSelectedDeleteMarker = null;
 
-                            } catch (Exception e) {
-                                Log.e("Poi_admin_Fragment", e.getMessage());
-                            }
-                        }
-
-                        mSelectedDeleteMarker.remove();
-                       // mSelectedDeleteMarker = null;
-                        progress.dismiss();
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if (error != null) {
-                            progress.dismiss();
-                            Log.e("Poi_admin_Fragment", error.getMessage());
-                        }
-                    }
-                });
-                queue.add(poiJsonArrayRequest);
 
                 break;
         }
 
+    }
+    //Delete the local poi table and get the new one from the server
+    private void syncWithServer() {
+        //Create requestQueue if not exist
+        if(mQueue == null){
+            mQueue = Volley.newRequestQueue(getActivity());
+        }
+
+        //Start the progressDialog
+        mProgress.show();
+
+        // Remove all poi from the local database
+        ContentResolver contentResolver = getActivity().getContentResolver();
+        contentResolver.delete(Contract.Poi.CONTENT_URI, null, null);
+
+        //Download poi from server
+        String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=pois";
+        JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                // Parse the response array into a list of Points of Interest
+                Gson gson = new Gson();
+                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
+
+                // Insert the pois into the local database
+                for (final Poi poi : pois) {
+                    ContentValues values = PentrefProvider.getContentValues(poi);
+
+                    try {
+                        getActivity().getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
+
+                    } catch (Exception e) {
+                        Log.e("Poi_admin_Fragment", e.getMessage());
+                    }
+                }
+
+
+
+                mProgress.dismiss();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (error != null) {
+                    mProgress.dismiss();
+                    Log.e("Poi_admmn_Fragment", error.getMessage());
+                }
+            }
+        });
+        mQueue.add(poiJsonArrayRequest);
     }
 
     @Override
@@ -524,6 +556,9 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
             }
         }
         mGoogleApiClient.disconnect();
+        if (mQueue != null) {
+            mQueue.cancelAll(TAG);
+        }
     }
 
     @Override

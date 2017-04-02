@@ -118,6 +118,7 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
                     public void onResponse(JSONObject response) {
                         int a = 1;
                         progress.dismiss();
+
                     }
                 }, new Response.ErrorListener() {
                     @Override

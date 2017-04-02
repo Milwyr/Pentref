@@ -56,6 +56,7 @@ public class AboutFragment extends Fragment {
                 String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=DEL&PATH=pois&UID=20161217";
 //                //TODO: implement json object
                 JSONObject poiJsonObject = new JSONObject();
+
 //                try {
 //                    poiJsonObject = new JSONObject("{\"id\": \"34\",\n" +
 //                            "        \"name\": \"Tai O Cultural And Ecological Integrated Resource Centre\"}");
@@ -79,7 +80,8 @@ public class AboutFragment extends Fragment {
 //                    e.printStackTrace();
 //                }
                 try {
-                    poiJsonObject.put("id","34");
+                    poiJsonObject.put("id",4444);
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

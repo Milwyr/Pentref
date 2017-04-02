@@ -7,10 +7,12 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -21,7 +23,9 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -51,12 +55,14 @@ import com.ywca.pentref.adapters.CategoryAdapter;
 import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
+import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -91,6 +97,10 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     private RelativeLayout mBottomSheet;
     private TextView mSummaryCardTitleTextView;
     private Poi mSelectedPoi;
+    private FloatingActionButton mBookmarkBtn;
+    private Toast mToast;
+    private Spinner mSpinner;
+
 
     // All the Points of Interest read from the local database
     private List<Poi> mPois;
@@ -122,6 +132,9 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
         mMapView = (MapView) rootView.findViewById(R.id.map_view);
 
+        mBookmarkBtn = (FloatingActionButton) rootView.findViewById(R.id.f_discover_fab_bookmark);
+        mBookmarkBtn.setOnClickListener(this);
+
         // Avoid unexpected crash
         try {
             mMapView.onCreate(savedInstanceState);
@@ -132,6 +145,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         mMapView.getMapAsync(this);
 
         mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
+        mSpinner = (Spinner) rootView.findViewById(R.id.f_discover_spinner);
 
         // Initialises category grid view that is embedded in the bottom sheet
         final GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
@@ -172,6 +186,8 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             protected void onPostExecute(List<Category> categories) {
                 // Add the categories to the grid view at the bottom
                 gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
+                mSpinner.setAdapter(new CategoryAdapter(getActivity(),categories));
+
             }
         }.execute();
 
@@ -394,6 +410,44 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, mSelectedPoi);
                 startActivityForResult(intent, REQUEST_POI_ACTIVITY_DETAILS);
                 break;
+            case R.id.f_discover_fab_bookmark:
+                //
+                final boolean isPreviouslyBookmarked = (boolean) mBookmarkBtn.getTag();
+
+                // Insert or delete the bookmark from database after the user clicks on the bookmark fab
+                new UpdateBookmarkAsyncTask(getActivity(),mSelectedPoi.getId()) {
+                    @Override
+                    protected void onPreExecute() {
+                        mBookmarkBtn.setEnabled(false);
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void v) {
+                        boolean isNowBookmarked = !isPreviouslyBookmarked;
+                        mBookmarkBtn.setTag(isNowBookmarked);
+                        mBookmarkBtn.setImageResource(isNowBookmarked ?
+                                R.drawable.ic_bookmarked_black_36dp : R.drawable.ic_bookmark_black_36dp);
+
+                        //Show isBookmarked msg
+                        if(isNowBookmarked){
+                            if(mToast != null){
+                                mToast.cancel();
+                            }
+                            mToast =  Toast.makeText(getActivity(), "Bookmark added", Toast.LENGTH_SHORT);
+                            mToast.show();
+                        }else{
+                            if(mToast != null) {
+                                mToast.cancel();
+                            }
+                            mToast = Toast.makeText(getActivity(), "Bookmark removed", Toast.LENGTH_SHORT);
+                            mToast.show();
+                        }
+
+
+                        mBookmarkBtn.setEnabled(true);
+                    }
+                }.execute(isPreviouslyBookmarked);
+                break;
 //            case R.id.f_discover_imgbtn_refresh:
 //                Log.i("DiscoverFragment","Refresh clicked");
 //
@@ -414,6 +468,8 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         mBottomSheet.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
+        new InitialiseBookmarkFabAsyncTask().execute(mSelectedPoi.getId());
+
 
         Locale locale = super.getDeviceLocale();
         mSummaryCardTitleTextView.setText(mSelectedPoi.getName(locale));
@@ -511,4 +567,30 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         }
     }
     //endregion
+
+    private class InitialiseBookmarkFabAsyncTask extends AsyncTask<Long, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Long... longs) {
+            long poiId = longs[0];
+
+            // Query the bookmark table with the given poi id
+            Uri uriWithPoiId = Uri.withAppendedPath(
+                    Contract.Bookmark.CONTENT_URI, Long.toString(poiId));
+            Cursor cursor = getActivity().getContentResolver().query(uriWithPoiId, null, null, null, null);
+
+            // Return true if the given poi id is found in the bookmark table
+            if (cursor != null) {
+                cursor.close();
+                return cursor.getCount() > 0;
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isBookmarked) {
+            super.onPostExecute(isBookmarked);
+            mBookmarkBtn.setTag(isBookmarked);
+            mBookmarkBtn.setImageResource(isBookmarked ? R.drawable.ic_bookmarked_black_36dp : R.drawable.ic_bookmark_black_36dp);
+        }
+    }
 }
