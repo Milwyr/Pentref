@@ -25,6 +25,12 @@ public class Category {
     // 5 to 7 is assigned for the Launching Acivity in a dodgy way
     public int getImageResourceId() {
         switch (this.id) {
+            //For bookmark
+            case -11:
+                return R.drawable.ic_bookmarked_black_36dp;
+            //For ALL POI
+            case -10:
+                return R.drawable.ic_place_black_36dp;
             case 1:
                 return R.drawable.ic_menu_camera;
             case 2:

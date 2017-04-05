@@ -217,6 +217,17 @@ public class PentrefProvider extends ContentProvider {
     }
     //endregion
 
+    public static List<Long> convertToBookmarkIds(@NonNull Cursor cursor){
+        List<Long> idList = new ArrayList<>();
+        cursor.moveToFirst();
+        while(!cursor.isAfterLast()){
+            idList.add(cursor.getLong(cursor.getColumnIndex(Contract.Bookmark.COLUMN_POI_ID)));
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return idList;
+    }
+
     private String convertToTableName(Uri uri) {
         switch (mUriMatcher.match(uri)) {
             case POI_TABLE:

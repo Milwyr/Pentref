@@ -52,6 +52,7 @@ import com.ywca.pentref.R;
 import com.ywca.pentref.activities.BaseActivity;
 import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.adapters.CategoryAdapter;
+import com.ywca.pentref.adapters.SpinnerCategoryAdapter;
 import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
@@ -145,7 +146,68 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         mMapView.getMapAsync(this);
 
         mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
+
+        // Initialises category spinner view that is embedded in the bottom sheet
         mSpinner = (Spinner) rootView.findViewById(R.id.f_discover_spinner);
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Remove all the existing markers
+                mGoogleMap.clear();
+                mPreviousMarker = null;
+
+                //Add All poi if position = 0
+                if(position == 0){
+                    for(Poi poi : mPois){
+                        MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                        mGoogleMap.addMarker(markerOptions).setTag(poi);
+                    }
+                }else if(position == mSpinner.getAdapter().getCount() - 1) {
+                    //Show bookmarked POI
+                    Toast.makeText(getActivity(),"bookmark selected",Toast.LENGTH_SHORT);
+                    new AsyncTask<Void, Void, List<Long>>() {
+                        @Override
+                        protected List<Long> doInBackground(Void... params) {
+                            //Retrvive all ids from local bookmark
+                            Cursor cursor = getActivity().getContentResolver().query(
+                                    Contract.Bookmark.CONTENT_URI, Contract.Bookmark.PROJECTION_ALL, null, null, null);
+
+                            // This line is used to get rid of the warning
+                            if (cursor == null) {
+                                return new ArrayList<>();
+                            }
+                            List<Long> idList = PentrefProvider.convertToBookmarkIds(cursor);
+                            cursor.close();
+                            return idList;
+                        }
+
+                        @Override
+                        protected void onPostExecute(List<Long> longs) {
+                            super.onPostExecute(longs);
+                            //Add only the markers that match the bookmark
+                            for(Poi poi : mPois){
+                                if(longs.contains(poi.getId())){
+                                    MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                                    mGoogleMap.addMarker(markerOptions).setTag(poi);
+                                }
+                            }
+                        }
+                    }.execute();
+                }else{
+                        // Add only the markers that match the selected category
+                        for (Poi poi : mPois) {
+                            if (poi.getCategoryId() == (position)) {
+                                MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                                mGoogleMap.addMarker(markerOptions).setTag(poi);
+                            }
+                        }
+                    }
+                }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         // Initialises category grid view that is embedded in the bottom sheet
         final GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
@@ -186,10 +248,11 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             protected void onPostExecute(List<Category> categories) {
                 // Add the categories to the grid view at the bottom
                 gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
-                mSpinner.setAdapter(new CategoryAdapter(getActivity(),categories));
+                mSpinner.setAdapter(new SpinnerCategoryAdapter(getActivity(),categories));
 
             }
         }.execute();
+
 
         mPoiSummaryCardView = (CardView) rootView.findViewById(R.id.poi_summary_card_view);
         mPoiSummaryCardView.setOnClickListener(this);

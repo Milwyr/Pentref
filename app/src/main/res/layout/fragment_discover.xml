@@ -9,24 +9,30 @@
     <!-- Zoom to Tai O by default -->
 
     <!-- A fixed-size view that shows summary of the selected Point of Interest -->
-    <Spinner
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:id="@+id/f_discover_spinner"
-        android:layout_height="9dp" />
+        android:layout_height="match_parent">
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/map_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        map:cameraTargetLat="22.2574336"
-        map:cameraTargetLng="113.8620642"
-        map:cameraZoom="15"
-        map:mapType="normal"
-        map:uiCompass="true"
-        map:uiRotateGestures="true"
-        map:uiZoomControls="true"
-        map:uiZoomGestures="true"
-       />
+        <Spinner
+            android:layout_width="match_parent"
+            android:id="@+id/f_discover_spinner"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/map_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            map:cameraTargetLat="22.2574336"
+            map:cameraTargetLng="113.8620642"
+            map:cameraZoom="15"
+            map:mapType="normal"
+            map:uiCompass="true"
+            map:uiRotateGestures="true"
+            map:uiZoomControls="true"
+            map:uiZoomGestures="true"
+           />
+    </LinearLayout>
 
     <include
         android:id="@+id/bottom_sheet"
