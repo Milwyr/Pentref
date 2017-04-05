@@ -95,7 +95,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
-    private RelativeLayout mBottomSheet;
+    //private RelativeLayout mBottomSheet;
     private TextView mSummaryCardTitleTextView;
     private Poi mSelectedPoi;
     private FloatingActionButton mBookmarkBtn;
@@ -145,13 +145,16 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
         mMapView.getMapAsync(this);
 
-        mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
+//        mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
 
         // Initialises category spinner view that is embedded in the bottom sheet
         mSpinner = (Spinner) rootView.findViewById(R.id.f_discover_spinner);
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Set summary card view to invisible
+                mPoiSummaryCardView.setVisibility(View.INVISIBLE);
+
                 // Remove all the existing markers
                 mGoogleMap.clear();
                 mPreviousMarker = null;
@@ -209,7 +212,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             }
         });
 
-        // Initialises category grid view that is embedded in the bottom sheet
+        /*// Initialises category grid view that is embedded in the bottom sheet
         final GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -226,7 +229,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                     }
                 }
             }
-        });
+        });*/
         new AsyncTask<Void, Void, List<Category>>() {
             @Override
             protected List<Category> doInBackground(Void... voids) {
@@ -247,7 +250,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             @Override
             protected void onPostExecute(List<Category> categories) {
                 // Add the categories to the grid view at the bottom
-                gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
+                //gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
                 mSpinner.setAdapter(new SpinnerCategoryAdapter(getActivity(),categories));
 
             }
@@ -269,7 +272,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         switch (requestCode) {
             case REQUEST_POI_ACTIVITY_DETAILS:
                 mPoiSummaryCardView.setVisibility(View.GONE);
-                mBottomSheet.setVisibility(View.VISIBLE);
+                //mBottomSheet.setVisibility(View.VISIBLE);
                 break;
             case REQUEST_CHECK_GPS_SETTINGS:
                 if (resultCode == RESULT_OK) {
@@ -319,7 +322,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                             .defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 }
 
-                mBottomSheet.setVisibility(View.VISIBLE);
+              //  mBottomSheet.setVisibility(View.VISIBLE);
                 mPoiSummaryCardView.setVisibility(View.GONE);
             }
         });
@@ -528,7 +531,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
         mPreviousMarker = marker;
 
-        mBottomSheet.setVisibility(View.GONE);
+        //mBottomSheet.setVisibility(View.GONE);
         mSelectedPoi = (Poi) marker.getTag();
         mPoiSummaryCardView.setVisibility(View.VISIBLE);
         new InitialiseBookmarkFabAsyncTask().execute(mSelectedPoi.getId());
