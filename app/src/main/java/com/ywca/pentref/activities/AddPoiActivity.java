@@ -102,7 +102,7 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
                 String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=INS&PATH=pois&UID=20161217";
                 JSONObject poiJsonObject = new JSONObject();
 
-                Poi newPoi = new Poi(id,name,chineseName,headerImageFileName,
+                Poi newPoi = new Poi("place holder",name,chineseName,headerImageFileName,
                         categoryId,websiteUri,address,chineseAddress,phoneNumber,new LatLng(latitude,longitude));
 
                 String test = new GsonBuilder().create().toJson(newPoi);

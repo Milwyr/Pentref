@@ -90,7 +90,7 @@ public class BookmarksAdapter extends RecyclerView.Adapter<BookmarksAdapter.View
         return (mPois == null) ? 0 : mPois.size();
     }
 
-    private void removePoi(long poiId) {
+    private void removePoi(String poiId) {
         int position = 0;
         for (Poi poi : mPois) {
             if (poiId == poi.getId()) {

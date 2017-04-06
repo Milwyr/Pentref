@@ -60,7 +60,7 @@ public class AboutFragment extends Fragment {
             public void onClick(View v) {
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference myRef = database.getReference("POI");
-                Poi newPoi = new Poi(2420,"Updated222 name","test2","ff.png",
+                Poi newPoi = new Poi("2240","Updated222 name","test2","ff.png",
                         2,"ddd","eee","fff","1234234",new LatLng(0,0));
                 //the id will be control by  the client side
                 /*myRef.child(((Long) newPoi.getId()).toString()).setValue(newPoi)
@@ -90,7 +90,7 @@ public class AboutFragment extends Fragment {
 //                });
 
                 //Update Example
-                myRef.child(((Long)newPoi.getId()).toString()).setValue(newPoi)
+                myRef.child(newPoi.getId()).setValue(newPoi)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

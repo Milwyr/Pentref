@@ -140,9 +140,11 @@ public class LaunchingActivity extends BaseActivity {
                     // TODO: handle the poiSnapshot
                     //try read one first
                     String test = (String) poiSnapshot.child("name").getValue();
-                    Log.i(TAG,test);
+//                    Log.i(TAG,test);
                     //try firebase getvalue function
                     Poi poi = poiSnapshot.getValue(Poi.class);
+                    poi.setId(poiSnapshot.getKey());
+                    int i = 5;
                     ContentValues values = PentrefProvider.getContentValues(poi);
                     try {
                         getContentResolver().insert(Contract.Poi.CONTENT_URI, values);

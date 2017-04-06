@@ -13,7 +13,7 @@ import com.ywca.pentref.models.Poi;
  */
 public class UpdateBookmarkAsyncTask extends AsyncTask<Boolean, Void, Void> {
     private Context mContext;
-    private long mPoiId;
+    private String mPoiId;
 
     /**
      * Constructor
@@ -21,7 +21,7 @@ public class UpdateBookmarkAsyncTask extends AsyncTask<Boolean, Void, Void> {
      * @param context Context
      * @param poiId   {@link Poi} id
      */
-    protected UpdateBookmarkAsyncTask(Context context, long poiId) {
+    protected UpdateBookmarkAsyncTask(Context context, String poiId) {
         mContext = context;
         mPoiId = poiId;
     }
@@ -44,7 +44,7 @@ public class UpdateBookmarkAsyncTask extends AsyncTask<Boolean, Void, Void> {
             // Delete the bookmarked poi from the bookmark table
             Uri uri = Contract.Bookmark.CONTENT_URI;
             String selection = Contract.Bookmark.COLUMN_POI_ID + " = ?";
-            String[] selectionArgs = {Long.toString(mPoiId)};
+            String[] selectionArgs = {mPoiId};
 
             mContext.getContentResolver().delete(uri, selection, selectionArgs);
         }

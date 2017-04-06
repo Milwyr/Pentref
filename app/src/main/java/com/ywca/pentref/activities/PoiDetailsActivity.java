@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.icu.text.StringSearch;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -335,14 +336,14 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
      * Finds if the given poi id is in table Bookmark of the local SQLite database.
      * After that, updates the image for bookmark fab according to the bookmarked state.
      */
-    private class InitialiseBookmarkFabAsyncTask extends AsyncTask<Long, Void, Boolean> {
+    private class InitialiseBookmarkFabAsyncTask extends AsyncTask<String, Void, Boolean> {
         @Override
-        protected Boolean doInBackground(Long... longs) {
-            long poiId = longs[0];
+        protected Boolean doInBackground(String... strings) {
+            String poiId = strings[0];
 
             // Query the bookmark table with the given poi id
             Uri uriWithPoiId = Uri.withAppendedPath(
-                    Contract.Bookmark.CONTENT_URI, Long.toString(poiId));
+                    Contract.Bookmark.CONTENT_URI, poiId);
             Cursor cursor = getContentResolver().query(uriWithPoiId, null, null, null, null);
 
             // Return true if the given poi id is found in the bookmark table

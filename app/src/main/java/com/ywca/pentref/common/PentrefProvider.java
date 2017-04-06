@@ -183,7 +183,7 @@ public class PentrefProvider extends ContentProvider {
         List<Poi> pois = new ArrayList<>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            long id = cursor.getLong(cursor.getColumnIndex(Contract.Poi._ID));
+            String id = cursor.getString(cursor.getColumnIndex(Contract.Poi._ID));
             String name = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_NAME));
             String chineseName = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_CHINESE_NAME));
             String headerImageFileName = cursor.getString(cursor.getColumnIndex(Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME));
@@ -217,11 +217,11 @@ public class PentrefProvider extends ContentProvider {
     }
     //endregion
 
-    public static List<Long> convertToBookmarkIds(@NonNull Cursor cursor){
-        List<Long> idList = new ArrayList<>();
+    public static List<String> convertToBookmarkIds(@NonNull Cursor cursor){
+        List<String> idList = new ArrayList<>();
         cursor.moveToFirst();
         while(!cursor.isAfterLast()){
-            idList.add(cursor.getLong(cursor.getColumnIndex(Contract.Bookmark.COLUMN_POI_ID)));
+            idList.add(cursor.getString(cursor.getColumnIndex(Contract.Bookmark.COLUMN_POI_ID)));
             cursor.moveToNext();
         }
         cursor.close();
@@ -275,7 +275,7 @@ public class PentrefProvider extends ContentProvider {
             // Create a table for point of interest
             final String CREATE_POI_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
                     Contract.Poi.TABLE_NAME + " (" +
-                    Contract.Poi._ID + " LONG PRIMARY KEY, " +
+                    Contract.Poi._ID + " TEXT PRIMARY KEY, " +
                     Contract.Poi.COLUMN_NAME + " TEXT, " +
                     Contract.Poi.COLUMN_CHINESE_NAME + " TEXT, " +
                     Contract.Poi.COLUMN_HEADER_IMAGE_FILE_NAME + " TEXT, " +
@@ -299,7 +299,7 @@ public class PentrefProvider extends ContentProvider {
             final String CREATE_BOOKMARK_TABLE_SQL_QUERY = "CREATE TABLE IF NOT EXISTS " +
                     Contract.Bookmark.TABLE_NAME + " (" +
                     Contract.Bookmark._ID + " INTEGER PRIMARY KEY, " +
-                    Contract.Bookmark.COLUMN_POI_ID + " LONG)";
+                    Contract.Bookmark.COLUMN_POI_ID + " TEXT)";
             db.execSQL(CREATE_BOOKMARK_TABLE_SQL_QUERY);
         }
 

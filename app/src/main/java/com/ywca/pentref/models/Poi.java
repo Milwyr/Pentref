@@ -15,7 +15,7 @@ import java.util.Locale;
  */
 public class Poi implements Comparable, Parcelable {
     //region Fields
-    private long id;
+    private String firebaseId;
     private String name;
     private String chineseName;
     private String headerImageFileName;
@@ -31,22 +31,11 @@ public class Poi implements Comparable, Parcelable {
     //for firebase
     public Poi(){}
 
-    public Poi(DataSnapshot poiDataSnapshot){
-        this.id = (long) poiDataSnapshot.child("id").getValue();
-        this.name = (String) poiDataSnapshot.child("chineseName").getValue();
-        this.headerImageFileName = (String) poiDataSnapshot.child("headerImageFileName").getValue();
-        //this.categoryId = (long) poiDataSnapshot.child("categoryId").getValue();
-        this.websiteUri = (String) poiDataSnapshot.child("websiteUri").getValue();
-        this.address = (String) poiDataSnapshot.child("address").getValue();
-        this.chineseAddress = (String) poiDataSnapshot.child("chineseAddress").getValue();
-        this.phoneNumber = (String) poiDataSnapshot.child("phoneNumber").getValue();
-        this.latitude = (double) poiDataSnapshot.child("latitude").getValue();
-        this.longitude = (double) poiDataSnapshot.child("longitude").getValue();
-    }
 
-    public Poi(long id, String name, String chineseName, String headerImageFileName, int categoryId,
+
+    public Poi(String id,String name, String chineseName, String headerImageFileName, int categoryId,
                String websiteUri, String address, String chineseAddress, String phoneNumber, LatLng latLng) {
-        this.id = id;
+        this.firebaseId = id;
         this.name = name;
         this.chineseName = chineseName;
         this.headerImageFileName = headerImageFileName;
@@ -59,8 +48,12 @@ public class Poi implements Comparable, Parcelable {
         this.longitude = latLng.longitude;
     }
 
-    public long getId() {
-        return this.id;
+    public String getId() {
+        return this.firebaseId;
+    }
+
+    public void setId(String firebaseID){
+        this.firebaseId = firebaseID;
     }
 
     /**
@@ -137,20 +130,20 @@ public class Poi implements Comparable, Parcelable {
     @Override
     public boolean equals(Object other) {
         if (other instanceof Poi) {
-            return this.id == ((Poi) other).getId();
+            return this.firebaseId == ((Poi) other).getId();
         }
         return super.equals(other);
     }
 
     @Override
     public int hashCode() {
-        return Long.valueOf(this.id).hashCode();
+        return Long.valueOf(this.firebaseId).hashCode();
     }
 
     @Override
     public int compareTo(@NonNull Object other) {
         if (other instanceof Poi) {
-            return Long.valueOf(this.id).compareTo(((Poi) other).getId());
+            return this.firebaseId.compareTo(((Poi) other).getId());
         }
         return 0;
     }
@@ -165,7 +158,7 @@ public class Poi implements Comparable, Parcelable {
 
     @Override
     public void writeToParcel(Parcel destination, int i) {
-        destination.writeLong(this.id);
+        destination.writeString(this.firebaseId);
         destination.writeString(this.name);
         destination.writeString(this.chineseName);
         destination.writeString(this.headerImageFileName);
@@ -182,7 +175,7 @@ public class Poi implements Comparable, Parcelable {
     }
 
     private Poi(Parcel source) {
-        this.id = source.readLong();
+        this.firebaseId = source.readString();
         this.name = source.readString();
         this.chineseName = source.readString();
         this.headerImageFileName = source.readString();

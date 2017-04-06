@@ -168,9 +168,9 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 }else if(position == mSpinner.getAdapter().getCount() - 1) {
                     //Show bookmarked POI
                     Toast.makeText(getActivity(),"bookmark selected",Toast.LENGTH_SHORT);
-                    new AsyncTask<Void, Void, List<Long>>() {
+                    new AsyncTask<Void, Void, List<String>>() {
                         @Override
-                        protected List<Long> doInBackground(Void... params) {
+                        protected List<String> doInBackground(Void... params) {
                             //Retrvive all ids from local bookmark
                             Cursor cursor = getActivity().getContentResolver().query(
                                     Contract.Bookmark.CONTENT_URI, Contract.Bookmark.PROJECTION_ALL, null, null, null);
@@ -179,17 +179,17 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                             if (cursor == null) {
                                 return new ArrayList<>();
                             }
-                            List<Long> idList = PentrefProvider.convertToBookmarkIds(cursor);
+                            List<String> idList = PentrefProvider.convertToBookmarkIds(cursor);
                             cursor.close();
                             return idList;
                         }
 
                         @Override
-                        protected void onPostExecute(List<Long> longs) {
-                            super.onPostExecute(longs);
+                        protected void onPostExecute(List<String> strings) {
+                            super.onPostExecute(strings);
                             //Add only the markers that match the bookmark
                             for(Poi poi : mPois){
-                                if(longs.contains(poi.getId())){
+                                if(strings.contains(poi.getId())){
                                     MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
                                     mGoogleMap.addMarker(markerOptions).setTag(poi);
                                 }
@@ -634,14 +634,14 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     }
     //endregion
 
-    private class InitialiseBookmarkFabAsyncTask extends AsyncTask<Long, Void, Boolean> {
+    private class InitialiseBookmarkFabAsyncTask extends AsyncTask<String, Void, Boolean> {
         @Override
-        protected Boolean doInBackground(Long... longs) {
-            long poiId = longs[0];
+        protected Boolean doInBackground(String... strings) {
+            String poiId = strings[0];
 
             // Query the bookmark table with the given poi id
             Uri uriWithPoiId = Uri.withAppendedPath(
-                    Contract.Bookmark.CONTENT_URI, Long.toString(poiId));
+                    Contract.Bookmark.CONTENT_URI, poiId);
             Cursor cursor = getActivity().getContentResolver().query(uriWithPoiId, null, null, null, null);
 
             // Return true if the given poi id is found in the bookmark table
