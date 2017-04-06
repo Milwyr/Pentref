@@ -1,33 +1,35 @@
 {
   "project_info": {
-    "project_number": "955418597070",
-    "project_id": "firebase-pentref"
+    "project_number": "1090547724167",
+    "firebase_url": "https://pentref-ccf8e.firebaseio.com",
+    "project_id": "pentref-ccf8e",
+    "storage_bucket": "pentref-ccf8e.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:955418597070:android:6b34bcfa01b6ecc2",
+        "mobilesdk_app_id": "1:1090547724167:android:5650ea4dc7282387",
         "android_client_info": {
-          "package_name": "com.ymca.pentref"
+          "package_name": "com.ywca.pentref"
         }
       },
       "oauth_client": [
         {
-          "client_id": "955418597070-09k3eqkn2r1mqi95pisf9l7j2ateikf7.apps.googleusercontent.com",
+          "client_id": "1090547724167-7qojv06bm5cedjjbkdrhspaovcdagr1n.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.ymca.pentref",
-            "certificate_hash": "AD2B9CC9226587E5EB0B4E47E586F53548CA28DC"
+            "package_name": "com.ywca.pentref",
+            "certificate_hash": "7755467603ca0255d0c3d0d1b41776e662abf1dd"
           }
         },
         {
-          "client_id": "955418597070-4h44b2mg0mt0fbg877da87jo9ltah5vb.apps.googleusercontent.com",
+          "client_id": "1090547724167-jb7bc3191eko1v0pkuete2425curaj80.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBzBSwRTUj_o9TRQuX4jvefnn5kBsSAlA0"
+          "current_key": "AIzaSyD8X4FhyJTLbExsMbNQ6-nQSTLHnddCR0U"
         }
       ],
       "services": {
@@ -35,11 +37,16 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1090547724167-jb7bc3191eko1v0pkuete2425curaj80.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }

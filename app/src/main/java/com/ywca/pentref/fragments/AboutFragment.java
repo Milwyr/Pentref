@@ -2,6 +2,7 @@ package com.ywca.pentref.fragments;
 
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.annotation.NonNull;
 import android.util.JsonWriter;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,10 @@ import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonToken;
 import com.ywca.pentref.R;
@@ -49,12 +54,65 @@ public class AboutFragment extends Fragment {
                              Bundle savedInstanceState) {
         View root_view = inflater.inflate(R.layout.fragment_about, container, false);
         Button test_button = (Button) root_view.findViewById(R.id.test_btn);
+
         test_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference myRef = database.getReference("POI");
+                Poi newPoi = new Poi(2420,"Updated222 name","test2","ff.png",
+                        2,"ddd","eee","fff","1234234",new LatLng(0,0));
+                //the id will be control by  the client side
+                /*myRef.child(((Long) newPoi.getId()).toString()).setValue(newPoi)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("AboutFragment",e.toString());
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("AboutFragment","Success!");
+                    }
+                });*/
+                //the id will be controled by firebase
+//                myRef.push().setValue(newPoi).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//                        Log.d("About","Success!");
+//                    }
+//                }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.d("About",e.getMessage());
+//                    }
+//                });
+
+                //Update Example
+                myRef.child(((Long)newPoi.getId()).toString()).setValue(newPoi)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.i("About","Success!");
+                    }
+                })
+                        .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i("About",e.getMessage());
+                    }
+                });
+
+            }
+        });
+
+        /*test_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //poiUrl for delete
                 String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=DEL&PATH=pois&UID=20161217";
-//                //TODO: implement json object
+//                /
                 JSONObject poiJsonObject = new JSONObject();
 
 //                try {
@@ -131,8 +189,7 @@ public class AboutFragment extends Fragment {
             }
         });
 
-
-        // Inflate the layout for this fragment
+*/        // Inflate the layout for this fragment
         return root_view;
     }
 

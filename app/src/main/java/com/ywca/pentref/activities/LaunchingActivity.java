@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -26,6 +27,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Category;
@@ -33,6 +39,7 @@ import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
+import com.ywca.pentref.models.Transport;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,8 +47,10 @@ import org.json.JSONException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The tutorial only appears to the user if the app is installed for the first time.
@@ -56,6 +65,8 @@ public class LaunchingActivity extends BaseActivity {
     private boolean mArePoiCategoriesDownloaded = false;
     private boolean mArePoisDownloaded = false;
     private boolean mIsScheduleFileDownloaded = false;
+    private FirebaseDatabase mDatabase;
+    private String TAG = "FirebaseLaunch";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +75,12 @@ public class LaunchingActivity extends BaseActivity {
         // Read this flag stored in SplashScreenActivity as it is more efficient
         // than reading from shared preferences
         boolean isFirstTimeInstalled = getIntent().getBooleanExtra(PREF_KEY_IS_FIRST_TIME_INSTALLED, true);
+
+        //Try out firebase : get list of poi from firebase
+        mDatabase = FirebaseDatabase.getInstance();
+
+
+
 
         // Show this activity to user if this app is installed for the first time
         if (isFirstTimeInstalled) {
@@ -113,17 +130,49 @@ public class LaunchingActivity extends BaseActivity {
     private void downloadDataFromServer() {
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        // Read all Points of Interest from the server and add them to SQLite database
+        //Read all Points of Interest from the firebase and add them to SQLite database
+        DatabaseReference poiRef = mDatabase.getReference("POI");
+        poiRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //dataSnapshot should contains a list of poi
+                for (DataSnapshot poiSnapshot: dataSnapshot.getChildren()) {
+                    // TODO: handle the poiSnapshot
+                    //try read one first
+                    String test = (String) poiSnapshot.child("name").getValue();
+                    Log.i(TAG,test);
+                    //try firebase getvalue function
+                    Poi poi = poiSnapshot.getValue(Poi.class);
+                    ContentValues values = PentrefProvider.getContentValues(poi);
+                    try {
+                        getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
+                        mArePoisDownloaded = true;
+                        updateIsFirstTimeInstalledFlag();
+                    } catch (Exception e) {
+                        Log.e("TutorialActivity:poi", e.getMessage());
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG,databaseError.getMessage());
+                int j = 0;
+            }
+        });
+
+        /*// Read all Points of Interest from the server and add them to SQLite database
         String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=pois";
         JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                /*try {
+                *//*try {
                     response.get(0).toString();
                 } catch (JSONException e) {
                     e.printStackTrace();
-                }*/
+                }*//*
 
                 // Parse the response array into a list of Points of Interest
                 Gson gson = new Gson();
@@ -153,7 +202,42 @@ public class LaunchingActivity extends BaseActivity {
         });
         queue.add(poiJsonArrayRequest);
 
-        // Read all Point of Interest categories from the server and add them to SQLite database
+
+*/
+        //Read all poiCategories from firebase
+        DatabaseReference categoryRef = mDatabase.getReference("Categories");
+        categoryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //dataSnapshot containes a list of categories\
+                Log.i("Categoriesfirebase","hi");
+                for(DataSnapshot categoryData : dataSnapshot.getChildren()){
+                    int k = 0;
+                    Category category = categoryData.getValue(Category.class);
+                    String test = category.getName();
+                    ContentValues values = new ContentValues();
+                    values.put(Contract.Category._ID, category.getId());
+                    values.put(Contract.Category.COLUMN_NAME, category.getName());
+
+                    try {
+                        getContentResolver().insert(Contract.Category.CONTENT_URI, values);
+                        mArePoiCategoriesDownloaded = true;
+                        updateIsFirstTimeInstalledFlag();
+                    } catch (Exception e) {
+                        Log.e("TutorialActivity:cat", e.getMessage());
+                    }
+                    Log.i(TAG,test);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                String test = databaseError.getMessage();
+                Log.i("CategoryFirebase",databaseError.getMessage());
+                int j = 0;
+            }
+        });
+       /* // Read all Point of Interest categories from the server and add them to SQLite database
         String poiCategoriesUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=poi_categories";
         JsonArrayRequest poiCategoryArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, poiCategoriesUrl, null, new Response.Listener<JSONArray>() {
@@ -184,7 +268,23 @@ public class LaunchingActivity extends BaseActivity {
                 }
             }
         });
-        queue.add(poiCategoryArrayRequest);
+        queue.add(poiCategoryArrayRequest);*/
+
+        //Get the teansports from firebase
+        DatabaseReference transportRef = mDatabase.getReference("Transport");
+        transportRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+               String test =  dataSnapshot.toString();
+                int i = 0 ;
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i("FireTrans",databaseError.getMessage());
+            }
+        });
 
         // Fetch the transports json on the server and save it to a local json file
         String transportUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=transport_schedule";

@@ -12,6 +12,13 @@ public class Price implements Parcelable {
     private double adultPrice;
     //endregion
 
+    public Price(){}
+
+    //getter function
+    public double getChildPrice(){ return childPrice; }
+    public double getAdultPrice(){ return adultPrice; }
+    //end
+
     //region Comparison methods
     @Override
     public boolean equals(Object other) {

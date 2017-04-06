@@ -20,6 +20,8 @@ public class Transport implements Comparable, Parcelable {
     private Timetable toTaiO;
     //endregion
 
+    public Transport(){}
+
     //region Getter methods
     public TypeEnum getTypeEnum() {
         return this.typeEnum;
@@ -40,6 +42,8 @@ public class Transport implements Comparable, Parcelable {
     public Timetable getToTaiO() {
         return this.toTaiO;
     }
+
+    public Price price(){return price;}
     //endregion
 
     //region Setter methods

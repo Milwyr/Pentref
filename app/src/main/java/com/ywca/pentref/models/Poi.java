@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DataSnapshot;
 
 import java.util.Locale;
 
@@ -26,6 +27,22 @@ public class Poi implements Comparable, Parcelable {
     private double latitude;
     private double longitude;
     //endregion
+
+    //for firebase
+    public Poi(){}
+
+    public Poi(DataSnapshot poiDataSnapshot){
+        this.id = (long) poiDataSnapshot.child("id").getValue();
+        this.name = (String) poiDataSnapshot.child("chineseName").getValue();
+        this.headerImageFileName = (String) poiDataSnapshot.child("headerImageFileName").getValue();
+        //this.categoryId = (long) poiDataSnapshot.child("categoryId").getValue();
+        this.websiteUri = (String) poiDataSnapshot.child("websiteUri").getValue();
+        this.address = (String) poiDataSnapshot.child("address").getValue();
+        this.chineseAddress = (String) poiDataSnapshot.child("chineseAddress").getValue();
+        this.phoneNumber = (String) poiDataSnapshot.child("phoneNumber").getValue();
+        this.latitude = (double) poiDataSnapshot.child("latitude").getValue();
+        this.longitude = (double) poiDataSnapshot.child("longitude").getValue();
+    }
 
     public Poi(long id, String name, String chineseName, String headerImageFileName, int categoryId,
                String websiteUri, String address, String chineseAddress, String phoneNumber, LatLng latLng) {
@@ -61,6 +78,10 @@ public class Poi implements Comparable, Parcelable {
         }
     }
 
+    public String getName(){ return this.name; }
+
+    public String getChineseName(){ return this.chineseName; }
+
     public String getHeaderImageFileName() {
         return this.headerImageFileName;
     }
@@ -88,12 +109,28 @@ public class Poi implements Comparable, Parcelable {
         }
     }
 
+    public String getAddress(){
+        return this.address;
+    }
+
+    public String getChineseAddress(){
+        return this.chineseAddress;
+    }
+
     public String getPhoneNumber() {
         return this.phoneNumber;
     }
 
     public LatLng getLatLng() {
         return new LatLng(this.latitude, this.longitude);
+    }
+
+    public double getLatitude(){
+        return this.latitude;
+    }
+
+    public double getLongitude(){
+        return this.longitude;
     }
 
     //region Comparison methods

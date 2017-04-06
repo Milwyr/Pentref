@@ -46,8 +46,8 @@ public class ChoosePageActivity extends AppCompatActivity implements AdapterView
             intent.putExtra(Utility.FRAGMENT_INDEX_EXTRA_KEY, i);
             startActivity(intent);
 
-            // Exit the app so this page won't be navigated back
-            finish();
+            // Exit the app so this page won't be navigated back to ChoosePageActivity
+            //finish();
         }
     }
 }
