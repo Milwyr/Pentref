@@ -150,6 +150,10 @@ public class MainActivity extends BaseActivity
 
     // Handles the event from method onNewIntent()
     private void handleIntent(Intent intent) {
+        //Do nothing when the action is null
+        if(intent.getAction() == null){
+            Log.d("MainActivity","intent null");
+            return;}
         if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //TODO: use the query to search your data somehow

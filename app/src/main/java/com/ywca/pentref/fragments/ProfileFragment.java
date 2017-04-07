@@ -227,8 +227,8 @@ public class ProfileFragment extends Fragment implements
                         final ProgressDialog progressDialog = new ProgressDialog(getActivity());
                         progressDialog.setCancelable(false);
                         progressDialog.setMessage(getActivity().getResources().getString(R.string.signining));
-                        progressDialog.show();
                         if(!mEmail.getText().toString().isEmpty() && !mPassword.getText().toString().isEmpty()){
+                            progressDialog.show();
                             mAuth.signInWithEmailAndPassword(mEmail.getText().toString(),mPassword.getText().toString())
                                     .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                                 @Override

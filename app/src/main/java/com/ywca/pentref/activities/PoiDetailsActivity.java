@@ -384,4 +384,9 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
             return new JsonPrimitive(dateString);
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }
