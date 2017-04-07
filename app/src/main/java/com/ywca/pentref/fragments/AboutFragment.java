@@ -1,5 +1,6 @@
 package com.ywca.pentref.fragments;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -20,13 +22,18 @@ import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonToken;
 import com.ywca.pentref.R;
+import com.ywca.pentref.activities.MainActivity;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
@@ -44,9 +51,21 @@ import java.util.Map;
  * A simple {@link Fragment} subclass.
  */
 public class AboutFragment extends Fragment {
+    private FirebaseAuth mAuth;
+    private ProgressDialog mProgress;
 
     public AboutFragment() {
         // Required empty public constructor
+    }
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mAuth = FirebaseAuth.getInstance();
+        mProgress = new ProgressDialog(getActivity());
+        mProgress.setMessage("Sign In");
+        mProgress.setCancelable(false);
     }
 
     @Override
@@ -60,41 +79,31 @@ public class AboutFragment extends Fragment {
             public void onClick(View v) {
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference myRef = database.getReference("POI");
-                Poi newPoi = new Poi("2240","Updated222 name","test2","ff.png",
-                        2,"ddd","eee","fff","1234234",new LatLng(0,0));
-                //the id will be control by  the client side
-                /*myRef.child(((Long) newPoi.getId()).toString()).setValue(newPoi)
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d("AboutFragment",e.toString());
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+
+                Poi addPoi = new Poi(null,"name2","chineseName","header",2,"uri","address","chineseAddress","34223233",new LatLng(0,0));
+
+                //Add new POI example
+                myRef.push().setValue(addPoi).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d("AboutFragment","Success!");
+                        Log.d("About","Add Success!");
                     }
-                });*/
-                //the id will be controled by firebase
-//                myRef.push().setValue(newPoi).addOnSuccessListener(new OnSuccessListener<Void>() {
-//                    @Override
-//                    public void onSuccess(Void aVoid) {
-//                        Log.d("About","Success!");
-//                    }
-//                }).addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Log.d("About",e.getMessage());
-//                    }
-//                });
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("About",e.getMessage());
+                    }
+                });
 
+                //update a poi with id(string) "2240"
+                Poi updatePoi = new Poi("2240","my ROnald name","test2","ff.png",
+                        2,"ddd","eee","fff","1234234",new LatLng(0,0));
                 //Update Example
-                myRef.child(newPoi.getId()).setValue(newPoi)
+                myRef.child(updatePoi.getId()).setValue(updatePoi)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.i("About","Success!");
+                        Log.i("About","Update Success!");
                     }
                 })
                         .addOnFailureListener(new OnFailureListener() {
@@ -189,7 +198,47 @@ public class AboutFragment extends Fragment {
             }
         });
 
-*/        // Inflate the layout for this fragment
+
+
+
+*/
+        Button loginBtn = (Button) root_view.findViewById(R.id.f_about_btn_login);
+       loginBtn.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               mProgress.show();
+               mAuth.signInWithEmailAndPassword("test@gmail.com","123456")
+                       .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                           @Override
+                           public void onSuccess(AuthResult authResult) {
+                               Log.d("Loginfirebase","Success!");
+                               mProgress.dismiss();
+                               Toast.makeText(getActivity(), "Success!", Toast.LENGTH_SHORT).show();
+                           }
+                       })
+                       .addOnFailureListener(new OnFailureListener() {
+                           @Override
+                           public void onFailure(@NonNull Exception e) {
+                               mProgress.dismiss();
+                               Toast.makeText(getActivity(), "Fail to login", Toast.LENGTH_SHORT).show();
+                           }
+                       });
+           }
+       });
+
+        Button signoutBtn = (Button) root_view.findViewById(R.id.f_about_btn_signout);
+        signoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                Toast.makeText(getActivity(), "SignOut!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+
+
+        // Inflate the layout for this fragment
         return root_view;
     }
 

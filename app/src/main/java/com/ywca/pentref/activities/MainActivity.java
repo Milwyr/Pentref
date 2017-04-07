@@ -15,9 +15,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
@@ -39,12 +47,38 @@ public class MainActivity extends BaseActivity
     private MenuItem mActionSearchMenuItem;
 
     private NavigationView mNavigationView;
+    //Firebase Auth instance
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initialiseComponents();
+
+        //Get a firebaseAuth instance
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("MainFireBaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());
+                    Menu menu = mNavigationView.getMenu();
+                    menu.findItem(R.id.nav_admin).setVisible(true);
+                } else {
+                    // User is signed out
+                    Log.d("MainFireBaseAuth", "onAuthStateChanged:signed_out");
+                    Menu menu = mNavigationView.getMenu();
+                    menu.findItem(R.id.nav_admin).setVisible(false);
+                }
+            }
+        };
+
+
+
 
         // Display the discover fragment only when the app launches as
         // savedInstanceState != null when orientation changes
@@ -245,4 +279,20 @@ public class MainActivity extends BaseActivity
             mActionSearchMenuItem.setVisible(false);
         }
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+
 }
