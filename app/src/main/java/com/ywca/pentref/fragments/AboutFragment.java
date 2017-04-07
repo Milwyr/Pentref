@@ -80,23 +80,27 @@ public class AboutFragment extends Fragment {
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference myRef = database.getReference("POI");
 
-                Poi addPoi = new Poi(null,"name2","chineseName","header",2,"uri","address","chineseAddress","34223233",new LatLng(0,0));
+                //addPoi should have null id
+                Poi addPoi = new Poi(null,"test poi2","chineseName","header",2,"uri","address","chineseAddress","34223233",new LatLng(0,0));
 
                 //Add new POI example
                 myRef.push().setValue(addPoi).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("About","Add Success!");
+                        Toast.makeText(getActivity(),"New POI added",Toast.LENGTH_SHORT).show();
+
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.d("About",e.getMessage());
+                        Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_SHORT).show();
                     }
                 });
 
                 //update a poi with id(string) "2240"
-                Poi updatePoi = new Poi("2240","my ROnald name","test2","ff.png",
+                Poi updatePoi = new Poi("2240","my ld name","test2","ff.png",
                         2,"ddd","eee","fff","1234234",new LatLng(0,0));
                 //Update Example
                 myRef.child(updatePoi.getId()).setValue(updatePoi)
