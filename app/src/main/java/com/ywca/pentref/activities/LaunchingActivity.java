@@ -93,7 +93,18 @@ public class LaunchingActivity extends BaseActivity {
 
                 mSharedPreferences = getSharedPreferences(getResources().getString(R.string.pref_file_name_local), MODE_PRIVATE);
 
-                downloadDataFromServer();
+
+                //async task here
+                new AsyncTask<Void, Void, Object>(
+
+                ) {
+                    @Override
+                    protected Object doInBackground(Void... params) {
+                        downloadDataFromServer();
+                        return null;
+                    }
+                }.execute();
+//                downloadDataFromServer();
 
                 // The adapter returns a fragment for each of the three sections
                 SectionsPagerAdapter sectionsPagerAdapter =

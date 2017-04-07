@@ -87,4 +87,5 @@
     <string name="error_message_sign_in_before_posting_review">请登入以发表评论。</string>
     <string name="error_network_unavailable">网络连线中断</string>
     <string name="error_message_connect_to_internet_before_posting_review">发表评论前请确保网络已连接。</string>
+    <string name="login_label"></string>
 </resources>

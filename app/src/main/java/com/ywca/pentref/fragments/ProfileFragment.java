@@ -1,16 +1,19 @@
 package com.ywca.pentref.fragments;
 
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +40,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.ywca.pentref.R;
 
 /**
@@ -60,6 +68,12 @@ public class ProfileFragment extends Fragment implements
     private TextView mUserNameTextView;
     private SignInButton mGoogleSignInButton;
     private Button mGoogleSignOutButton;
+    private Button mAdminSignInBtn;
+    private Button mAdminSignoutBtn;
+
+    //Used for Firebase login
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     //endregion
 
     public ProfileFragment() {
@@ -69,6 +83,23 @@ public class ProfileFragment extends Fragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //initialises componments for Firebase admin login
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if( user != null){
+                    //User is signed in
+                    getActivity().findViewById(R.id.f_admin_sign_in_btn).setVisibility(View.GONE);
+                    getActivity().findViewById(R.id.f_admin_sign_out_btn).setVisibility(View.VISIBLE);
+                }else{
+                    //User is signed out
+                    getActivity().findViewById(R.id.f_admin_sign_in_btn).setVisibility(View.VISIBLE);
+                    getActivity().findViewById(R.id.f_admin_sign_out_btn).setVisibility(View.GONE);
+                }
+            }
+        };
 
         // Initialises components for Facebook login
         FacebookSdk.sdkInitialize(getActivity());
@@ -175,12 +206,73 @@ public class ProfileFragment extends Fragment implements
         mGoogleSignOutButton = (Button) rootView.findViewById(R.id.sign_out_button);
         mGoogleSignOutButton.setOnClickListener(this);
 
+        //Buttons for admin login/logout
+        mAdminSignInBtn = (Button) rootView.findViewById(R.id.f_admin_sign_in_btn);
+        mAdminSignInBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(getActivity());
+                View mView = getActivity().getLayoutInflater().inflate(R.layout.fragment_profile_admin_login, null);
+                final EditText mEmail = (EditText) mView.findViewById(R.id.f_profile_admin_et_email);
+                final EditText mPassword = (EditText) mView.findViewById(R.id.f_profile_admin_login_et_password);
+                Button mLogin = (Button) mView.findViewById(R.id.f_profile_admin_btn_login);
+
+                mBuilder.setView(mView);
+                final AlertDialog dialog = mBuilder.create();
+                dialog.show();
+
+                mLogin.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+                        progressDialog.setCancelable(false);
+                        progressDialog.setMessage(getActivity().getResources().getString(R.string.signining));
+                        progressDialog.show();
+                        if(!mEmail.getText().toString().isEmpty() && !mPassword.getText().toString().isEmpty()){
+                            mAuth.signInWithEmailAndPassword(mEmail.getText().toString(),mPassword.getText().toString())
+                                    .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                                @Override
+                                public void onSuccess(AuthResult authResult) {
+                                    Toast.makeText(getActivity(), "Login Success", Toast.LENGTH_SHORT).show();
+                                    progressDialog.dismiss();
+                                    dialog.dismiss();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_SHORT).show();
+                                    progressDialog.dismiss();
+                                }
+                            });
+
+                        }else{
+                            Toast.makeText(getActivity(),
+                                    "Please enter correct email/password",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+
+
+            }
+        });
+        mAdminSignoutBtn = (Button) rootView.findViewById(R.id.f_admin_sign_out_btn);
+        mAdminSignoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAuth.signOut();
+                Toast.makeText(getActivity(), "Sign out", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         return rootView;
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
 
         OptionalPendingResult<GoogleSignInResult> opr =
                 Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
@@ -286,5 +378,13 @@ public class ProfileFragment extends Fragment implements
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(mAuthListener != null){
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
     }
 }

@@ -87,4 +87,10 @@
     <string name="error_message_sign_in_before_posting_review">請登入以發表評論。</string>
     <string name="error_network_unavailable">網絡連線中斷</string>
     <string name="error_message_connect_to_internet_before_posting_review">發表評論前請確保網絡已連接。</string>
+    <string name="login_label">登入</string>
+    <string name="login">管理者登入</string>
+    <string name="password">密碼</string>
+    <string name="email">登入密碼</string>
+    <string name="AdminSignOut">管理者登出</string>
+    <string name="signining">登入中</string>
 </resources>
