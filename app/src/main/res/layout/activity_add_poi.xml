@@ -19,12 +19,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
-            <TextView
-                android:text="ID:"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/a_add_poi_tv_id" />
-
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

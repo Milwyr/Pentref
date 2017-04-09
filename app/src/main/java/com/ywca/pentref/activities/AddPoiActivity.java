@@ -1,6 +1,8 @@
 package com.ywca.pentref.activities;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -15,8 +18,14 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.GsonBuilder;
 import com.ywca.pentref.R;
+import com.ywca.pentref.common.Contract;
+import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
@@ -42,12 +51,16 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
 
     private ProgressDialog progress;
 
+    private DatabaseReference mDatabaseRef;
+
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_poi);
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         poiLatitude = (TextView) findViewById(R.id.PoiLatitude);
         poiLongitude = (TextView) findViewById(R.id.PoiLongitude);
         if(getIntent() != null){
@@ -84,51 +97,55 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
             case R.id.a_add_poi_btn_submit:
                 //Create all input
                 Log.i("AddPoiActivity","submit clicked");
-                int id = Integer.parseInt(idEt.getText().toString());
                 String name = nameEt.getText().toString();
                 String chineseName = chineseNameEt.getText().toString();
                 String headerImageFileName = headerImageFileNameEt.getText().toString();
-                int categoryId = Integer.parseInt(categoryIdEt.getText().toString());
+                Integer categoryId = Integer.parseInt(categoryIdEt.getText().toString());
                 String websiteUri = websiteUriEt.getText().toString();
                 String address = addressEt.getText().toString();
                 String chineseAddress = chineseAddressEt.getText().toString();
                 String phoneNumber = phoneNumberEt.getText().toString();
 
+
                 //TODO: Implements the data checking
-
-
-                //Send Request
-                progress.show();
-                String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=INS&PATH=pois&UID=20161217";
-                JSONObject poiJsonObject = new JSONObject();
-
-                Poi newPoi = new Poi("place holder",name,chineseName,headerImageFileName,
-                        categoryId,websiteUri,address,chineseAddress,phoneNumber,new LatLng(latitude,longitude));
-
-                String test = new GsonBuilder().create().toJson(newPoi);
-                try {
-                    poiJsonObject = new JSONObject(test);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if(name == null || chineseName ==null || headerImageFileName == null || categoryId == null ||
+                        websiteUri == null || address == null || chineseAddress == null || phoneNumber == null){
+                    Toast.makeText(AddPoiActivity.this,"Please enter all data",Toast.LENGTH_SHORT).show();
                 }
 
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                        Request.Method.POST, poiUrl, poiJsonObject, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        int a = 1;
-                        progress.dismiss();
 
+                //add poi to firebase
+                progress.show();
+                //Create tha poi to be add
+                final Poi addPoi = new Poi(null,name,chineseName,headerImageFileName,categoryId.intValue()
+                        ,websiteUri,address,chineseAddress,phoneNumber,new LatLng(latitude,longitude));
+                DatabaseReference newPoiRef =  mDatabaseRef.child("POI").push();
+                //get the push key of the poi
+                final String poiKey = newPoiRef.getKey();
+                newPoiRef.setValue(addPoi).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    progress.dismiss();
+                    Log.d("AddPoActivity",poiKey);
+                    addPoi.setId(poiKey);
+                    ContentValues poiValues = PentrefProvider.getContentValues(addPoi);
+                    try {
+                        getContentResolver().insert(Contract.Poi.CONTENT_URI, poiValues);
+                    }catch (Exception e){
+                        Log.e("AddPoiActivity",e.getMessage());
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    //Server side error
-                    public void onErrorResponse(VolleyError error) {
-                        progress.dismiss();
-                        int b = 1;
-                    }
-                });
-                Volley.newRequestQueue(this).add(jsonObjectRequest);
+                    Toast.makeText(AddPoiActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+                }
+                  }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(AddPoiActivity.this, "Fail to add poi", Toast.LENGTH_SHORT).show();
+                    progress.dismiss();
+                }});
+
+
+
+
 
 
 

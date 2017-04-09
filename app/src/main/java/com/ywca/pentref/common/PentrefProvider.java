@@ -43,8 +43,10 @@ public class PentrefProvider extends ContentProvider {
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Category.TABLE_NAME, CATEGORY_TABLE);
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Category.TABLE_NAME + "/#", CATEGORY_TABLE);
         mUriMatcher.addURI(Contract.AUTHORITY, Contract.Bookmark.TABLE_NAME, BOOKMARK_TABLE);
-        mUriMatcher.addURI(Contract.AUTHORITY, Contract.Bookmark.TABLE_NAME + "/#", BOOKMARK_ROW);
+        mUriMatcher.addURI(Contract.AUTHORITY, Contract.Bookmark.TABLE_NAME + "/*", BOOKMARK_ROW);
         mUriMatcher.addURI(Contract.AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGESTIONS);
+        //test
+        //mUriMatcher.addURI(Contract.AUTHORITY, Contract.Bookmark.TABLE_NAME + "/-*", BOOKMARK_ROW);
     }
     //endregion
 
@@ -229,6 +231,7 @@ public class PentrefProvider extends ContentProvider {
     }
 
     private String convertToTableName(Uri uri) {
+        int i = mUriMatcher.match(uri);
         switch (mUriMatcher.match(uri)) {
             case POI_TABLE:
             case POI_ROW:
@@ -254,7 +257,7 @@ public class PentrefProvider extends ContentProvider {
             case CATEGORY_ROW:
                 return Contract.Category._ID + " = " + uri.getLastPathSegment();
             case BOOKMARK_ROW:
-                return Contract.Bookmark.COLUMN_POI_ID + " = " + uri.getLastPathSegment();
+                return Contract.Bookmark.COLUMN_POI_ID + " = " + "\""+ uri.getLastPathSegment() +"\"";
             default:
                 return selection;
         }
