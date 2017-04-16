@@ -43,6 +43,7 @@ import com.ywca.pentref.models.Transport;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * The tutorial only appears to the user if the app is installed for the first time.
@@ -289,7 +291,33 @@ public class LaunchingActivity extends BaseActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                String test =  dataSnapshot.toString();
+                JSONArray transJson = new JSONArray();
+
+                for(DataSnapshot data : dataSnapshot.getChildren()){
+                    Map<String,String> value = (Map<String,String>) data.getValue();
+                    transJson.put(new JSONObject(value));
+                }
                 int i = 0 ;
+
+                File transportsFile = new File(getFilesDir(), Utility.TRANSPORTATION_JSON_FILE_NAME);
+                if (transportsFile.exists()) {
+                    return;
+                }
+                // Create the transportation json file, and write the response json array
+                // that is read from server to the newly created local json file
+                try {
+                    boolean isFileCreated = transportsFile.createNewFile();
+                    if (isFileCreated) {
+                        FileWriter fileWriter = new FileWriter(transportsFile);
+                        fileWriter.write(transJson.toString());
+                        fileWriter.flush();
+                        fileWriter.close();
+                        mIsScheduleFileDownloaded = true;
+                        updateIsFirstTimeInstalledFlag();
+                    }
+                } catch (IOException e) {
+                    Log.e("TutorialActivity:trans", e.getMessage());
+                }
 
             }
 
@@ -335,7 +363,8 @@ public class LaunchingActivity extends BaseActivity {
                 }
             }
         });
-        queue.add(transportJsonArrayRequest);
+        //Don't add this to queue to debug
+        //queue.add(transportJsonArrayRequest);
     }
 
     // Save the app is not installed for the first time in SharedPreferences
