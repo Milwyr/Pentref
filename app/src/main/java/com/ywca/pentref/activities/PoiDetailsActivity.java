@@ -5,10 +5,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.icu.text.StringSearch;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,6 +22,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -35,6 +38,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -72,6 +80,9 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
     private FloatingActionButton mBookmarkFab;
     private RatingBar mUserReviewRatingBar;
 
+    private StorageReference mStorageRef;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +92,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
         if (getIntent() != null) {
             mSelectedPoi = getIntent().getParcelableExtra(Utility.SELECTED_POI_EXTRA_KEY);
         }
+        mStorageRef = FirebaseStorage.getInstance().getReference();
 
         initialiseComponents();
 
@@ -196,24 +208,47 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
 
         mLocale = super.getDeviceLocale();
 
-        String baseUrl = Utility.SERVER_URL + "/poi_photos/";
-        // Download the header image from server
-        ImageRequest imageRequest = new ImageRequest(
-                baseUrl + mSelectedPoi.getHeaderImageFileName(),
-                new Response.Listener<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap response) {
-                        ImageView headerImageView = (ImageView) findViewById(R.id.header_image);
-                        headerImageView.setImageBitmap(response);
-                    }
-                }, 1280, 720, ImageView.ScaleType.CENTER_CROP, null,
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("PoiDetailsActivity", "Failed to download header image.");
-                    }
-                });
-        Volley.newRequestQueue(this).add(imageRequest);
+
+        //TODO: change this to asyncTask if needed
+        //Download the header image from firebase
+        StorageReference headerImageRef = mStorageRef.child("images/"+mSelectedPoi.getHeaderImageFileName());
+        final long TEN_MEGABYTE = 1024 * 1024 * 10;
+        headerImageRef.getBytes(TEN_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                // Convert bytes data into a Bitmap
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                //Set imageview to bitmap
+                ImageView headerImageView = (ImageView) findViewById(R.id.header_image);
+                headerImageView.setImageBitmap(bitmap);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(PoiDetailsActivity.this,e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("PoiDetailsActivity", "Failed to download header image.");
+            }
+        });
+
+//        String baseUrl = Utility.SERVER_URL + "/poi_photos/";
+//        // Download the header image from server
+//        ImageRequest imageRequest = new ImageRequest(
+//                baseUrl + mSelectedPoi.getHeaderImageFileName(),
+//                new Response.Listener<Bitmap>() {
+//                    @Override
+//                    public void onResponse(Bitmap response) {
+//                        ImageView headerImageView = (ImageView) findViewById(R.id.header_image);
+//                        headerImageView.setImageBitmap(response);
+//                    }
+//                }, 1280, 720, ImageView.ScaleType.CENTER_CROP, null,
+//                new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Log.e("PoiDetailsActivity", "Failed to download header image.");
+//                    }
+//                });
+//        Volley.newRequestQueue(this).add(imageRequest);
 
         // Read category name that matches the id from database,
         // and set the name to the category text view

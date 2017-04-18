@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -54,6 +55,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.AddPoiActivity;
@@ -373,42 +378,27 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                 Log.i("PoiAdminFragment",""+mSelectedDeletePoi.getId());
 
 
-                //Delete the selected poi from server
-                if(mQueue == null) {
-                    mQueue = Volley.newRequestQueue(getActivity());
-                }
-                String delUrl = Utility.SERVER_URL + "/PostReq.php?Method=DEL&PATH=pois&UID=20161217";
-                JSONObject delPoijsonObject = new JSONObject();
-                try {
-                    delPoijsonObject.put("id",mSelectedDeletePoi.getId());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                        Request.Method.POST, delUrl, delPoijsonObject, new Response.Listener<JSONObject>() {
+                //Delete the selected poi from firebase realtime database
+                DatabaseReference poiRef = FirebaseDatabase.getInstance().getReference().child("POI").child(mSelectedDeletePoi.getId());
+                poiRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        int a = 1;
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
                     }
-                }, new Response.ErrorListener() {
+                }).addOnFailureListener(new OnFailureListener() {
                     @Override
-                    //Server side error
-                    public void onErrorResponse(VolleyError error) {
-                        int b = 1;
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getActivity(), "Fail to delete", Toast.LENGTH_SHORT).show();
                     }
-
                 });
+                //TODO: Delete the selected poi pic from firebase storage
 
-                jsonObjectRequest.setTag(TAG);
-                mQueue.add(jsonObjectRequest);
+                //Delete the selected poi from local table
+                // Defines selection criteria for the rows you want to delete
+                String mSelectionClause = Contract.Poi._ID + " = ?";
+                String[] mSelectionArgs = {mSelectedDeletePoi.getId()+""};
+                getActivity().getContentResolver().delete(Contract.Poi.CONTENT_URI,mSelectionClause,mSelectionArgs);
 
-//                //Delete the selected poi from local table
-//                // Defines selection criteria for the rows you want to delete
-//                String mSelectionClause = Contract.Poi._ID + " = ?";
-//                String[] mSelectionArgs = {mSelectedDeletePoi.getId()+""};
-//                getActivity().getContentResolver().delete(Contract.Poi.CONTENT_URI,mSelectionClause,mSelectionArgs);
-
-                syncWithServer();
 
                 //delete the SelectedDeleteMarker marker from the map
                 mSelectedDeleteMarker.remove();
