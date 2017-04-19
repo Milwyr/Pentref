@@ -59,6 +59,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.activities.AddPoiActivity;
@@ -392,6 +394,19 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                     }
                 });
                 //TODO: Delete the selected poi pic from firebase storage
+                StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+                StorageReference poiPicRef = storageRef.child("images/"+mSelectedDeletePoi.getHeaderImageFileName());
+                poiPicRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(getActivity(),"Pic deleted",Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getActivity(),"fail to remove pic",Toast.LENGTH_SHORT).show();
+                    }
+                });
 
                 //Delete the selected poi from local table
                 // Defines selection criteria for the rows you want to delete

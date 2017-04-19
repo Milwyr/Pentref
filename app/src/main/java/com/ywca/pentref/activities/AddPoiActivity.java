@@ -1,15 +1,22 @@
 package com.ywca.pentref.activities;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -87,6 +94,7 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
 
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_SELECT_PHOTO = 2;
 
 
 
@@ -95,6 +103,11 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_poi);
+        //Check if the storage access is granted
+        if(!isStoragePermissionGranted()){
+           ImageButton galleryButton = (ImageButton) findViewById(R.id.a_add_poi_img_btn_gallery);
+            galleryButton.setVisibility(View.INVISIBLE);
+        }
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mStorageRef = FirebaseStorage.getInstance().getReference();
         poiLatitude = (TextView) findViewById(R.id.PoiLatitude);
@@ -116,6 +129,9 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
         chineseAddressEt = (EditText) findViewById(R.id.a_add_poi_et_chinese_address);
         phoneNumberEt = (EditText) findViewById(R.id.a_add_poi_et_phone_number);
         mPreviewImage = (ImageView) findViewById(R.id.a_add_poi_preview_image);
+
+        ImageButton galleryButton = (ImageButton) findViewById(R.id.a_add_poi_img_btn_gallery);
+        galleryButton.setOnClickListener(this);
 
         ImageButton cameraButton = (ImageButton) findViewById(R.id.a_add_poi_img_btn_camera);
         cameraButton.setOnClickListener(this);
@@ -166,6 +182,12 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
             }
         }
     }
+
+    private void dispatchGetGalleryPictureIntent(){
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, REQUEST_SELECT_PHOTO);
+    }
     private void setPic() {
         // Get the dimensions of the View
         int targetW = mPreviewImage.getWidth();
@@ -174,6 +196,7 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
+        bmOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
         BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
         int photoW = bmOptions.outWidth;
         int photoH = bmOptions.outHeight;
@@ -187,15 +210,34 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
         bmOptions.inPurgeable = true;
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        Bitmap bitmap2 = BitmapFactory.decodeFile(mCurrentPhotoPath);
+        File test  = new File(mCurrentPhotoPath);
+        Bitmap bitmap3 = BitmapFactory.decodeFile(test.getAbsolutePath());
         mPreviewImage.setImageBitmap(bitmap);
     }
+
 
 
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
            setPic();
+        }else if (requestCode == REQUEST_SELECT_PHOTO && resultCode == RESULT_OK){
+            //Get the selectedImage Uri
+            Uri selectedImage = data.getData();
+            String[] filePathColumn = { MediaStore.Images.Media.DATA };
+            // Get the cursor
+            Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+            // Move to first row
+            cursor.moveToFirst();
+
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            mCurrentPhotoPath = cursor.getString(columnIndex);
+            cursor.close();
+            //Set preview picture
+            setPic();
         }
+        int j = 0;
     }
 
     //Check if both poi and picture is completed the upload
@@ -208,6 +250,35 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
         }else if(onCompleteCount >= 2){
             progress.dismiss();
             Toast.makeText(AddPoiActivity.this,"Fail",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v("AddPoiActivity","Permission is granted");
+                return true;
+            } else {
+
+                Log.v("AddPoiActivity","Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v("AddPoiActivity","Permission is granted");
+            return true;
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            Log.v("AddPoiActivity","Permission: "+permissions[0]+ "was "+grantResults[0]);
+            //resume tasks needing this permission
+            ImageButton galleryBtn = (ImageButton) findViewById(R.id.a_add_poi_img_btn_gallery);
+            galleryBtn.setVisibility(View.VISIBLE);
         }
     }
 
@@ -233,8 +304,6 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
                         websiteUri == null || address == null || chineseAddress == null || phoneNumber == null){
                     Toast.makeText(AddPoiActivity.this,"Please enter all data",Toast.LENGTH_SHORT).show();
                 }
-
-
                 //add poi to firebase
                 progress.show();
                 //Create tha poi to be add
@@ -269,34 +338,44 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
                 //Add picture to firebase storage
                 StorageReference poisRef = mStorageRef.child("images/"+headerImageFileName);
                 try {
-                    InputStream stream = new FileInputStream(new File(mCurrentPhotoPath));
-                    UploadTask uploadTask = poisRef.putStream(stream);
-                    uploadTask.addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            // Handle unsuccessful uploads
-                            onComplete();
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                            mPictureFlag = true;
-                            onComplete();
-                        }
-                    });
-                }catch(FileNotFoundException e){
-                    //For java compiler
-                }
-
+                    if (mCurrentPhotoPath != null) {
+                        //TODO: Resize the pic before upload
+                        File fullSizeImage = new File(mCurrentPhotoPath);
+                        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                        Bitmap bitmap = BitmapFactory.decodeFile(fullSizeImage.getAbsolutePath(), bmOptions);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG,30,baos);
+                        byte[] data = baos.toByteArray();
+                        UploadTask testTask = poisRef.putBytes(data);
+                        testTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                Toast.makeText(AddPoiActivity.this,"Test Success",Toast.LENGTH_SHORT).show();
+                                //Signal the complete
+                                mPictureFlag = true;
+                                onComplete();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(AddPoiActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                                onComplete();
+                            }
+                        });
+                    }
+                }catch(Exception e){
+                        //For java compile
+                    }
                 break;
-
             case R.id.a_add_poi_img_btn_camera:
                 dispatchTakePictureIntent();
                 break;
+            case R.id.a_add_poi_img_btn_gallery:
+                dispatchGetGalleryPictureIntent();
             default:
                 break;
         }
 
     }
+
 }
