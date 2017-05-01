@@ -1,7 +1,6 @@
 package com.ywca.pentref.fragments;
 
 import android.Manifest;
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -14,14 +13,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.util.Pair;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -49,9 +50,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.ywca.pentref.R;
-import com.ywca.pentref.activities.BaseActivity;
 import com.ywca.pentref.activities.PoiDetailsActivity;
-import com.ywca.pentref.adapters.CategoryAdapter;
+import com.ywca.pentref.adapters.NearbyPlacesAdapter;
 import com.ywca.pentref.adapters.SpinnerCategoryAdapter;
 import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
@@ -61,9 +61,10 @@ import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -101,10 +102,16 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     private FloatingActionButton mBookmarkBtn;
     private Toast mToast;
     private Spinner mSpinner;
+    // About shortest distance
+    Button btn;
 
 
+    //All the points of interest from the selected category
+    private List<Poi> mCategoriesPois;
     // All the Points of Interest read from the local database
     private List<Poi> mPois;
+    // For storing distanceBetween
+    float results[]=new float[1];
     //endregion
 
     public DiscoverFragment() {
@@ -115,8 +122,9 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPois = new ArrayList<>();
 
+        mPois = new ArrayList<>();
+        mCategoriesPois = new ArrayList<>();
         // Build Google Api client and connect to it
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
@@ -148,13 +156,14 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 //        mBottomSheet = (RelativeLayout) rootView.findViewById(R.id.bottom_sheet);
 
         // Initialises category spinner view that is embedded in the bottom sheet
+
         mSpinner = (Spinner) rootView.findViewById(R.id.f_discover_spinner);
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //Set summary card view to invisible
                 mPoiSummaryCardView.setVisibility(View.INVISIBLE);
-
+                mCategoriesPois.clear();
                 // Remove all the existing markers
                 mGoogleMap.clear();
                 mPreviousMarker = null;
@@ -162,6 +171,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 //Add All poi if position = 0
                 if(position == 0){
                     for(Poi poi : mPois){
+                        mCategoriesPois.add(poi);
                         MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
                         mGoogleMap.addMarker(markerOptions).setTag(poi);
                     }
@@ -190,6 +200,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                             //Add only the markers that match the bookmark
                             for(Poi poi : mPois){
                                 if(strings.contains(poi.getId())){
+                                    mCategoriesPois.add(poi);
                                     MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
                                     mGoogleMap.addMarker(markerOptions).setTag(poi);
                                 }
@@ -200,6 +211,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                         // Add only the markers that match the selected category
                         for (Poi poi : mPois) {
                             if (poi.getCategoryId() == (position)) {
+                                mCategoriesPois.add(poi);
                                 MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
                                 mGoogleMap.addMarker(markerOptions).setTag(poi);
                             }
@@ -417,7 +429,38 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
     @Override
     public void onLocationChanged(Location location) {
-        // Remove the circle that has been previously added
+        List<Pair<Poi,Float>> poiListPair = new ArrayList<>();
+        for (Poi poiItem : mCategoriesPois) {
+            try {
+                Location.distanceBetween(location.getLatitude(), location.getLongitude(),
+                        poiItem.getLatitude(), poiItem.getLongitude(), results);
+
+                float distance = results[0];
+
+                Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
+                poiListPair.add(poiPair);
+            } catch (Exception e) {
+                int a =1;
+            }
+
+        }
+
+        Collections.sort(poiListPair, new DistanceComparator());
+
+        RelativeLayout bottomSheet = (RelativeLayout) getActivity().findViewById(R.id.bottom_sheet);
+        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        NearbyPlacesAdapter adapter = new NearbyPlacesAdapter(poiListPair);
+        adapter.setOnItemClickListener(new NearbyPlacesAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Poi selectedPoi) {
+                Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
+                intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, selectedPoi);
+                getActivity().startActivity(intent);
+            }
+        });
+        recyclerView.setAdapter(adapter);
+
         if (mCircle != null) {
             mCircle.remove();
         }
@@ -657,6 +700,20 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             super.onPostExecute(isBookmarked);
             mBookmarkBtn.setTag(isBookmarked);
             mBookmarkBtn.setImageResource(isBookmarked ? R.drawable.ic_bookmarked_black_36dp : R.drawable.ic_bookmark_black_36dp);
+        }
+    }
+
+    private class DistanceComparator implements Comparator<Pair<Poi, Float>> {
+
+        @Override
+        public int compare(Pair<Poi, Float> o1, Pair<Poi, Float> o2) {
+            if (o1.second < o2.second) {
+                return -1;
+            } else if (o1.second > o2.second) {
+                return 1;
+            }
+
+            return 0;
         }
     }
 }

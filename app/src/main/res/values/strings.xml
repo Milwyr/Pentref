@@ -87,6 +87,7 @@
     <string name="error_message_sign_in_before_posting_review">Please sign in before posting your review.</string>
     <string name="error_network_unavailable">Network unavailable</string>
     <string name="error_message_connect_to_internet_before_posting_review">Please connect to internet before posting your review.</string>
+    <string name="error_message">An error has occurred. Please try again by clicking REFRESH</string>
 
     <!-- SharedPreferences File Name -->
     <string name="pref_file_name_local" translatable="false">local</string>

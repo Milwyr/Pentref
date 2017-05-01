@@ -20,6 +20,7 @@
 
     <GridView
         android:id="@+id/category_grid_view"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/scroll_up_image_view"

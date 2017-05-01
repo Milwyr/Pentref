@@ -62,6 +62,7 @@
             android:name=".activities.ReviewActivity"
             android:parentActivityName=".activities.PoiDetailsActivity" />
 
+
         <provider
             android:name=".common.PentrefProvider"
             android:authorities="com.ywca.pentref.provider"

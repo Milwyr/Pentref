@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_horizontal_margin">
 
     <ImageView
         android:id="@+id/spinner_category_icon"
         android:layout_width="24dp"
-        android:layout_height="24dp"
-        />
+        android:layout_height="24dp" />
 
     <TextView
-        android:text="TextView"
+        android:id="@+id/spinner_category_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/spinner_category_name"
-        android:layout_weight="1" />
-</LinearLayout>
+        android:paddingStart="8dp"
+        android:layout_toEndOf="@+id/spinner_category_icon"
+        android:text="TextView"
+        android:textSize="16sp" />
+</RelativeLayout>

@@ -210,9 +210,6 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
         bmOptions.inPurgeable = true;
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        Bitmap bitmap2 = BitmapFactory.decodeFile(mCurrentPhotoPath);
-        File test  = new File(mCurrentPhotoPath);
-        Bitmap bitmap3 = BitmapFactory.decodeFile(test.getAbsolutePath());
         mPreviewImage.setImageBitmap(bitmap);
     }
 
@@ -221,7 +218,7 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-           setPic();
+            setPic();
         }else if (requestCode == REQUEST_SELECT_PHOTO && resultCode == RESULT_OK){
             //Get the selectedImage Uri
             Uri selectedImage = data.getData();
@@ -235,7 +232,7 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
             mCurrentPhotoPath = cursor.getString(columnIndex);
             cursor.close();
             //Set preview picture
-            setPic();
+           setPic();
         }
         int j = 0;
     }
@@ -344,7 +341,7 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
                         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                         Bitmap bitmap = BitmapFactory.decodeFile(fullSizeImage.getAbsolutePath(), bmOptions);
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.JPEG,30,baos);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG,10,baos);
                         byte[] data = baos.toByteArray();
                         UploadTask testTask = poisRef.putBytes(data);
                         testTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
