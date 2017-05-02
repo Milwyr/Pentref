@@ -341,7 +341,7 @@ public class AddPoiActivity extends AppCompatActivity implements View.OnClickLis
                         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                         Bitmap bitmap = BitmapFactory.decodeFile(fullSizeImage.getAbsolutePath(), bmOptions);
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.JPEG,10,baos);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG,30,baos);
                         byte[] data = baos.toByteArray();
                         UploadTask testTask = poisRef.putBytes(data);
                         testTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {

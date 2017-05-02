@@ -104,6 +104,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     private Spinner mSpinner;
     // About shortest distance
     Button btn;
+    private Location mLastLocation;
 
 
     //All the points of interest from the selected category
@@ -122,6 +123,8 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //set last location to null
+        mLastLocation = null;
 
         mPois = new ArrayList<>();
         mCategoriesPois = new ArrayList<>();
@@ -217,7 +220,11 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                             }
                         }
                     }
+                //Update the bottomsheet if category is change and lastLocation is not null
+                if(mLastLocation != null){
+                    updateNearbyList(mLastLocation);
                 }
+            }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -318,6 +325,9 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 requestPermissions(new String[]{
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_PERMISSION);
+            } else{
+                //Location permissions have been granted for device after Marshmallow by runtime permissions already
+                googleMap.setMyLocationEnabled(true);
             }
         } else {
             // Location permissions have been granted prior to installation before Marshmallow (API 23)
@@ -427,8 +437,44 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     //region Geo-fencing API
     private LatLng mLastLatLng;
 
+    private void updateNearbyList(Location lastLocation){
+        List<Pair<Poi,Float>> poiListPair = new ArrayList<>();
+        for (Poi poiItem : mCategoriesPois) {
+            try {
+                Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
+                        poiItem.getLatitude(), poiItem.getLongitude(), results);
+
+                float distance = results[0];
+
+                Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
+                poiListPair.add(poiPair);
+            } catch (Exception e) {
+                int a =1;
+            }
+
+        }
+
+        Collections.sort(poiListPair, new DistanceComparator());
+
+        RelativeLayout bottomSheet = (RelativeLayout) getActivity().findViewById(R.id.bottom_sheet);
+        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        NearbyPlacesAdapter adapter = new NearbyPlacesAdapter(poiListPair);
+        adapter.setOnItemClickListener(new NearbyPlacesAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Poi selectedPoi) {
+                Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
+                intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, selectedPoi);
+                getActivity().startActivity(intent);
+            }
+        });
+        recyclerView.setAdapter(adapter);
+    }
+
     @Override
     public void onLocationChanged(Location location) {
+        //Save location to last location
+        mLastLocation = location;
         List<Pair<Poi,Float>> poiListPair = new ArrayList<>();
         for (Poi poiItem : mCategoriesPois) {
             try {
@@ -471,6 +517,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 .radius(500)
                 .strokeWidth(5));
 
+        //This will cause unexpected outcome for user. Need futhrer disucssion
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(
                 new LatLng(location.getLatitude(), location.getLongitude())));
 
@@ -624,6 +671,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 Log.e("DiscoverFragment", e.getMessage());
             }
         }
+        mGoogleApiClient.connect();
     }
 
     @Override
