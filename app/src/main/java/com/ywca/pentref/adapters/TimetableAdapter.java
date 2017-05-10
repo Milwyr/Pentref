@@ -1,6 +1,5 @@
 package com.ywca.pentref.adapters;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,13 +23,6 @@ public class TimetableAdapter extends RecyclerView.Adapter<TimetableAdapter.View
     private int mLayoutId;
     private List<LocalTime> mLocalTimes;
     private OnItemClickListener mOnItemClickListener;
-
-    /**
-     * Interface definition for a callback to be invoked when an item in this {@link RecyclerView} has been clicked.
-     */
-    public interface OnItemClickListener {
-        void onItemClick(LocalTime localTime);
-    }
 
     /**
      * Constructor
@@ -75,10 +67,18 @@ public class TimetableAdapter extends RecyclerView.Adapter<TimetableAdapter.View
 
     /**
      * Registers a callback to be invoked when an item in this {@link RecyclerView} has been clicked.
+     *
      * @param onItemClickListener The callback that will be invoked
      */
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when an item in this {@link RecyclerView} has been clicked.
+     */
+    public interface OnItemClickListener {
+        void onItemClick(LocalTime localTime);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

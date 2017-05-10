@@ -1,10 +1,9 @@
 package com.ywca.pentref.fragments;
 
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
-import android.util.JsonWriter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,40 +11,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.gson.GsonBuilder;
-import com.google.gson.stream.JsonToken;
 import com.ywca.pentref.R;
-import com.ywca.pentref.activities.MainActivity;
-import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -81,41 +55,41 @@ public class AboutFragment extends Fragment {
                 DatabaseReference myRef = database.getReference("POI");
 
                 //addPoi should have null id
-                Poi addPoi = new Poi(null,"test poi2","chineseName","header",2,"uri","address","chineseAddress","34223233",new LatLng(0,0));
+                Poi addPoi = new Poi(null, "test poi2", "chineseName", "header", 2, "uri", "address", "chineseAddress", "34223233", new LatLng(0, 0));
 
                 //Add new POI example
                 myRef.push().setValue(addPoi).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d("About","Add Success!");
-                        Toast.makeText(getActivity(),"New POI added",Toast.LENGTH_SHORT).show();
+                        Log.d("About", "Add Success!");
+                        Toast.makeText(getActivity(), "New POI added", Toast.LENGTH_SHORT).show();
 
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d("About",e.getMessage());
-                        Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_SHORT).show();
+                        Log.d("About", e.getMessage());
+                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
                 //update a poi with id(string) "2240"
-                Poi updatePoi = new Poi("2240","my ld name","test2","ff.png",
-                        2,"ddd","eee","fff","1234234",new LatLng(0,0));
+                Poi updatePoi = new Poi("2240", "my ld name", "test2", "ff.png",
+                        2, "ddd", "eee", "fff", "1234234", new LatLng(0, 0));
                 //Update Example
                 myRef.child(updatePoi.getId()).setValue(updatePoi)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.i("About","Update Success!");
-                    }
-                })
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.i("About", "Update Success!");
+                            }
+                        })
                         .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i("About",e.getMessage());
-                    }
-                });
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.i("About", e.getMessage());
+                            }
+                        });
 
             }
         });
@@ -207,28 +181,28 @@ public class AboutFragment extends Fragment {
 
 */
         Button loginBtn = (Button) root_view.findViewById(R.id.f_about_btn_login);
-       loginBtn.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               mProgress.show();
-               mAuth.signInWithEmailAndPassword("test@gmail.com","123456")
-                       .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                           @Override
-                           public void onSuccess(AuthResult authResult) {
-                               Log.d("Loginfirebase","Success!");
-                               mProgress.dismiss();
-                               Toast.makeText(getActivity(), "Success!", Toast.LENGTH_SHORT).show();
-                           }
-                       })
-                       .addOnFailureListener(new OnFailureListener() {
-                           @Override
-                           public void onFailure(@NonNull Exception e) {
-                               mProgress.dismiss();
-                               Toast.makeText(getActivity(), "Fail to login", Toast.LENGTH_SHORT).show();
-                           }
-                       });
-           }
-       });
+        loginBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mProgress.show();
+                mAuth.signInWithEmailAndPassword("test@gmail.com", "123456")
+                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                            @Override
+                            public void onSuccess(AuthResult authResult) {
+                                Log.d("Loginfirebase", "Success!");
+                                mProgress.dismiss();
+                                Toast.makeText(getActivity(), "Success!", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                mProgress.dismiss();
+                                Toast.makeText(getActivity(), "Fail to login", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        });
 
         Button signoutBtn = (Button) root_view.findViewById(R.id.f_about_btn_signout);
         signoutBtn.setOnClickListener(new View.OnClickListener() {
@@ -238,8 +212,6 @@ public class AboutFragment extends Fragment {
                 Toast.makeText(getActivity(), "SignOut!", Toast.LENGTH_SHORT).show();
             }
         });
-
-
 
 
         // Inflate the layout for this fragment

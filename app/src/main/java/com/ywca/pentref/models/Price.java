@@ -7,17 +7,40 @@ import android.os.Parcelable;
  * Includes a child price and an adult price.
  */
 public class Price implements Parcelable {
+    public static final Creator<Price> CREATOR = new Creator<Price>() {
+        @Override
+        public Price createFromParcel(Parcel source) {
+            return new Price(source);
+        }
+
+        @Override
+        public Price[] newArray(int size) {
+            return new Price[size];
+        }
+    };
     //region Fields
     private double childPrice;
-    private double adultPrice;
     //endregion
+    private double adultPrice;
 
-    public Price(){}
+    public Price() {
+    }
+
+    private Price(Parcel source) {
+        this.childPrice = source.readDouble();
+        this.adultPrice = source.readDouble();
+    }
+    //end
 
     //getter function
-    public double getChildPrice(){ return childPrice; }
-    public double getAdultPrice(){ return adultPrice; }
-    //end
+    public double getChildPrice() {
+        return childPrice;
+    }
+
+    public double getAdultPrice() {
+        return adultPrice;
+    }
+    //endregion
 
     //region Comparison methods
     @Override
@@ -36,7 +59,6 @@ public class Price implements Parcelable {
     public int hashCode() {
         return Double.valueOf(this.childPrice).hashCode() * Double.valueOf(this.adultPrice).hashCode();
     }
-    //endregion
 
     //region Code to implement Parcelable
     @Override
@@ -49,22 +71,5 @@ public class Price implements Parcelable {
         destination.writeDouble(this.childPrice);
         destination.writeDouble(this.adultPrice);
     }
-
-    private Price(Parcel source) {
-        this.childPrice = source.readDouble();
-        this.adultPrice = source.readDouble();
-    }
-
-    public static final Creator<Price> CREATOR = new Creator<Price>() {
-        @Override
-        public Price createFromParcel(Parcel source) {
-            return new Price(source);
-        }
-
-        @Override
-        public Price[] newArray(int size) {
-            return new Price[size];
-        }
-    };
     //endregion
 }

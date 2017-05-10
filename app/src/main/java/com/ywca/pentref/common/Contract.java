@@ -12,7 +12,7 @@ public final class Contract {
 
     public static final class Poi implements BaseColumns {
         public static final String TABLE_NAME = "poi";
-
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, TABLE_NAME);
         static final String COLUMN_NAME = "name";
         static final String COLUMN_CHINESE_NAME = "chinese_name";
         static final String COLUMN_HEADER_IMAGE_FILE_NAME = "header_image";
@@ -23,9 +23,6 @@ public final class Contract {
         static final String COLUMN_PHONE_NUMBER = "phone_number";
         static final String COLUMN_LATITUDE = "latitude";
         static final String COLUMN_LONGITUDE = "longitude";
-
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, TABLE_NAME);
-
         public static final String[] PROJECTION_ALL = {
                 _ID,
                 COLUMN_NAME,
@@ -42,15 +39,12 @@ public final class Contract {
     }
 
     public static final class Category implements BaseColumns {
-        static final String TABLE_NAME = "category";
-
         public static final String COLUMN_NAME = "category_name";
-
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, TABLE_NAME);
-
         public static final String[] PROJECTION_ALL = {
                 _ID, COLUMN_NAME
         };
+        static final String TABLE_NAME = "category";
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, TABLE_NAME);
     }
 
     public static final class Bookmark implements BaseColumns {

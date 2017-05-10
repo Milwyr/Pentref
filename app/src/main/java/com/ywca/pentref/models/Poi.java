@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.database.DataSnapshot;
 
 import java.util.Locale;
 
@@ -14,6 +13,17 @@ import java.util.Locale;
  * including its name, address, and other relevant information.
  */
 public class Poi implements Comparable, Parcelable {
+    public static final Creator<Poi> CREATOR = new Creator<Poi>() {
+        @Override
+        public Poi createFromParcel(Parcel source) {
+            return new Poi(source);
+        }
+
+        @Override
+        public Poi[] newArray(int size) {
+            return new Poi[size];
+        }
+    };
     //region Fields
     private String firebaseId;
     private String name;
@@ -25,15 +35,15 @@ public class Poi implements Comparable, Parcelable {
     private String chineseAddress;
     private String phoneNumber;
     private double latitude;
-    private double longitude;
     //endregion
+    private double longitude;
+
 
     //for firebase
-    public Poi(){}
+    public Poi() {
+    }
 
-
-
-    public Poi(String id,String name, String chineseName, String headerImageFileName, int categoryId,
+    public Poi(String id, String name, String chineseName, String headerImageFileName, int categoryId,
                String websiteUri, String address, String chineseAddress, String phoneNumber, LatLng latLng) {
         this.firebaseId = id;
         this.name = name;
@@ -48,11 +58,25 @@ public class Poi implements Comparable, Parcelable {
         this.longitude = latLng.longitude;
     }
 
+    private Poi(Parcel source) {
+        this.firebaseId = source.readString();
+        this.name = source.readString();
+        this.chineseName = source.readString();
+        this.headerImageFileName = source.readString();
+        this.categoryId = source.readInt();
+        this.websiteUri = source.readString();
+        this.address = source.readString();
+        this.chineseAddress = source.readString();
+        this.phoneNumber = source.readString();
+        this.latitude = source.readDouble();
+        this.longitude = source.readDouble();
+    }
+
     public String getId() {
         return this.firebaseId;
     }
 
-    public void setId(String firebaseID){
+    public void setId(String firebaseID) {
         this.firebaseId = firebaseID;
     }
 
@@ -71,9 +95,13 @@ public class Poi implements Comparable, Parcelable {
         }
     }
 
-    public String getName(){ return this.name; }
+    public String getName() {
+        return this.name;
+    }
 
-    public String getChineseName(){ return this.chineseName; }
+    public String getChineseName() {
+        return this.chineseName;
+    }
 
     public String getHeaderImageFileName() {
         return this.headerImageFileName;
@@ -102,11 +130,11 @@ public class Poi implements Comparable, Parcelable {
         }
     }
 
-    public String getAddress(){
+    public String getAddress() {
         return this.address;
     }
 
-    public String getChineseAddress(){
+    public String getChineseAddress() {
         return this.chineseAddress;
     }
 
@@ -118,11 +146,11 @@ public class Poi implements Comparable, Parcelable {
         return new LatLng(this.latitude, this.longitude);
     }
 
-    public double getLatitude(){
+    public double getLatitude() {
         return this.latitude;
     }
 
-    public double getLongitude(){
+    public double getLongitude() {
         return this.longitude;
     }
 
@@ -134,6 +162,8 @@ public class Poi implements Comparable, Parcelable {
         }
         return super.equals(other);
     }
+
+    //endregion
 
     @Override
     public int hashCode() {
@@ -147,8 +177,6 @@ public class Poi implements Comparable, Parcelable {
         }
         return 0;
     }
-
-    //endregion
 
     //region Code to implement Parcelable
     @Override
@@ -173,31 +201,5 @@ public class Poi implements Comparable, Parcelable {
         destination.writeDouble(this.latitude);
         destination.writeDouble(this.longitude);
     }
-
-    private Poi(Parcel source) {
-        this.firebaseId = source.readString();
-        this.name = source.readString();
-        this.chineseName = source.readString();
-        this.headerImageFileName = source.readString();
-        this.categoryId = source.readInt();
-        this.websiteUri = source.readString();
-        this.address = source.readString();
-        this.chineseAddress = source.readString();
-        this.phoneNumber = source.readString();
-        this.latitude = source.readDouble();
-        this.longitude = source.readDouble();
-    }
-
-    public static final Creator<Poi> CREATOR = new Creator<Poi>() {
-        @Override
-        public Poi createFromParcel(Parcel source) {
-            return new Poi(source);
-        }
-
-        @Override
-        public Poi[] newArray(int size) {
-            return new Poi[size];
-        }
-    };
     //endregion
 }

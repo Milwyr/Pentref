@@ -2,26 +2,20 @@ package com.ywca.pentref.activities;
 
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
 import com.ywca.pentref.R;
 import com.ywca.pentref.adapters.TimetableAdapter;
@@ -30,11 +24,8 @@ import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Timetable;
 import com.ywca.pentref.models.Transport;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 

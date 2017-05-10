@@ -11,16 +11,45 @@ import com.google.gson.annotations.SerializedName;
  * price, departure station and destination station.
  */
 public class Transport implements Comparable, Parcelable {
+    public static final Parcelable.Creator<Transport> CREATOR = new Parcelable.Creator<Transport>() {
+
+        @Override
+        public Transport createFromParcel(Parcel parcel) {
+            return new Transport(parcel);
+        }
+
+        @Override
+        public Transport[] newArray(int size) {
+            return new Transport[size];
+        }
+    };
     //region Instance variables
     private String routeNumber;
     private TypeEnum typeEnum;
     private String nonTaiODestinationStation;
     private Price price;
     private Timetable fromTaiO;
-    private Timetable toTaiO;
     //endregion
+    private Timetable toTaiO;
 
-    public Transport(){}
+    public Transport() {
+    }
+
+    private Transport(Parcel source) {
+        this.routeNumber = source.readString();
+
+        int typeIndex = source.readInt();
+        if (typeIndex == 0) {
+            this.typeEnum = TypeEnum.BUS;
+        } else {
+            this.typeEnum = TypeEnum.FERRY;
+        }
+
+        this.nonTaiODestinationStation = source.readString();
+        this.price = source.readParcelable(getClass().getClassLoader());
+        this.fromTaiO = source.readParcelable(getClass().getClassLoader());
+        this.toTaiO = source.readParcelable(getClass().getClassLoader());
+    }
 
     //region Getter methods
     public TypeEnum getTypeEnum() {
@@ -38,17 +67,19 @@ public class Transport implements Comparable, Parcelable {
     public Timetable getFromTaiO() {
         return this.fromTaiO;
     }
-
-    public Timetable getToTaiO() {
-        return this.toTaiO;
-    }
-
-    public Price price(){return price;}
     //endregion
 
     //region Setter methods
 
     //endregion
+
+    public Timetable getToTaiO() {
+        return this.toTaiO;
+    }
+
+    public Price price() {
+        return price;
+    }
 
     //region Comparison methods
     @Override
@@ -58,6 +89,7 @@ public class Transport implements Comparable, Parcelable {
         }
         return super.equals(other);
     }
+    //endregion
 
     @Override
     public int hashCode() {
@@ -71,7 +103,6 @@ public class Transport implements Comparable, Parcelable {
         }
         return 0;
     }
-    //endregion
 
     //region Code to implement Parcelable
     @Override
@@ -87,35 +118,6 @@ public class Transport implements Comparable, Parcelable {
         destination.writeParcelable(this.price, flags);
         destination.writeParcelable(this.fromTaiO, flags);
         destination.writeParcelable(this.toTaiO, flags);
-    }
-
-    public static final Parcelable.Creator<Transport> CREATOR = new Parcelable.Creator<Transport>() {
-
-        @Override
-        public Transport createFromParcel(Parcel parcel) {
-            return new Transport(parcel);
-        }
-
-        @Override
-        public Transport[] newArray(int size) {
-            return new Transport[size];
-        }
-    };
-
-    private Transport(Parcel source) {
-        this.routeNumber = source.readString();
-
-        int typeIndex = source.readInt();
-        if (typeIndex == 0) {
-            this.typeEnum = TypeEnum.BUS;
-        } else {
-            this.typeEnum = TypeEnum.FERRY;
-        }
-
-        this.nonTaiODestinationStation = source.readString();
-        this.price = source.readParcelable(getClass().getClassLoader());
-        this.fromTaiO = source.readParcelable(getClass().getClassLoader());
-        this.toTaiO = source.readParcelable(getClass().getClassLoader());
     }
     //endregion
 

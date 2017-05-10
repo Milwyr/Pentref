@@ -10,8 +10,10 @@ import android.widget.TextView;
 import com.ywca.pentref.R;
 import com.ywca.pentref.models.Review;
 
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.util.List;
 
@@ -38,11 +40,14 @@ public class ReviewsAdapter extends
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Review review = mReviews.get(position);
 
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("HH:mm");
+        DateTimeFormatter formatter = ISODateTimeFormat.dateTimeNoMillis();
+        DateTime timeStampDateTime = formatter.parseDateTime(review.getTimestamp());
+        DateTimeFormatter displayFormatter = DateTimeFormat.forPattern("dd-MM-yyyy");
+
 
         holder.userNameTextView.setText(review.getUserName());
         holder.ratingBar.setRating((float) review.getRating());
-        holder.timeTextView.setText(formatter.print(review.getTimestamp()));
+        holder.timeTextView.setText(displayFormatter.print(timeStampDateTime));
         holder.titleTextView.setText(review.getTitle());
         holder.descriptionTextView.setText(review.getDescription());
     }

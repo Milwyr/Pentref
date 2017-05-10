@@ -38,6 +38,43 @@ public class Utility {
     public static final String TRANSPORTATION_JSON_FILE_NAME = "transports.json";
 
     /**
+     * Reads from the given {@link LocalTime} list, and returns a {@link LocalTime} list
+     * with the time that are later than the current time.
+     *
+     * @param localTimes A list of {@link LocalTime} objects
+     * @return A list of {@link LocalTime} objects that are later than the current time
+     */
+    public static List<LocalTime> getTimesAfterNow(List<LocalTime> localTimes) {
+        // -1 indicates no restriction of number of returned results
+        return getTimesAfterNow(localTimes, -1);
+    }
+
+    /**
+     * Reads from the given {@link LocalTime} list, and returns a {@link LocalTime} list
+     * with the time that are later than the current time.
+     *
+     * @param localTimes A list of {@link LocalTime} objects
+     * @param max        Maximum number of results
+     * @return A list of {@link LocalTime} objects that are later than the current time
+     */
+    public static List<LocalTime> getTimesAfterNow(List<LocalTime> localTimes, int max) {
+        List<LocalTime> nextTwoTimes = new ArrayList<>();
+        LocalTime now = LocalTime.now();
+
+        for (LocalTime localTime : localTimes) {
+            if (localTime.isAfter(now)) {
+                nextTwoTimes.add(localTime);
+
+                // Breaks the loop when there number of LocalTime objects reaches maximum
+                if (nextTwoTimes.size() == max) {
+                    return nextTwoTimes;
+                }
+            }
+        }
+        return nextTwoTimes;
+    }
+
+    /**
      * A serialiser that helps Gson to parse {@link LocalTime} object.
      */
     public static class LocalTimeSerializer implements
@@ -64,42 +101,5 @@ public class Utility {
             }
             return new JsonPrimitive(dateString);
         }
-    }
-
-    /**
-     * Reads from the given {@link LocalTime} list, and returns a {@link LocalTime} list
-     * with the time that are later than the current time.
-     *
-     * @param localTimes A list of {@link LocalTime} objects
-     * @return A list of {@link LocalTime} objects that are later than the current time
-     */
-    public static List<LocalTime> getTimesAfterNow(List<LocalTime> localTimes) {
-        // -1 indicates no restriction of number of returned results
-        return getTimesAfterNow(localTimes, -1);
-    }
-
-    /**
-     * Reads from the given {@link LocalTime} list, and returns a {@link LocalTime} list
-     * with the time that are later than the current time.
-     *
-     * @param localTimes A list of {@link LocalTime} objects
-     * @param max Maximum number of results
-     * @return A list of {@link LocalTime} objects that are later than the current time
-     */
-    public static List<LocalTime> getTimesAfterNow(List<LocalTime> localTimes, int max) {
-        List<LocalTime> nextTwoTimes = new ArrayList<>();
-        LocalTime now = LocalTime.now();
-
-        for (LocalTime localTime : localTimes) {
-            if (localTime.isAfter(now)) {
-                nextTwoTimes.add(localTime);
-
-                // Breaks the loop when there number of LocalTime objects reaches maximum
-                if (nextTwoTimes.size() == max) {
-                    return nextTwoTimes;
-                }
-            }
-        }
-        return nextTwoTimes;
     }
 }

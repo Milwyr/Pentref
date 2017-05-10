@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
@@ -17,19 +18,18 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
+import com.ywca.pentref.models.Review;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +45,14 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
     private float mRating;
     private String mUserName;
 
+    private DatabaseReference mDatabase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_review);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
 
         mSelectedPhotoUris = new ArrayList<>();
 
@@ -144,31 +148,26 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
                 break;
             case R.id.submit_button:
                 if (isConnectedToInternet()) {
-                    try {
-                        EditText titleEditText = (EditText) findViewById(R.id.review_title_edit_text);
-                        EditText descriptionEditText = (EditText) findViewById(R.id.review_description_edit_text);
 
-                        String title = null;
-                        if (titleEditText.getText() != null && titleEditText.getText().length() > 0) {
-                            title = titleEditText.getText().toString();
-                        }
+                    EditText titleEditText = (EditText) findViewById(R.id.review_title_edit_text);
+                    EditText descriptionEditText = (EditText) findViewById(R.id.review_description_edit_text);
 
-                        String description = null;
-                        if (descriptionEditText.getText() != null && descriptionEditText.getText().length() > 0) {
-                            description = descriptionEditText.getText().toString();
-                        }
+                    String title = null;
+                    if (titleEditText.getText() != null && titleEditText.getText().length() > 0) {
+                        title = titleEditText.getText().toString();
+                    }
 
-                        if (title == null || title.isEmpty() || description == null || description.isEmpty()) {
-                            View view = findViewById(R.id.relative_layout);
-                            Snackbar.make(view, "Not empty", Snackbar.LENGTH_LONG).show();
-                        } else {
-                            // Pass the incoming Poi instance to PoiDetailsActivity
-                            postReview(title, description);
-                            setResult(RESULT_OK, mIncomingIntent);
-                            finish();
-                        }
-                    } catch (JSONException e) {
-                        Log.e("ReviewActivity", e.getMessage());
+                    String description = null;
+                    if (descriptionEditText.getText() != null && descriptionEditText.getText().length() > 0) {
+                        description = descriptionEditText.getText().toString();
+                    }
+
+                    if (title == null || title.isEmpty() || description == null || description.isEmpty()) {
+                        View view = findViewById(R.id.relative_layout);
+                        Snackbar.make(view, "Not empty", Snackbar.LENGTH_LONG).show();
+                    } else {
+                        // Pass the incoming Poi instance to PoiDetailsActivity
+                        postReview(title, description);
                     }
                 } else {
                     new AlertDialog.Builder(this)
@@ -186,30 +185,26 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
     }
 
     // Post review to the server
-    private void postReview(String title, String description) throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("poiId", mCurrentPoi.getId());
-        jsonObject.put("userId", getIntent().getStringExtra(Utility.USER_PROFILE_ID_EXTRA_KEY));
-        jsonObject.put("userName", mUserName);
-        jsonObject.put("rating", mRating);
-        jsonObject.put("title", title);
-        jsonObject.put("description", description);
-        jsonObject.put("timestamp", ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now()));
+    private void postReview(String title, String description) {
+        Review review = new Review(mCurrentPoi.getId(),
+                getIntent().getStringExtra(Utility.USER_PROFILE_ID_EXTRA_KEY),
+                mUserName, mRating, title, description, ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now()));
 
-        String url = Utility.SERVER_URL + "/PostReq.php?METHOD=INS&PATH=reviews&";
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
-                url, jsonObject,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                    }
-                }, new Response.ErrorListener() {
+        DatabaseReference reviewRef = mDatabase.child("Reviews").child(mCurrentPoi.getId()).child(review.getUserId());
+        reviewRef.setValue(review).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-
+            public void onSuccess(Void aVoid) {
+                setResult(RESULT_OK, mIncomingIntent);
+                finish();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("ReviewActivity", e.getMessage());
+                finish();
             }
         });
-        Volley.newRequestQueue(this).add(request);
+
+
     }
 }

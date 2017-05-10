@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.icu.text.StringSearch;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,7 +26,6 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.facebook.FacebookSdk;
@@ -38,9 +36,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
-import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
@@ -65,6 +67,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -81,6 +84,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
     private RatingBar mUserReviewRatingBar;
 
     private StorageReference mStorageRef;
+    private DatabaseReference mDatabase;
 
 
     @Override
@@ -88,6 +92,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poi_details);
         FacebookSdk.sdkInitialize(this);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         if (getIntent() != null) {
             mSelectedPoi = getIntent().getParcelableExtra(Utility.SELECTED_POI_EXTRA_KEY);
@@ -178,7 +183,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
                     intent.putExtra(Utility.USER_PROFILE_ID_EXTRA_KEY, Profile.getCurrentProfile().getId());
                     intent.putExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY, Profile.getCurrentProfile().getName());
                 } else if (mGoogleSignInAccount != null) {
-                    intent.putExtra(Utility.USER_PROFILE_ID_EXTRA_KEY, mGoogleSignInAccount.getIdToken());
+                    intent.putExtra(Utility.USER_PROFILE_ID_EXTRA_KEY, mGoogleSignInAccount.getId());
                     intent.putExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY, mGoogleSignInAccount.getDisplayName());
                 }
 
@@ -211,7 +216,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
 
         //TODO: change this to asyncTask if needed
         //Download the header image from firebase
-        StorageReference headerImageRef = mStorageRef.child("images/"+mSelectedPoi.getHeaderImageFileName());
+        StorageReference headerImageRef = mStorageRef.child("images/" + mSelectedPoi.getHeaderImageFileName());
         final long TEN_MEGABYTE = 1024 * 1024 * 10;
         headerImageRef.getBytes(TEN_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
@@ -226,10 +231,11 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(PoiDetailsActivity.this,e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(PoiDetailsActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("PoiDetailsActivity", "Failed to download header image.");
             }
         });
+
 
 //        String baseUrl = Utility.SERVER_URL + "/poi_photos/";
 //        // Download the header image from server
@@ -326,31 +332,29 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
             poiPhoneNumberTextView.setText(phoneNumber.replace("+852 ", ""));
         }
 
-        // Download reviews from server
-        String url = Utility.SERVER_URL + "/PostReq.php?METHOD=GET&PATH=reviews&poiId=" + mSelectedPoi.getId();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        //Download review from firebase
+        mDatabase.child("Reviews").child(mSelectedPoi.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onResponse(JSONArray response) {
-                Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer())
-                        .create();
-                List<Review> reviews = Arrays.asList(gson.fromJson(response.toString(), Review[].class));
-
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Review> reviewList = new ArrayList<>();
+                for(DataSnapshot data : dataSnapshot.getChildren()){
+                    Review review = data.getValue(Review.class);
+                    reviewList.add(review);
+                }
                 RecyclerView recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new LinearLayoutManager(PoiDetailsActivity.this));
 
-                ReviewsAdapter adapter = new ReviewsAdapter(reviews);
+                ReviewsAdapter adapter = new ReviewsAdapter(reviewList);
                 recyclerView.setAdapter(adapter);
             }
-        }, new Response.ErrorListener() {
+
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("PoiDetailsActivity", error.getMessage());
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("PoiDetail",databaseError.getMessage());
             }
         });
-        Volley.newRequestQueue(this).add(jsonArrayRequest);
+
 
         mUserReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
         mUserReviewRatingBar.setOnRatingBarChangeListener(this);
@@ -365,6 +369,11 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
     // Returns true if the user has signed in with either Facebook or Google
     private boolean isSignedIn() {
         return Profile.getCurrentProfile() != null || mGoogleSignInAccount != null;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 
     /**
@@ -418,10 +427,5 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
             }
             return new JsonPrimitive(dateString);
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
     }
 }

@@ -12,9 +12,6 @@ import android.widget.TextView;
 import com.ywca.pentref.R;
 import com.ywca.pentref.models.Poi;
 
-import org.joda.time.LocalTime;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -28,14 +25,8 @@ public class NearbyPlacesAdapter extends RecyclerView.Adapter<NearbyPlacesAdapte
     private Context mContext;
 
     /**
-     * Interface definition for a callback to be invoked when an item in this {@link RecyclerView} has been clicked.
-     */
-    public interface OnItemClickListener {
-        void onItemClick(Poi poi);
-    }
-
-    /**
-     *  Constructor
+     * Constructor
+     *
      * @param poiPairList A list of pairs, where first={@link Poi}, second=distance
      */
     public NearbyPlacesAdapter(@NonNull List<Pair<Poi, Float>> poiPairList) {
@@ -73,10 +64,18 @@ public class NearbyPlacesAdapter extends RecyclerView.Adapter<NearbyPlacesAdapte
 
     /**
      * Registers a callback to be invoked when an item in this {@link RecyclerView} has been clicked.
+     *
      * @param onItemClickListener The callback that will be invoked
      */
     public void setOnItemClickListener(NearbyPlacesAdapter.OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when an item in this {@link RecyclerView} has been clicked.
+     */
+    public interface OnItemClickListener {
+        void onItemClick(Poi poi);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

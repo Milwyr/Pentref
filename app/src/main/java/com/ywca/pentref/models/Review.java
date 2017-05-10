@@ -2,26 +2,24 @@ package com.ywca.pentref.models;
 
 import org.joda.time.LocalDateTime;
 
-import java.util.List;
-
 /**
  * A Poi (Point of Interest) encapsulates information about a review contributed by a user.
  */
 public class Review {
-    private long poiId;
+    private String poiId;
     private String userId;
     private String userName;
-    private double rating;
+    private float rating;
     private String title;
     private String description;
     //    private List<String> photoUris;
-    private LocalDateTime timestamp;
+    private String timestamp;
 
     public Review() {
     }
 
-    public Review(long poiId, String userId, String userName, int rating, String title,
-                  String description/*, List<String> photoUris*/, LocalDateTime timestamp) {
+    public Review(String poiId, String userId, String userName, float rating, String title,
+                  String description/*, List<String> photoUris*/, String timestamp) {
         this.poiId = poiId;
         this.userId = userId;
         this.userName = userName;
@@ -32,11 +30,15 @@ public class Review {
         this.timestamp = timestamp;
     }
 
+    public String getPoiId() {
+        return this.poiId;
+    }
+
     public String getUserId() {
         return this.userId;
     }
 
-    public double getRating() {
+    public float getRating() {
         return rating;
     }
 
@@ -59,7 +61,7 @@ public class Review {
 //        return this.photoUris;
 //    }
 
-    public LocalDateTime getTimestamp() {
+    public String getTimestamp() {
         return this.timestamp;
     }
 }

@@ -50,107 +50,10 @@ public class PentrefProvider extends ContentProvider {
     }
     //endregion
 
+    //region SQLite database
+    private final int DATABASE_VERSION = 1;
+    private final String DATABASE_NAME = "Pentref.db";
     private LocalDatabaseHelper mDbHelper;
-
-    @Override
-    public boolean onCreate() {
-        mDbHelper = new LocalDatabaseHelper(getContext());
-        return true;
-    }
-
-    //region CRUD operations (create, read, update, delete)
-    @Nullable
-    @Override
-    public Cursor query(@NonNull Uri uri, String[] projection,
-                        String selection, String[] selectionArgs, String sortOrder) {
-        String tableName = convertToTableName(uri);
-        selection = convertToSelection(uri, selection);
-
-        if (mUriMatcher.match(uri) == SEARCH_SUGGESTIONS) {
-            /*
-                The column names "_id", "SUGGEST_COLUMN_TEXT_1", "SUGGEST_COLUMN_TEXT_2"
-                are used to build a suggestion table and show a list of suggestions when
-                the user searches for Points of Interest.
-
-                The column "SUGGEST_COLUMN_INTENT_DATA_ID" records the POI id of each row.
-            */
-            projection = new String[]{
-                    Contract.Poi._ID + " AS " + BaseColumns._ID,
-                    Contract.Poi.COLUMN_NAME + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
-                    Contract.Poi.COLUMN_ADDRESS + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
-                    Contract.Poi._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
-
-            // The two percent signs are used to match the 'LIKE' statements specified in searchable.xml
-            if (selectionArgs.length > 0) {
-                selectionArgs = new String[]{"%" + selectionArgs[0] + "%"};
-            }
-        }
-
-        Cursor cursor = mDbHelper.getReadableDatabase().query(
-                tableName, projection, selection, selectionArgs, null, null, sortOrder);
-
-        if (getContext() != null) {
-            cursor.setNotificationUri(getContext().getContentResolver(), uri);
-        }
-
-        return cursor;
-    }
-
-    @Nullable
-    @Override
-    public Uri insert(@NonNull Uri uri, ContentValues values) {
-        String tableName = convertToTableName(uri);
-
-        long id = mDbHelper.getWritableDatabase().insertWithOnConflict(
-                tableName, null, values, SQLiteDatabase.CONFLICT_ROLLBACK);
-
-        if (id >= 0) {
-            Uri newUri = ContentUris.withAppendedId(uri, id);
-
-            if (getContext() != null) {
-                getContext().getContentResolver().notifyChange(newUri, null);
-            }
-            return newUri;
-        }
-        throw new SQLException("Problem while inserting into uri: " + uri);
-    }
-
-    @Override
-    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
-        String tableName = convertToTableName(uri);
-        selection = convertToSelection(uri, selection);
-
-        int count = mDbHelper.getWritableDatabase().delete(tableName, selection, selectionArgs);
-
-        if (count > 0 && getContext() != null) {
-            getContext().getContentResolver().notifyChange(uri, null);
-        }
-        return count;
-    }
-
-    @Override
-    public int update(@NonNull Uri uri, ContentValues values,
-                      String selection, String[] selectionArgs) {
-        String tableName = convertToTableName(uri);
-        selection = convertToSelection(uri, selection);
-        int count = mDbHelper.getWritableDatabase()
-                .update(tableName, values, selection, selectionArgs);
-
-        if (count > 0 && getContext() != null) {
-            getContext().getContentResolver().notifyChange(uri, null);
-        }
-
-        return count;
-    }
-    //endregion
-
-    @Nullable
-    @Override
-    public String getType(Uri uri) {
-        return null;
-    }
-
-    //region Helper methods
 
     /**
      * A helper method that initialises a {@link ContentValues}
@@ -219,15 +122,115 @@ public class PentrefProvider extends ContentProvider {
     }
     //endregion
 
-    public static List<String> convertToBookmarkIds(@NonNull Cursor cursor){
+    public static List<String> convertToBookmarkIds(@NonNull Cursor cursor) {
         List<String> idList = new ArrayList<>();
         cursor.moveToFirst();
-        while(!cursor.isAfterLast()){
+        while (!cursor.isAfterLast()) {
             idList.add(cursor.getString(cursor.getColumnIndex(Contract.Bookmark.COLUMN_POI_ID)));
             cursor.moveToNext();
         }
         cursor.close();
         return idList;
+    }
+
+    //region Helper methods
+
+    @Override
+    public boolean onCreate() {
+        mDbHelper = new LocalDatabaseHelper(getContext());
+        return true;
+    }
+
+    //region CRUD operations (create, read, update, delete)
+    @Nullable
+    @Override
+    public Cursor query(@NonNull Uri uri, String[] projection,
+                        String selection, String[] selectionArgs, String sortOrder) {
+        String tableName = convertToTableName(uri);
+        selection = convertToSelection(uri, selection);
+
+        if (mUriMatcher.match(uri) == SEARCH_SUGGESTIONS) {
+            /*
+                The column names "_id", "SUGGEST_COLUMN_TEXT_1", "SUGGEST_COLUMN_TEXT_2"
+                are used to build a suggestion table and show a list of suggestions when
+                the user searches for Points of Interest.
+
+                The column "SUGGEST_COLUMN_INTENT_DATA_ID" records the POI id of each row.
+            */
+            projection = new String[]{
+                    Contract.Poi._ID + " AS " + BaseColumns._ID,
+                    Contract.Poi.COLUMN_NAME + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
+                    Contract.Poi.COLUMN_ADDRESS + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
+                    Contract.Poi._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
+
+            // The two percent signs are used to match the 'LIKE' statements specified in searchable.xml
+            if (selectionArgs.length > 0) {
+                selectionArgs = new String[]{"%" + selectionArgs[0] + "%"};
+            }
+        }
+
+        Cursor cursor = mDbHelper.getReadableDatabase().query(
+                tableName, projection, selection, selectionArgs, null, null, sortOrder);
+
+        if (getContext() != null) {
+            cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        }
+
+        return cursor;
+    }
+
+    @Nullable
+    @Override
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
+        String tableName = convertToTableName(uri);
+
+        long id = mDbHelper.getWritableDatabase().insertWithOnConflict(
+                tableName, null, values, SQLiteDatabase.CONFLICT_ROLLBACK);
+
+        if (id >= 0) {
+            Uri newUri = ContentUris.withAppendedId(uri, id);
+
+            if (getContext() != null) {
+                getContext().getContentResolver().notifyChange(newUri, null);
+            }
+            return newUri;
+        }
+        throw new SQLException("Problem while inserting into uri: " + uri);
+    }
+    //endregion
+
+    @Override
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
+        String tableName = convertToTableName(uri);
+        selection = convertToSelection(uri, selection);
+
+        int count = mDbHelper.getWritableDatabase().delete(tableName, selection, selectionArgs);
+
+        if (count > 0 && getContext() != null) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return count;
+    }
+
+    @Override
+    public int update(@NonNull Uri uri, ContentValues values,
+                      String selection, String[] selectionArgs) {
+        String tableName = convertToTableName(uri);
+        selection = convertToSelection(uri, selection);
+        int count = mDbHelper.getWritableDatabase()
+                .update(tableName, values, selection, selectionArgs);
+
+        if (count > 0 && getContext() != null) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return count;
+    }
+
+    @Nullable
+    @Override
+    public String getType(Uri uri) {
+        return null;
     }
 
     private String convertToTableName(Uri uri) {
@@ -257,15 +260,11 @@ public class PentrefProvider extends ContentProvider {
             case CATEGORY_ROW:
                 return Contract.Category._ID + " = " + uri.getLastPathSegment();
             case BOOKMARK_ROW:
-                return Contract.Bookmark.COLUMN_POI_ID + " = " + "\""+ uri.getLastPathSegment() +"\"";
+                return Contract.Bookmark.COLUMN_POI_ID + " = " + "\"" + uri.getLastPathSegment() + "\"";
             default:
                 return selection;
         }
     }
-
-    //region SQLite database
-    private final int DATABASE_VERSION = 1;
-    private final String DATABASE_NAME = "Pentref.db";
 
     class LocalDatabaseHelper extends SQLiteOpenHelper {
 

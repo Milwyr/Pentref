@@ -89,11 +89,11 @@ public class ProfileFragment extends Fragment implements
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if( user != null){
+                if (user != null) {
                     //User is signed in
                     getActivity().findViewById(R.id.f_admin_sign_in_btn).setVisibility(View.GONE);
                     getActivity().findViewById(R.id.f_admin_sign_out_btn).setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     //User is signed out
                     getActivity().findViewById(R.id.f_admin_sign_in_btn).setVisibility(View.VISIBLE);
                     getActivity().findViewById(R.id.f_admin_sign_out_btn).setVisibility(View.GONE);
@@ -139,6 +139,7 @@ public class ProfileFragment extends Fragment implements
         GoogleSignInOptions gso = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .build();
+
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .enableAutoManage((AppCompatActivity) getActivity(), this)
@@ -227,32 +228,31 @@ public class ProfileFragment extends Fragment implements
                         final ProgressDialog progressDialog = new ProgressDialog(getActivity());
                         progressDialog.setCancelable(false);
                         progressDialog.setMessage(getActivity().getResources().getString(R.string.signining));
-                        if(!mEmail.getText().toString().isEmpty() && !mPassword.getText().toString().isEmpty()){
+                        if (!mEmail.getText().toString().isEmpty() && !mPassword.getText().toString().isEmpty()) {
                             progressDialog.show();
-                            mAuth.signInWithEmailAndPassword(mEmail.getText().toString(),mPassword.getText().toString())
+                            mAuth.signInWithEmailAndPassword(mEmail.getText().toString(), mPassword.getText().toString())
                                     .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                                @Override
-                                public void onSuccess(AuthResult authResult) {
-                                    Toast.makeText(getActivity(), "Login Success", Toast.LENGTH_SHORT).show();
-                                    progressDialog.dismiss();
-                                    dialog.dismiss();
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onSuccess(AuthResult authResult) {
+                                            Toast.makeText(getActivity(), "Login Success", Toast.LENGTH_SHORT).show();
+                                            progressDialog.dismiss();
+                                            dialog.dismiss();
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
                                     progressDialog.dismiss();
                                 }
                             });
 
-                        }else{
+                        } else {
                             Toast.makeText(getActivity(),
                                     "Please enter correct email/password",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
-
 
 
             }
@@ -383,7 +383,7 @@ public class ProfileFragment extends Fragment implements
     @Override
     public void onStop() {
         super.onStop();
-        if(mAuthListener != null){
+        if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
     }

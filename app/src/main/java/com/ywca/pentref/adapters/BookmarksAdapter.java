@@ -3,7 +3,6 @@ package com.ywca.pentref.adapters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,9 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ywca.pentref.R;
-import com.ywca.pentref.activities.AddPoiActivity;
-import com.ywca.pentref.activities.BaseActivity;
-import com.ywca.pentref.activities.PoiDetailsActivity;
 import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.UpdateBookmarkAsyncTask;
 import com.ywca.pentref.models.Poi;

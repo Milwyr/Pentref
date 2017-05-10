@@ -5,18 +5,16 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
@@ -32,26 +30,19 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Category;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
 import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
-import com.ywca.pentref.models.Transport;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -80,8 +71,6 @@ public class LaunchingActivity extends BaseActivity {
 
         //Try out firebase : get list of poi from firebase
         mDatabase = FirebaseDatabase.getInstance();
-
-
 
 
         // Show this activity to user if this app is installed for the first time
@@ -149,7 +138,7 @@ public class LaunchingActivity extends BaseActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //dataSnapshot should contains a list of poi
-                for (DataSnapshot poiSnapshot: dataSnapshot.getChildren()) {
+                for (DataSnapshot poiSnapshot : dataSnapshot.getChildren()) {
                     // TODO: handle the poiSnapshot
                     //try read one first
                     String test = (String) poiSnapshot.child("name").getValue();
@@ -172,7 +161,7 @@ public class LaunchingActivity extends BaseActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG,databaseError.getMessage());
+                Log.d(TAG, databaseError.getMessage());
                 int j = 0;
             }
         });
@@ -225,8 +214,8 @@ public class LaunchingActivity extends BaseActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //dataSnapshot containes a list of categories\
-                Log.i("Categoriesfirebase","hi");
-                for(DataSnapshot categoryData : dataSnapshot.getChildren()){
+
+                for (DataSnapshot categoryData : dataSnapshot.getChildren()) {
                     int k = 0;
                     Category category = categoryData.getValue(Category.class);
                     String test = category.getName();
@@ -241,14 +230,14 @@ public class LaunchingActivity extends BaseActivity {
                     } catch (Exception e) {
                         Log.e("TutorialActivity:cat", e.getMessage());
                     }
-                    Log.i(TAG,test);
+                    Log.i(TAG, test);
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 String test = databaseError.getMessage();
-                Log.i("CategoryFirebase",databaseError.getMessage());
+                Log.i("CategoryFirebase", databaseError.getMessage());
                 int j = 0;
             }
         });
@@ -290,14 +279,13 @@ public class LaunchingActivity extends BaseActivity {
         transportRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-               String test =  dataSnapshot.toString();
                 JSONArray transJson = new JSONArray();
 
-                for(DataSnapshot data : dataSnapshot.getChildren()){
-                    Map<String,String> value = (Map<String,String>) data.getValue();
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    Map<String, String> value = (Map<String, String>) data.getValue();
                     transJson.put(new JSONObject(value));
                 }
-                int i = 0 ;
+                int i = 0;
 
                 File transportsFile = new File(getFilesDir(), Utility.TRANSPORTATION_JSON_FILE_NAME);
                 if (transportsFile.exists()) {
@@ -323,7 +311,7 @@ public class LaunchingActivity extends BaseActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.i("FireTrans",databaseError.getMessage());
+                Log.i("FireTrans", databaseError.getMessage());
             }
         });
 

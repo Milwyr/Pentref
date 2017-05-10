@@ -13,11 +13,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
-import android.util.Pair;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,7 +85,10 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     // Request code for checking whether GPS is turned on
     private final int REQUEST_CHECK_GPS_SETTINGS = 10001;
     //endregion
-
+    // About shortest distance
+    Button btn;
+    // For storing distanceBetween
+    float results[] = new float[1];
     //region Fields
     private Circle mCircle;
     private GoogleApiClient mGoogleApiClient;
@@ -93,7 +96,6 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     private Marker mPreviousMarker;
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
-
     private CardView mPoiSummaryCardView;
     private MapView mMapView;
     //private RelativeLayout mBottomSheet;
@@ -102,18 +104,14 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     private FloatingActionButton mBookmarkBtn;
     private Toast mToast;
     private Spinner mSpinner;
-    // About shortest distance
-    Button btn;
     private Location mLastLocation;
-
-
     //All the points of interest from the selected category
     private List<Poi> mCategoriesPois;
     // All the Points of Interest read from the local database
     private List<Poi> mPois;
-    // For storing distanceBetween
-    float results[]=new float[1];
     //endregion
+    //region Geo-fencing API
+    private LatLng mLastLatLng;
 
     public DiscoverFragment() {
         // Required empty public constructor
@@ -172,15 +170,15 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 mPreviousMarker = null;
 
                 //Add All poi if position = 0
-                if(position == 0){
-                    for(Poi poi : mPois){
+                if (position == 0) {
+                    for (Poi poi : mPois) {
                         mCategoriesPois.add(poi);
                         MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
                         mGoogleMap.addMarker(markerOptions).setTag(poi);
                     }
-                }else if(position == mSpinner.getAdapter().getCount() - 1) {
+                } else if (position == mSpinner.getAdapter().getCount() - 1) {
                     //Show bookmarked POI
-                    Toast.makeText(getActivity(),"bookmark selected",Toast.LENGTH_SHORT);
+                    Toast.makeText(getActivity(), "bookmark selected", Toast.LENGTH_SHORT);
                     new AsyncTask<Void, Void, List<String>>() {
                         @Override
                         protected List<String> doInBackground(Void... params) {
@@ -201,8 +199,8 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                         protected void onPostExecute(List<String> strings) {
                             super.onPostExecute(strings);
                             //Add only the markers that match the bookmark
-                            for(Poi poi : mPois){
-                                if(strings.contains(poi.getId())){
+                            for (Poi poi : mPois) {
+                                if (strings.contains(poi.getId())) {
                                     mCategoriesPois.add(poi);
                                     MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
                                     mGoogleMap.addMarker(markerOptions).setTag(poi);
@@ -210,21 +208,22 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                             }
                         }
                     }.execute();
-                }else{
-                        // Add only the markers that match the selected category
-                        for (Poi poi : mPois) {
-                            if (poi.getCategoryId() == (position)) {
-                                mCategoriesPois.add(poi);
-                                MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
-                                mGoogleMap.addMarker(markerOptions).setTag(poi);
-                            }
+                } else {
+                    // Add only the markers that match the selected category
+                    for (Poi poi : mPois) {
+                        if (poi.getCategoryId() == (position)) {
+                            mCategoriesPois.add(poi);
+                            MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                            mGoogleMap.addMarker(markerOptions).setTag(poi);
                         }
                     }
+                }
                 //Update the bottomsheet if category is change and lastLocation is not null
-                if(mLastLocation != null){
+                if (mLastLocation != null) {
                     updateNearbyList(mLastLocation);
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -270,7 +269,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             protected void onPostExecute(List<Category> categories) {
                 // Add the categories to the grid view at the bottom
                 //gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
-                mSpinner.setAdapter(new SpinnerCategoryAdapter(getActivity(),categories));
+                mSpinner.setAdapter(new SpinnerCategoryAdapter(getActivity(), categories));
 
             }
         }.execute();
@@ -284,6 +283,12 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         // Inflate the layout for this fragment
         return rootView;
     }
+
+    //    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        mMapView.onSaveInstanceState(outState);
+//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -302,12 +307,6 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         }
     }
 
-    //    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        mMapView.onSaveInstanceState(outState);
-//    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
@@ -325,7 +324,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 requestPermissions(new String[]{
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_PERMISSION);
-            } else{
+            } else {
                 //Location permissions have been granted for device after Marshmallow by runtime permissions already
                 googleMap.setMyLocationEnabled(true);
             }
@@ -344,7 +343,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                             .defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 }
 
-              //  mBottomSheet.setVisibility(View.VISIBLE);
+                //  mBottomSheet.setVisibility(View.VISIBLE);
                 mPoiSummaryCardView.setVisibility(View.GONE);
             }
         });
@@ -434,11 +433,8 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         startLocationUpdates();
     }
 
-    //region Geo-fencing API
-    private LatLng mLastLatLng;
-
-    private void updateNearbyList(Location lastLocation){
-        List<Pair<Poi,Float>> poiListPair = new ArrayList<>();
+    private void updateNearbyList(Location lastLocation) {
+        List<Pair<Poi, Float>> poiListPair = new ArrayList<>();
         for (Poi poiItem : mCategoriesPois) {
             try {
                 Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
@@ -449,7 +445,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
                 poiListPair.add(poiPair);
             } catch (Exception e) {
-                int a =1;
+                int a = 1;
             }
 
         }
@@ -475,7 +471,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     public void onLocationChanged(Location location) {
         //Save location to last location
         mLastLocation = location;
-        List<Pair<Poi,Float>> poiListPair = new ArrayList<>();
+        List<Pair<Poi, Float>> poiListPair = new ArrayList<>();
         for (Poi poiItem : mCategoriesPois) {
             try {
                 Location.distanceBetween(location.getLatitude(), location.getLongitude(),
@@ -486,7 +482,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
                 poiListPair.add(poiPair);
             } catch (Exception e) {
-                int a =1;
+                int a = 1;
             }
 
         }
@@ -571,7 +567,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 final boolean isPreviouslyBookmarked = (boolean) mBookmarkBtn.getTag();
 
                 // Insert or delete the bookmark from database after the user clicks on the bookmark fab
-                new UpdateBookmarkAsyncTask(getActivity(),mSelectedPoi.getId()) {
+                new UpdateBookmarkAsyncTask(getActivity(), mSelectedPoi.getId()) {
                     @Override
                     protected void onPreExecute() {
                         mBookmarkBtn.setEnabled(false);
@@ -585,14 +581,14 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                                 R.drawable.ic_bookmarked_black_36dp : R.drawable.ic_bookmark_black_36dp);
 
                         //Show isBookmarked msg
-                        if(isNowBookmarked){
-                            if(mToast != null){
+                        if (isNowBookmarked) {
+                            if (mToast != null) {
                                 mToast.cancel();
                             }
-                            mToast =  Toast.makeText(getActivity(), "Bookmark added", Toast.LENGTH_SHORT);
+                            mToast = Toast.makeText(getActivity(), "Bookmark added", Toast.LENGTH_SHORT);
                             mToast.show();
-                        }else{
-                            if(mToast != null) {
+                        } else {
+                            if (mToast != null) {
                                 mToast.cancel();
                             }
                             mToast = Toast.makeText(getActivity(), "Bookmark removed", Toast.LENGTH_SHORT);

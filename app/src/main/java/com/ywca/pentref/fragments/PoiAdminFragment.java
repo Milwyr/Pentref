@@ -32,7 +32,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -70,8 +69,6 @@ import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,22 +80,18 @@ import java.util.Locale;
  * Activities that contain this fragment must implement the
  * {@link PoiAdminFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
-
-
  */
-public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback, View.OnClickListener, LocationListener,GoogleMap.OnMarkerClickListener{
+public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback, View.OnClickListener, LocationListener, GoogleMap.OnMarkerClickListener {
 
+    public static final String TAG = "PoiAdminFragment";
     //region Constants
     // Request code to launch PoiDetailsActivity
     private final int REQUEST_POI_ACTIVITY_DETAILS = 9000;
-
     // Request code for requesting for location permission
     private final int REQUEST_LOCATION_PERMISSION = 10000;
-
+    //endregion
     // Request code for checking whether GPS is turned on
     private final int REQUEST_CHECK_GPS_SETTINGS = 10001;
-    //endregion
-
     private Circle mCircle;
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mGoogleMap;
@@ -113,10 +106,8 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     private ArrayList<Poi> mPois;
     private ProgressDialog mProgress;
     private RequestQueue mQueue;
-
-    public static final String TAG = "PoiAdminFragment";
-
-
+    //region Geo-fencing API
+    private LatLng mLastLatLng;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -233,7 +224,7 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                 mPois.addAll(pois);
 
                 // Set a marker click listener
-               mGoogleMap.setOnMarkerClickListener(PoiAdminFragment.this);
+                mGoogleMap.setOnMarkerClickListener(PoiAdminFragment.this);
 
             }
         }.execute();
@@ -242,14 +233,14 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
         mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                if(mCurrentMarker != null){
+                if (mCurrentMarker != null) {
                     mCurrentMarker.remove();
-                    mCurrentMarker  = null;
+                    mCurrentMarker = null;
                 }
                 MarkerOptions makerOption = new MarkerOptions()
                         .position(latLng)
                         .icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                                .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                 mCurrentMarker = mGoogleMap.addMarker(makerOption);
                 mPoiAddCardView.setVisibility(View.VISIBLE);
                 mPoiDelCardView.setVisibility(View.GONE);
@@ -266,9 +257,6 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                 return false;
             }
         });
-
-
-
 
 
     }
@@ -313,9 +301,6 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
 
         startLocationUpdates();
     }
-
-    //region Geo-fencing API
-    private LatLng mLastLatLng;
 
     @Override
     public void onLocationChanged(Location location) {
@@ -364,20 +349,20 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
 
     @Override
     public void onClick(View v) {
-        Log.i("PoiAdminFragment","Onclick()");
-        switch(v.getId()){
+        Log.i("PoiAdminFragment", "Onclick()");
+        switch (v.getId()) {
             case R.id.okBtn:
-                Log.i("PoiAdminFragment","OKpressed");
+                Log.i("PoiAdminFragment", "OKpressed");
                 Intent intent = new Intent(getActivity(), AddPoiActivity.class);
-               // String eee = getCompleteAddressString(mCurrentMarker.getPosition().latitude,mCurrentMarker.getPosition().longitude);
-                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LATITUDE,mCurrentMarker.getPosition().latitude);
-                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LONGITUDE,mCurrentMarker.getPosition().longitude);
+                // String eee = getCompleteAddressString(mCurrentMarker.getPosition().latitude,mCurrentMarker.getPosition().longitude);
+                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LATITUDE, mCurrentMarker.getPosition().latitude);
+                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LONGITUDE, mCurrentMarker.getPosition().longitude);
                 startActivity(intent);
                 break;
             case R.id.poi_btn_del:
 
-                Log.i("PoiAdminFragment","DELpressed");
-                Log.i("PoiAdminFragment",""+mSelectedDeletePoi.getId());
+                Log.i("PoiAdminFragment", "DELpressed");
+                Log.i("PoiAdminFragment", "" + mSelectedDeletePoi.getId());
 
 
                 //Delete the selected poi from firebase realtime database
@@ -395,24 +380,24 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                 });
                 //TODO: Delete the selected poi pic from firebase storage
                 StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                StorageReference poiPicRef = storageRef.child("images/"+mSelectedDeletePoi.getHeaderImageFileName());
+                StorageReference poiPicRef = storageRef.child("images/" + mSelectedDeletePoi.getHeaderImageFileName());
                 poiPicRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(getActivity(),"Pic deleted",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Pic deleted", Toast.LENGTH_SHORT).show();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getActivity(),"fail to remove pic",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "fail to remove pic", Toast.LENGTH_SHORT).show();
                     }
                 });
 
                 //Delete the selected poi from local table
                 // Defines selection criteria for the rows you want to delete
                 String mSelectionClause = Contract.Poi._ID + " = ?";
-                String[] mSelectionArgs = {mSelectedDeletePoi.getId()+""};
-                getActivity().getContentResolver().delete(Contract.Poi.CONTENT_URI,mSelectionClause,mSelectionArgs);
+                String[] mSelectionArgs = {mSelectedDeletePoi.getId() + ""};
+                getActivity().getContentResolver().delete(Contract.Poi.CONTENT_URI, mSelectionClause, mSelectionArgs);
 
 
                 //delete the SelectedDeleteMarker marker from the map
@@ -424,10 +409,11 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
         }
 
     }
+
     //Delete the local poi table and get the new one from the server
     private void syncWithServer() {
         //Create requestQueue if not exist
-        if(mQueue == null){
+        if (mQueue == null) {
             mQueue = Volley.newRequestQueue(getActivity());
         }
 
@@ -461,7 +447,6 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                 }
 
 
-
                 mProgress.dismiss();
             }
         }, new Response.ErrorListener() {
@@ -479,10 +464,10 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        if (marker == mCurrentMarker){
+        if (marker == mCurrentMarker) {
             mPoiAddCardView.setVisibility(View.VISIBLE);
             mPoiDelCardView.setVisibility(View.GONE);
-        }else{
+        } else {
             mPoiAddCardView.setVisibility(View.GONE);
             mPoiDelCardView.setVisibility(View.VISIBLE);
             mSelectedDeletePoi = (Poi) marker.getTag();
@@ -491,21 +476,6 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
 
 
         return false;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 
     //region Lifecycle methods for MapView
@@ -587,7 +557,6 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
             mMapView.onLowMemory();
         }
     }
-    //endregion
 
     //get full address
     private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
@@ -603,7 +572,7 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                     strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
                 }
                 strAdd = strReturnedAddress.toString();
-               //Log.w("My Current loction address", "" + strReturnedAddress.toString());
+                //Log.w("My Current loction address", "" + strReturnedAddress.toString());
             } else {
                 //Log.i("My Current loction address", "No Address returned!");
             }
@@ -612,5 +581,21 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
             //Log.w("My Current loction address", "Canont get Address!");
         }
         return strAdd;
+    }
+    //endregion
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
     }
 }

@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.ywca.pentref.R;
@@ -28,10 +27,10 @@ public class SpinnerCategoryAdapter extends BaseAdapter {
         mCategories = categories;
 
         //Add a new categories for ALL POI
-        Category allCategory = new Category(-10,"All point of interest");
-        mCategories.add(0,allCategory);
+        Category allCategory = new Category(-10, "All point of interest");
+        mCategories.add(0, allCategory);
         //All a new categories for Bookmark
-        Category bookmarkCategory = new Category(-11,"Bookmark");
+        Category bookmarkCategory = new Category(-11, "Bookmark");
         mCategories.add(bookmarkCategory);
     }
 
@@ -52,7 +51,7 @@ public class SpinnerCategoryAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.i("SpinnerAdapter","Ha");
+        Log.i("SpinnerAdapter", "Ha");
         // Create the layout for the item of the grid view if it has not been created
         if (convertView == null) {
             // Inflate the layout for the grid view
@@ -66,8 +65,8 @@ public class SpinnerCategoryAdapter extends BaseAdapter {
             TextView category = (TextView) convertView.findViewById(R.id.spinner_category_name);
             category.setText(categoryItem.getName());
 
-        }else{
-            Log.i("SpinnerAdapter","Else");
+        } else {
+            Log.i("SpinnerAdapter", "Else");
             final Category categoryItem = mCategories.get(position);
 
             ImageView icon = (ImageView) convertView.findViewById(R.id.spinner_category_icon);

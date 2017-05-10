@@ -51,15 +51,6 @@ public class SettingsFragment extends PreferenceFragment implements
     private boolean mIsCategoryDownloaded;
     private boolean mIsTransportDownloaded;
 
-    // Called to inform the app that a download process is complete
-    private interface VolleyFinishCallback {
-        void onPoiFinish();
-
-        void onCategoryFinish();
-
-        void onTransportFinish();
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -277,5 +268,14 @@ public class SettingsFragment extends PreferenceFragment implements
     private void updateNotificationPreferenceSummary() {
         int minutes = mSharedPreferences.getInt(Utility.PREF_KEY_NOTIFICATION_PREFERENCE, 30);
         mNotificationPreference.setSummary(String.format(getResources().getString(R.string.pref_notification_summary), minutes));
+    }
+
+    // Called to inform the app that a download process is complete
+    private interface VolleyFinishCallback {
+        void onPoiFinish();
+
+        void onCategoryFinish();
+
+        void onTransportFinish();
     }
 }

@@ -18,12 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.ywca.pentref.R;
@@ -76,8 +71,6 @@ public class MainActivity extends BaseActivity
                 }
             }
         };
-
-
 
 
         // Display the discover fragment only when the app launches as
@@ -151,9 +144,10 @@ public class MainActivity extends BaseActivity
     // Handles the event from method onNewIntent()
     private void handleIntent(Intent intent) {
         //Do nothing when the action is null
-        if(intent.getAction() == null){
-            Log.d("MainActivity","intent null");
-            return;}
+        if (intent.getAction() == null) {
+            Log.d("MainActivity", "intent null");
+            return;
+        }
         if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //TODO: use the query to search your data somehow
@@ -222,7 +216,7 @@ public class MainActivity extends BaseActivity
                 break;
             case R.id.nav_about:
 //                changeFragment(R.string.about, new AboutFragment());
-                changeFragment(R.string.about,new AboutFragment());
+                changeFragment(R.string.about, new AboutFragment());
                 break;
             case R.id.nav_admin:
                 changeFragment(R.string.admin, new PoiAdminFragment());
@@ -251,7 +245,7 @@ public class MainActivity extends BaseActivity
             mNavigationView.setCheckedItem(R.id.nav_transportation);
         } else if (fragment instanceof SettingsFragment) {
             mNavigationView.setCheckedItem(R.id.nav_settings);
-        } else if (fragment instanceof PoiAdminFragment){
+        } else if (fragment instanceof PoiAdminFragment) {
             mNavigationView.setCheckedItem(R.id.nav_admin);
         }
 
