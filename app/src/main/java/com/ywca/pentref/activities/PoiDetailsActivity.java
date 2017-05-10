@@ -120,6 +120,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
             if (resultCode == RESULT_OK) {
                 View coordinatorLayout = findViewById(R.id.coordinator_layout);
                 Snackbar.make(coordinatorLayout, getResources().getText(R.string.review_submitted), Snackbar.LENGTH_LONG).show();
+                downloadReviewFromFirebase();
             } else {
                 mUserReviewRatingBar.setRating(0);
             }
@@ -237,24 +238,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
         });
 
 
-//        String baseUrl = Utility.SERVER_URL + "/poi_photos/";
-//        // Download the header image from server
-//        ImageRequest imageRequest = new ImageRequest(
-//                baseUrl + mSelectedPoi.getHeaderImageFileName(),
-//                new Response.Listener<Bitmap>() {
-//                    @Override
-//                    public void onResponse(Bitmap response) {
-//                        ImageView headerImageView = (ImageView) findViewById(R.id.header_image);
-//                        headerImageView.setImageBitmap(response);
-//                    }
-//                }, 1280, 720, ImageView.ScaleType.CENTER_CROP, null,
-//                new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        Log.e("PoiDetailsActivity", "Failed to download header image.");
-//                    }
-//                });
-//        Volley.newRequestQueue(this).add(imageRequest);
+
 
         // Read category name that matches the id from database,
         // and set the name to the category text view
@@ -333,6 +317,21 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
         }
 
         //Download review from firebase
+        downloadReviewFromFirebase();
+
+        mUserReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
+        mUserReviewRatingBar.setOnRatingBarChangeListener(this);
+
+        // Initialise Google api client for Google login
+        GoogleSignInOptions gso = new GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso).enableAutoManage(this, null).build();
+    }
+
+    //Download reviews from firebase
+    private void downloadReviewFromFirebase(){
+        //Download review from firebase
         mDatabase.child("Reviews").child(mSelectedPoi.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -354,16 +353,6 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
                 Log.e("PoiDetail",databaseError.getMessage());
             }
         });
-
-
-        mUserReviewRatingBar = (RatingBar) findViewById(R.id.user_review_rating_bar);
-        mUserReviewRatingBar.setOnRatingBarChangeListener(this);
-
-        // Initialise Google api client for Google login
-        GoogleSignInOptions gso = new GoogleSignInOptions
-                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso).enableAutoManage(this, null).build();
     }
 
     // Returns true if the user has signed in with either Facebook or Google
