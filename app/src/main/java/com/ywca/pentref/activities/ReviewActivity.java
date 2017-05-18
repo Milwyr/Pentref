@@ -137,6 +137,25 @@ public class ReviewActivity extends BaseActivity implements View.OnClickListener
     }
 
     @Override
+    public void onBackPressed(){
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.dialog_message_confirm_discard_changes)
+                .setPositiveButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Does nothing, and the dialog will be dismissed
+                    }
+                })
+                .setNegativeButton(R.string.discard, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Pass the incoming Poi instance to PoiDetailsActivity
+                        setResult(RESULT_CANCELED, mIncomingIntent);
+                        finish();
+                    }
+                }).show();
+    }
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.import_from_photo_gallery:
