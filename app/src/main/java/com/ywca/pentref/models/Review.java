@@ -1,11 +1,12 @@
 package com.ywca.pentref.models;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
 
 /**
  * A Poi (Point of Interest) encapsulates information about a review contributed by a user.
  */
-public class Review {
+public class Review implements Comparable<Review>{
     private String poiId;
     private String userId;
     private String userName;
@@ -14,6 +15,7 @@ public class Review {
     private String description;
     //    private List<String> photoUris;
     private String timestamp;
+    private DateTime dateTime;
 
     public Review() {
     }
@@ -57,11 +59,24 @@ public class Review {
         return description;
     }
 
+    public DateTime getDateTime(){
+        return dateTime;
+    }
+
+    public void setDateTime(DateTime time){
+        this.dateTime = time;
+    }
+
 //    public List<String> getPhotoUris() {
 //        return this.photoUris;
 //    }
 
     public String getTimestamp() {
         return this.timestamp;
+    }
+
+    @Override
+    public int compareTo(Review o) {
+        return this.dateTime.compareTo(o.dateTime);
     }
 }

@@ -1,12 +1,15 @@
 package com.ywca.pentref.adapters;
 
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.amulyakhare.textdrawable.TextDrawable;
 import com.ywca.pentref.R;
 import com.ywca.pentref.models.Review;
 
@@ -50,6 +53,13 @@ public class ReviewsAdapter extends
         holder.timeTextView.setText(displayFormatter.print(timeStampDateTime));
         holder.titleTextView.setText(review.getTitle());
         holder.descriptionTextView.setText(review.getDescription());
+
+        //Create letterImage as profile image from the first letter of the userName
+        String firstLetter = review.getUserName().substring(0,1);
+        TextDrawable letterImageDrawable = TextDrawable.builder()
+                .buildRound(firstLetter, Color.RED);
+        holder.letterImage.setImageDrawable(letterImageDrawable);
+
     }
 
     @Override
@@ -73,6 +83,7 @@ public class ReviewsAdapter extends
         private TextView timeTextView;
         private TextView titleTextView;
         private TextView descriptionTextView;
+        private ImageView letterImage;
 
         ViewHolder(View view) {
             super(view);
@@ -81,6 +92,7 @@ public class ReviewsAdapter extends
             timeTextView = (TextView) view.findViewById(R.id.review_time_text_view);
             titleTextView = (TextView) view.findViewById(R.id.review_title_text_view);
             descriptionTextView = (TextView) view.findViewById(R.id.review_description_text_view);
+            letterImage = (ImageView) view.findViewById(R.id.profile_picture);
         }
     }
 }

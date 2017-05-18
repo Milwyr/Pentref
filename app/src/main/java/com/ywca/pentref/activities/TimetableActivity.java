@@ -26,6 +26,7 @@ import com.ywca.pentref.models.Transport;
 
 import org.joda.time.LocalTime;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -75,8 +76,10 @@ public class TimetableActivity extends AppCompatActivity implements
                 CharSequence temp = mDepartureStationTextView.getText();
                 mDepartureStationTextView.setText(mDestinationStationTextView.getText());
                 mDestinationStationTextView.setText(temp);
-
+                // Negate the flag
+                mIsDirectionFromTaiO = !mIsDirectionFromTaiO;
                 updateTimetableAdapter();
+
 
                 mShowFullTimetableSwitch.setChecked(false);
             }
@@ -101,27 +104,31 @@ public class TimetableActivity extends AppCompatActivity implements
         // Select the timetable based on the direction (either 'from Tai O' or 'to Tai O)
         Timetable currentTimetable = mIsDirectionFromTaiO ?
                 mSelectedTransportItem.getFromTaiO() : mSelectedTransportItem.getToTaiO();
+        if(currentTimetable != null) {
+            List<LocalTime> localTimes = currentTimetable.getMonToSatTimes();
 
-        List<LocalTime> localTimes = currentTimetable.getMonToSatTimes();
-
-        // Only select the times that are later than now
-        List<LocalTime> timesAfterNow = Utility.getTimesAfterNow(localTimes);
-        mAdapter.updateLocalTimes(timesAfterNow);
-
-        // Negate the flag
-        mIsDirectionFromTaiO = !mIsDirectionFromTaiO;
+            // Only select the times that are later than now
+            List<LocalTime> timesAfterNow = Utility.getTimesAfterNow(localTimes);
+            mAdapter.updateLocalTimes(timesAfterNow);
+        }else{
+            mAdapter.updateLocalTimes(new ArrayList<LocalTime>());
+        }
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        List<LocalTime> localTimes = mSelectedTransportItem.getFromTaiO().getMonToSatTimes();
+        Timetable currentTimetable = mIsDirectionFromTaiO ?
+                mSelectedTransportItem.getFromTaiO() : mSelectedTransportItem.getToTaiO();
+        if(currentTimetable != null) {
+            List<LocalTime> localTimes = currentTimetable.getMonToSatTimes();
 
-        if (isChecked) {
-            // Display the full timetable with time slots of the whole day
-            mAdapter.updateLocalTimes(localTimes);
-        } else {
-            // Only select the times that are later than now
-            mAdapter.updateLocalTimes(Utility.getTimesAfterNow(localTimes));
+            if (isChecked) {
+                // Display the full timetable with time slots of the whole day
+                mAdapter.updateLocalTimes(localTimes);
+            } else {
+                // Only select the times that are later than now
+                mAdapter.updateLocalTimes(Utility.getTimesAfterNow(localTimes));
+            }
         }
     }
 

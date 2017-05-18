@@ -62,13 +62,16 @@ import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Poi;
 import com.ywca.pentref.models.Review;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -338,8 +341,13 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
                 List<Review> reviewList = new ArrayList<>();
                 for(DataSnapshot data : dataSnapshot.getChildren()){
                     Review review = data.getValue(Review.class);
+                    DateTimeFormatter formatter = ISODateTimeFormat.dateTimeNoMillis();
+                    DateTime timeStampDateTime = formatter.parseDateTime(review.getTimestamp());
+                    review.setDateTime(timeStampDateTime);
                     reviewList.add(review);
                 }
+                //sort the reviewList
+                Collections.sort(reviewList,Collections.reverseOrder());
                 RecyclerView recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setLayoutManager(new LinearLayoutManager(PoiDetailsActivity.this));
