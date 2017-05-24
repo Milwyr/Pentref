@@ -270,7 +270,6 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 // Add the categories to the grid view at the bottom
                 //gridView.setAdapter(new CategoryAdapter(getActivity(), categories));
                 mSpinner.setAdapter(new SpinnerCategoryAdapter(getActivity(), categories));
-
             }
         }.execute();
 

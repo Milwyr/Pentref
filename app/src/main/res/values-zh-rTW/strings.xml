@@ -91,6 +91,6 @@
     <string name="login">管理者登入</string>
     <string name="password">密碼</string>
     <string name="email">登入密碼</string>
-    <string name="AdminSignOut">管理者登出</string>
+    <string name="firebase_sign_out">登出</string>
     <string name="signining">登入中</string>
 </resources>

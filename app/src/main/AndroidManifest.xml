@@ -20,7 +20,7 @@
             android:value="@string/facebook_app_id" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC8QOWd_gTYzmydGhRNU5wjmRGNmpNb3G0" />
+            android:value="AIzaSyDQyOLLZKIqSbEpJRvzIFm3sS8vnunXGnk" />
 
         <activity
             android:name=".activities.SplashScreenActivity"

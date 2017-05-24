@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,9 +19,16 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.amulyakhare.textdrawable.TextDrawable;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.ywca.pentref.R;
 import com.ywca.pentref.common.Contract;
 import com.ywca.pentref.common.PentrefProvider;
@@ -45,12 +53,17 @@ public class MainActivity extends BaseActivity
     //Firebase Auth instance
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseDatabase mDatabase;
+    private int mCurrentFragmentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initialiseComponents();
+        Menu menu = mNavigationView.getMenu();
+        menu.findItem(R.id.nav_admin).setVisible(false);
+        mDatabase = FirebaseDatabase.getInstance();
 
         //Get a firebaseAuth instance
         mAuth = FirebaseAuth.getInstance();
@@ -61,8 +74,26 @@ public class MainActivity extends BaseActivity
                 if (user != null) {
                     // User is signed in
                     Log.d("MainFireBaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());
-                    Menu menu = mNavigationView.getMenu();
-                    menu.findItem(R.id.nav_admin).setVisible(true);
+                    //Check if user is admin
+                    DatabaseReference adminRef = mDatabase.getReference().child(Utility.FIREBASE_TABLE_ADMIN).child(user.getUid());
+                    adminRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            //dataSnapshot.getValue is true when the user is admin
+                            Menu menu = mNavigationView.getMenu();
+                            if (dataSnapshot.getValue() != null && (boolean) dataSnapshot.getValue()) {
+                                menu.findItem(R.id.nav_admin).setVisible(true);
+                            }else{
+                                menu.findItem(R.id.nav_admin).setVisible(false);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Toast.makeText(MainActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
                 } else {
                     // User is signed out
                     Log.d("MainFireBaseAuth", "onAuthStateChanged:signed_out");
@@ -230,9 +261,16 @@ public class MainActivity extends BaseActivity
     // Changes the title to the given string resource and
     // replaces the current fragment by the given one.
     private void changeFragment(int resourceId, Fragment fragment) {
-        setTitle(resourceId);
+        //Check if it's the current fragment
+        if(mCurrentFragmentId != resourceId){
+            mCurrentFragmentId = resourceId;
+            setTitle(resourceId);
+            getFragmentManager().beginTransaction().replace(R.id.frame, fragment).commit();
+        }else{
+            //Do nth
+        }
 
-        getFragmentManager().beginTransaction().replace(R.id.frame, fragment).commit();
+
 
         // Highlight the selected item in the Navigation Drawer
         if (fragment instanceof DiscoverFragment) {

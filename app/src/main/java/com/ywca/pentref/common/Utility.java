@@ -37,6 +37,10 @@ public class Utility {
 
     public static final String TRANSPORTATION_JSON_FILE_NAME = "transports.json";
 
+    public static final String FIREBASE_TABLE_ADMIN = "Admin";
+    public static final String FIREBASE_TABLE_REVIEWS = "Reviews";
+
+
     /**
      * Reads from the given {@link LocalTime} list, and returns a {@link LocalTime} list
      * with the time that are later than the current time.

@@ -43,46 +43,26 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/facebook_sign_in_button"
         android:layout_marginBottom="20dp" />
+
+
+
     <Button
-        android:id="@+id/sign_out_button"
+        android:id="@+id/f_admin_sign_in_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/facebook_sign_in_button"
-        android:layout_marginBottom="20dp"
-        android:text="@string/sign_out"
-        android:visibility="gone" />
-
-
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_marginBottom="17dp"
+        android:text="@string/login"
         android:layout_above="@+id/sign_in_button"
-        android:layout_centerHorizontal="true">
+        android:layout_alignParentStart="true" />
 
-        <Button
-            android:id="@+id/f_admin_sign_in_btn"
-            android:text="@string/login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="17dp"
-            android:background="@drawable/common_google_signin_btn_icon_light_normal_background"
-            android:layout_above="@+id/sign_in_button"
-            android:layout_alignParentStart="true"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/f_admin_sign_out_btn"
-            android:text="@string/AdminSignOut"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="17dp"
-            android:background="@drawable/common_google_signin_btn_icon_light_normal_background"
-            android:layout_alignParentStart="true"
-            android:visibility="gone"
-            />
-    </LinearLayout>
+    <Button
+        android:id="@+id/f_firebase_sign_out_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="17dp"
+        android:layout_alignParentBottom="true"
+        android:text="@string/firebase_sign_out"
+        android:visibility="gone" />
 
 </RelativeLayout>

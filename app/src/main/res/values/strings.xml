@@ -93,7 +93,7 @@
     <string name="pref_file_name_local" translatable="false">local</string>
     <string name="pref_file_name_user_settings" translatable="false">user_settings</string>
 
-    <string name="facebook_app_id" translatable="false">195665774189937</string>
+    <string name="facebook_app_id" translatable="false">700599673445936</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -101,6 +101,6 @@
     <string name="email">Email</string>
     <string name="login">ADMIN LOGIN</string>
     <string name="login_label">LOGIN</string>
-    <string name="AdminSignOut">Admin SignOut</string>
+    <string name="firebase_sign_out">Sign Out</string>
     <string name="signining">Sign in</string>
 </resources>

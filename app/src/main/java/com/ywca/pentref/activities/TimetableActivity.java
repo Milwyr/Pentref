@@ -24,6 +24,7 @@ import com.ywca.pentref.common.Utility;
 import com.ywca.pentref.models.Timetable;
 import com.ywca.pentref.models.Transport;
 
+import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
 import java.util.ArrayList;
@@ -101,10 +102,13 @@ public class TimetableActivity extends AppCompatActivity implements
 
     // Changes the direction of the chosen transportation
     private void updateTimetableAdapter() {
+        //Test the isSunday
+        Boolean testBoolean = isSundayAndPublicHoliday();
         // Select the timetable based on the direction (either 'from Tai O' or 'to Tai O)
         Timetable currentTimetable = mIsDirectionFromTaiO ?
                 mSelectedTransportItem.getFromTaiO() : mSelectedTransportItem.getToTaiO();
         if(currentTimetable != null) {
+            //check if it is sunday and public holiday
             List<LocalTime> localTimes = currentTimetable.getMonToSatTimes();
 
             // Only select the times that are later than now
@@ -114,6 +118,17 @@ public class TimetableActivity extends AppCompatActivity implements
             mAdapter.updateLocalTimes(new ArrayList<LocalTime>());
         }
     }
+
+    private boolean isSundayAndPublicHoliday(){
+        LocalDateTime dateTime = LocalDateTime.now();
+        // 7 means Sunday
+        if(dateTime.getDayOfWeek() == 7){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

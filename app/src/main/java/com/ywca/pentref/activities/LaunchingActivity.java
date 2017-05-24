@@ -162,7 +162,6 @@ public class LaunchingActivity extends BaseActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.d(TAG, databaseError.getMessage());
-                int j = 0;
             }
         });
 

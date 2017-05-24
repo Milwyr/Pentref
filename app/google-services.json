@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "1090547724167-d0etp27jg0rca6asd5vb8gged1p3hucq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ywca.pentref",
+            "certificate_hash": "c06ceb1b8a29c1804c9462771f5b77146eff3bd2"
+          }
+        },
+        {
+          "client_id": "1090547724167-0utf6p6diiphk11r1sgarr4mdgl0lho9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ywca.pentref",
+            "certificate_hash": "7fa3060d38c8bc00405ce8c2821825a93d33032e"
+          }
+        },
+        {
           "client_id": "1090547724167-7qojv06bm5cedjjbkdrhspaovcdagr1n.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

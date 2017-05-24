@@ -38,6 +38,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -76,6 +78,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRatingBarChangeListener, View.OnClickListener {
+    private static final String TAG = "PoiDetailsActivity";
     private final int REQUEST_CODE_REVIEW_ACTIVITY = 9000;
 
     private Locale mLocale;
@@ -89,6 +92,9 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
     private StorageReference mStorageRef;
     private DatabaseReference mDatabase;
 
+    private FirebaseUser mFirebaseUser;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +109,25 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         initialiseComponents();
+
+        //Firebase Sign In
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    mFirebaseUser = user;
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                    mFirebaseUser = null;
+                }
+                // ...
+            }
+        };
 
         // Retrieve Google account if the user has signed in with Google
         OptionalPendingResult<GoogleSignInResult> opr =
@@ -133,6 +158,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
     @Override
     protected void onStart() {
         super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
 
         // This code is put here as the selectedPoi instance might only be returned
         // from onActivityResult() method, in which onCreate() method is not called.
@@ -144,6 +170,9 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
     @Override
     protected void onStop() {
         super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
         mGoogleApiClient.disconnect();
     }
 
@@ -186,9 +215,9 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
                 if (Profile.getCurrentProfile() != null) {
                     intent.putExtra(Utility.USER_PROFILE_ID_EXTRA_KEY, Profile.getCurrentProfile().getId());
                     intent.putExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY, Profile.getCurrentProfile().getName());
-                } else if (mGoogleSignInAccount != null) {
-                    intent.putExtra(Utility.USER_PROFILE_ID_EXTRA_KEY, mGoogleSignInAccount.getId());
-                    intent.putExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY, mGoogleSignInAccount.getDisplayName());
+                } else if (mFirebaseUser != null) {
+                    intent.putExtra(Utility.USER_PROFILE_ID_EXTRA_KEY, mFirebaseUser.getProviderData().get(1).getUid());
+                    intent.putExtra(Utility.USER_PROFILE_NAME_EXTRA_KEY, mFirebaseUser.getProviderData().get(1).getDisplayName());
                 }
 
                 startActivityForResult(intent, REQUEST_CODE_REVIEW_ACTIVITY);
@@ -365,7 +394,7 @@ public class PoiDetailsActivity extends BaseActivity implements RatingBar.OnRati
 
     // Returns true if the user has signed in with either Facebook or Google
     private boolean isSignedIn() {
-        return Profile.getCurrentProfile() != null || mGoogleSignInAccount != null;
+        return Profile.getCurrentProfile() != null || mFirebaseUser != null;
     }
 
     @Override
