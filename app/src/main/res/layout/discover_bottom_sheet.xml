@@ -4,9 +4,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="400dp"
     android:background="#FFFFFF"
-    app:behavior_peekHeight="105dp"
+    app:behavior_peekHeight="50dp"
     app:layout_behavior="@string/bottom_sheet_behavior">
 
     <ImageView

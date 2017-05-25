@@ -112,6 +112,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     //endregion
     //region Geo-fencing API
     private LatLng mLastLatLng;
+    private RecyclerView mRecyclerView;
 
     public DiscoverFragment() {
         // Required empty public constructor
@@ -123,6 +124,9 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
         //set last location to null
         mLastLocation = null;
+
+
+
 
         mPois = new ArrayList<>();
         mCategoriesPois = new ArrayList<>();
@@ -144,6 +148,9 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
         mBookmarkBtn = (FloatingActionButton) rootView.findViewById(R.id.f_discover_fab_bookmark);
         mBookmarkBtn.setOnClickListener(this);
+
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         // Avoid unexpected crash
         try {
@@ -452,8 +459,8 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         Collections.sort(poiListPair, new DistanceComparator());
 
         RelativeLayout bottomSheet = (RelativeLayout) getActivity().findViewById(R.id.bottom_sheet);
-        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+
         NearbyPlacesAdapter adapter = new NearbyPlacesAdapter(poiListPair);
         adapter.setOnItemClickListener(new NearbyPlacesAdapter.OnItemClickListener() {
             @Override
@@ -463,7 +470,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 getActivity().startActivity(intent);
             }
         });
-        recyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -489,8 +496,6 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         Collections.sort(poiListPair, new DistanceComparator());
 
         RelativeLayout bottomSheet = (RelativeLayout) getActivity().findViewById(R.id.bottom_sheet);
-        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         NearbyPlacesAdapter adapter = new NearbyPlacesAdapter(poiListPair);
         adapter.setOnItemClickListener(new NearbyPlacesAdapter.OnItemClickListener() {
             @Override
@@ -500,7 +505,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 getActivity().startActivity(intent);
             }
         });
-        recyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(adapter);
 
         if (mCircle != null) {
             mCircle.remove();
