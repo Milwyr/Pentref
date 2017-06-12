@@ -1,6 +1,8 @@
 package com.ywca.pentref.fragments;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -66,6 +68,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -74,7 +79,7 @@ import static android.app.Activity.RESULT_OK;
  */
 // Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
 public class DiscoverFragment extends BaseFragment implements LocationListener,
-        OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks {
+        OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, AdapterView.OnItemSelectedListener {
 
     //region Constants
     // Request code to launch PoiDetailsActivity
@@ -116,7 +121,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     private RecyclerView mRecyclerView;
 
     private Boolean mRequestLocationUpdate;
-    private Boolean mCategorized;
+
 
 
     public DiscoverFragment() {
@@ -127,10 +132,11 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         //set last location to null
         mLastLocation = null;
         mRequestLocationUpdate = false;
-        mCategorized = false;
+
 
 
 
@@ -159,6 +165,18 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        // Retrieve a list of Points of Interest from the local database
+        Cursor cursor = getActivity().getContentResolver().query(
+                Contract.Poi.CONTENT_URI, Contract.Poi.PROJECTION_ALL, null, null, null);
+
+        // This line is used to get rid of the warning
+        if (cursor == null) {
+            mPois = new ArrayList<Poi>();
+        }else {
+            mPois = PentrefProvider.convertToPois(cursor);
+        }
+        cursor.close();
+
         // Avoid unexpected crash
         try {
             mMapView.onCreate(savedInstanceState);
@@ -173,83 +191,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         // Initialises category spinner view that is embedded in the bottom sheet
 
         mSpinner = (Spinner) rootView.findViewById(R.id.f_discover_spinner);
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mCategorized = false;
-                //Set summary card view to invisible
-                mPoiSummaryCardView.setVisibility(View.INVISIBLE);
-
-                // Remove all the existing markers
-                mGoogleMap.clear();
-                mPreviousMarker = null;
-                //TODO: mCategories.add(poi) should be put in asycntask otherwise mCategories could be empty
-                //Add All poi if position = 0
-                synchronized (mCategoriesPois) {
-                    mCategoriesPois.clear();
-                    if (position == 0) {
-                        for (Poi poi : mPois) {
-                            mCategoriesPois.add(poi);
-                            MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
-                            mGoogleMap.addMarker(markerOptions).setTag(poi);
-                        }
-                    } else if (position == mSpinner.getAdapter().getCount() - 1) {
-                        //Show bookmarked POI
-                        Toast.makeText(getActivity(), "bookmark selected", Toast.LENGTH_SHORT);
-                        new AsyncTask<Void, Void, List<String>>() {
-                            @Override
-                            protected List<String> doInBackground(Void... params) {
-                                //Retrvive all ids from local bookmark
-                                Cursor cursor = getActivity().getContentResolver().query(
-                                        Contract.Bookmark.CONTENT_URI, Contract.Bookmark.PROJECTION_ALL, null, null, null);
-
-                                // This line is used to get rid of the warning
-                                if (cursor == null) {
-                                    return new ArrayList<>();
-                                }
-                                List<String> idList = PentrefProvider.convertToBookmarkIds(cursor);
-                                cursor.close();
-                                return idList;
-                            }
-
-                            @Override
-                            protected void onPostExecute(List<String> strings) {
-                                super.onPostExecute(strings);
-                                //Add only the markers that match the bookmark
-                                for (Poi poi : mPois) {
-                                    if (strings.contains(poi.getId())) {
-                                        mCategoriesPois.add(poi);
-                                        MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
-                                        mGoogleMap.addMarker(markerOptions).setTag(poi);
-                                    }
-                                }
-                            }
-                        }.execute();
-                    } else {
-                        // Add only the markers that match the selected category
-                        for (Poi poi : mPois) {
-                            if (poi.getCategoryId() == (position)) {
-                                mCategoriesPois.add(poi);
-                                MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
-                                mGoogleMap.addMarker(markerOptions).setTag(poi);
-                            }
-                        }
-                    }
-                    //Finish Categoriezd by setting mCategorized to true and  notify the mCategorisedPoi
-                    mCategorized = true;
-                    mCategoriesPois.notify();
-                }
-                //Update the bottomsheet if category is change and lastLocation is not null
-                if (mLastLocation != null) {
-                    updateNearbyList(mLastLocation);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        mSpinner.setOnItemSelectedListener(this);
 
         /*// Initialises category grid view that is embedded in the bottom sheet
         final GridView gridView = (GridView) rootView.findViewById(R.id.category_grid_view);
@@ -404,9 +346,6 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                     mGoogleMap.addMarker(markerOptions).setTag(poi);
                 }
 
-                // Save all the Points of Interest to the instance variable
-                mPois.addAll(pois);
-
                 // Set a marker click listener
                 mGoogleMap.setOnMarkerClickListener(DiscoverFragment.this);
             }
@@ -454,113 +393,117 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         startLocationUpdates();
     }
 
-    private void updateNearbyList(Location lastLocation) {
-        List<Pair<Poi, Float>> poiListPair = new ArrayList<>();
-        synchronized (mCategoriesPois) {
-            while(!mCategorized){
-                try {
-                    mCategoriesPois.wait();
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-            for (Poi poiItem : mCategoriesPois) {
-                try {
-                    Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
-                            poiItem.getLatitude(), poiItem.getLongitude(), results);
-
-                    float distance = results[0];
-
-                    Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
-                    poiListPair.add(poiPair);
-                } catch (Exception e) {
-                    int a = 1;
-                }
-
-            }
-        }
-
-        Collections.sort(poiListPair, new DistanceComparator());
-
-        RelativeLayout bottomSheet = (RelativeLayout) getActivity().findViewById(R.id.bottom_sheet);
-
-
-        NearbyPlacesAdapter adapter = new NearbyPlacesAdapter(poiListPair);
-        adapter.setOnItemClickListener(new NearbyPlacesAdapter.OnItemClickListener() {
+    private void updateNearbyList(final Location lastLocation) {
+        final List<Pair<Poi, Float>> poiListPair = new ArrayList<>();
+        new AsyncTask<Void, Void, Void>(){
             @Override
-            public void onItemClick(Poi selectedPoi) {
-                Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
-                intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, selectedPoi);
-                getActivity().startActivity(intent);
+            protected Void doInBackground(Void... params) {
+                for (Poi poiItem : mCategoriesPois) {
+                    try {
+                        Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
+                                poiItem.getLatitude(), poiItem.getLongitude(), results);
+
+                        float distance = results[0];
+
+                        Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
+                        poiListPair.add(poiPair);
+                    } catch (Exception e) {
+                        int a = 1;
+                    }
+                }
+                return null;
             }
-        });
-        mRecyclerView.setAdapter(adapter);
+
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                Collections.sort(poiListPair, new DistanceComparator());
+
+                NearbyPlacesAdapter adapter = new NearbyPlacesAdapter(poiListPair);
+                adapter.setOnItemClickListener(new NearbyPlacesAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(Poi selectedPoi) {
+                        Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
+                        intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, selectedPoi);
+                        getActivity().startActivity(intent);
+                    }
+                });
+                mRecyclerView.setAdapter(adapter);
+            }
+        }.execute();
+
+
+
     }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(final Location location) {
         //Save location to last location
         mLastLocation = location;
-        List<Pair<Poi, Float>> poiListPair = new ArrayList<>();
-        synchronized (mCategoriesPois) {
-            if(!mCategorized){
-                try {
-                    mCategoriesPois.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            for (Poi poiItem : mCategoriesPois) {
-                try {
-                    Location.distanceBetween(location.getLatitude(), location.getLongitude(),
-                            poiItem.getLatitude(), poiItem.getLongitude(), results);
-
-                    float distance = results[0];
-
-                    Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
-                    poiListPair.add(poiPair);
-                } catch (Exception e) {
-                    int a = 1;
-                }
-
-            }
-        }
-
-        Collections.sort(poiListPair, new DistanceComparator());
-
-        RelativeLayout bottomSheet = (RelativeLayout) getActivity().findViewById(R.id.bottom_sheet);
-        NearbyPlacesAdapter adapter = new NearbyPlacesAdapter(poiListPair);
-        adapter.setOnItemClickListener(new NearbyPlacesAdapter.OnItemClickListener() {
+        final List<Pair<Poi, Float>> poiListPair = new ArrayList<>();
+        new AsyncTask<Void, Void, Void>(){
             @Override
-            public void onItemClick(Poi selectedPoi) {
-                Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
-                intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, selectedPoi);
-                getActivity().startActivity(intent);
+            protected Void doInBackground(Void... params) {
+                for (Poi poiItem : mCategoriesPois) {
+                    try {
+                        Location.distanceBetween(location.getLatitude(), location.getLongitude(),
+                                poiItem.getLatitude(), poiItem.getLongitude(), results);
+
+                        float distance = results[0];
+
+                        Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
+                        poiListPair.add(poiPair);
+                    } catch (Exception e) {
+                        int a = 1;
+                    }
+
+                }
+                return null;
             }
-        });
-        mRecyclerView.setAdapter(adapter);
 
-        if (mCircle != null) {
-            mCircle.remove();
-        }
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                Collections.sort(poiListPair, new DistanceComparator());
 
-        // Draw a circle with radius 500m from the current location
-        mCircle = mGoogleMap.addCircle(new CircleOptions()
-                .center(new LatLng(location.getLatitude(), location.getLongitude()))
-                .radius(500)
-                .strokeWidth(5));
+//                RelativeLayout bottomSheet = (RelativeLayout) getActivity().findViewById(R.id.bottom_sheet);
+                NearbyPlacesAdapter adapter = new NearbyPlacesAdapter(poiListPair);
+                adapter.setOnItemClickListener(new NearbyPlacesAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(Poi selectedPoi) {
+                        Intent intent = new Intent(getActivity(), PoiDetailsActivity.class);
+                        intent.putExtra(Utility.SELECTED_POI_EXTRA_KEY, selectedPoi);
+                        getActivity().startActivity(intent);
+                    }
+                });
+                mRecyclerView.setAdapter(adapter);
 
-        //This will cause unexpected outcome for user. Need futhrer disucssion
-       // mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+                if (mCircle != null) {
+                    mCircle.remove();
+                }
 
-        // Draw a line of the route the user has travelled
-        if (mLastLatLng != null) {
-            PolylineOptions polylineOptions = new PolylineOptions()
-                    .visible(true).width(5).color(ContextCompat.getColor(getActivity(), R.color.black))
-                    .add(mLastLatLng, new LatLng(location.getLatitude(), location.getLongitude()));
-            mGoogleMap.addPolyline(polylineOptions);
-        }
-        mLastLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                // Draw a circle with radius 500m from the current location
+                mCircle = mGoogleMap.addCircle(new CircleOptions()
+                        .center(new LatLng(location.getLatitude(), location.getLongitude()))
+                        .radius(500)
+                        .strokeWidth(5));
+
+                //This will cause unexpected outcome for user. Need futhrer disucssion
+                // mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+
+                // Draw a line of the route the user has travelled
+                if (mLastLatLng != null) {
+                    PolylineOptions polylineOptions = new PolylineOptions()
+                            .visible(true).width(5).color(ContextCompat.getColor(getActivity(), R.color.black))
+                            .add(mLastLatLng, new LatLng(location.getLatitude(), location.getLongitude()));
+                    mGoogleMap.addPolyline(polylineOptions);
+                }
+                mLastLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            }
+        }.execute();
+
+
     }
 
     private void startLocationUpdates() {
@@ -682,7 +625,6 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     @Override
     public void onResume() {
         super.onResume();
-        mCategorized = false;
         //
         if (mMapView != null) {
             // NullPointerException is thrown in certain circumstances
@@ -726,6 +668,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     @Override
     public void onStop() {
         super.onStop();
+
         if (mMapView != null) {
             try {
                 // NullPointerException is thrown in certain circumstances
@@ -768,6 +711,80 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
     @Override
     public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            //Set summary card view to invisible
+            mPoiSummaryCardView.setVisibility(View.INVISIBLE);
+
+            // Remove all the existing markers
+            mGoogleMap.clear();
+            mPreviousMarker = null;
+            //TODO: mCategories.add(poi) should be put in asycntask otherwise mCategories could be empty
+            //Add All poi if position = 0
+
+            mCategoriesPois.clear();
+        int a = 1;
+            if (position == 0) {
+                for (Poi poi : mPois) {
+                    mCategoriesPois.add(poi);
+                    MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                    mGoogleMap.addMarker(markerOptions).setTag(poi);
+                }
+            } else if (position == mSpinner.getAdapter().getCount() - 1) {
+                //Show bookmarked POI
+                Toast.makeText(getActivity(), "bookmark selected", Toast.LENGTH_SHORT);
+                new AsyncTask<Void, Void, List<String>>() {
+                    @Override
+                    protected List<String> doInBackground(Void... params) {
+                        //Retrvive all ids from local bookmark
+                        Cursor cursor = getActivity().getContentResolver().query(
+                                Contract.Bookmark.CONTENT_URI, Contract.Bookmark.PROJECTION_ALL, null, null, null);
+
+                        // This line is used to get rid of the warning
+                        if (cursor == null) {
+                            return new ArrayList<>();
+                        }
+                        List<String> idList = PentrefProvider.convertToBookmarkIds(cursor);
+                        cursor.close();
+                        return idList;
+                    }
+
+                    @Override
+                    protected void onPostExecute(List<String> strings) {
+                        super.onPostExecute(strings);
+                        //Add only the markers that match the bookmark
+                        for (Poi poi : mPois) {
+                            if (strings.contains(poi.getId())) {
+                                mCategoriesPois.add(poi);
+                                MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                                mGoogleMap.addMarker(markerOptions).setTag(poi);
+                            }
+                        }
+                    }
+                }.execute();
+            } else {
+                // Add only the markers that match the selected category
+                for (Poi poi : mPois) {
+                    if (poi.getCategoryId() == (position)) {
+                        mCategoriesPois.add(poi);
+                        MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                        mGoogleMap.addMarker(markerOptions).setTag(poi);
+                    }
+                }
+            }
+
+
+            //Update the bottomsheet if category is change and lastLocation is not null
+            if (mLastLocation != null) {
+                updateNearbyList(mLastLocation);
+            }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
 
     }
     //endregion
