@@ -104,18 +104,16 @@
             </LinearLayout>
 
             <TextView
-                android:text="Category ID:"
+                android:text="Category:"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/a_add_poi_tv_category_id" />
 
-            <EditText
+            <Spinner
+                android:id="@+id/a_add_poi_spinner_category_id"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:ems="10"
-                android:layout_marginBottom="10dp"
-                android:id="@+id/a_add_poi_et_category_id" />
+                android:layout_height="wrap_content" />
+
 
             <TextView
                 android:text="Website URL:"

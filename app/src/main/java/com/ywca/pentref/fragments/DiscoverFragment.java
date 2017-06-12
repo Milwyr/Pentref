@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
@@ -73,7 +74,7 @@ import static android.app.Activity.RESULT_OK;
  */
 // Reference: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/RawMapViewDemoActivity.java
 public class DiscoverFragment extends BaseFragment implements LocationListener,
-        OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
+        OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks {
 
     //region Constants
     // Request code to launch PoiDetailsActivity
@@ -114,6 +115,10 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     private LatLng mLastLatLng;
     private RecyclerView mRecyclerView;
 
+    private Boolean mRequestLocationUpdate;
+    private Boolean mCategorized;
+
+
     public DiscoverFragment() {
         // Required empty public constructor
     }
@@ -124,7 +129,8 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
         //set last location to null
         mLastLocation = null;
-
+        mRequestLocationUpdate = false;
+        mCategorized = false;
 
 
 
@@ -133,6 +139,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         // Build Google Api client and connect to it
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
                 .build();
         mGoogleApiClient.connect();
 //        ImageButton imgbtn = (ImageButton) getActivity().findViewById(R.id.f_discover_imgbtn_refresh);
@@ -169,61 +176,68 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mCategorized = false;
                 //Set summary card view to invisible
                 mPoiSummaryCardView.setVisibility(View.INVISIBLE);
-                mCategoriesPois.clear();
+
                 // Remove all the existing markers
                 mGoogleMap.clear();
                 mPreviousMarker = null;
-
+                //TODO: mCategories.add(poi) should be put in asycntask otherwise mCategories could be empty
                 //Add All poi if position = 0
-                if (position == 0) {
-                    for (Poi poi : mPois) {
-                        mCategoriesPois.add(poi);
-                        MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
-                        mGoogleMap.addMarker(markerOptions).setTag(poi);
-                    }
-                } else if (position == mSpinner.getAdapter().getCount() - 1) {
-                    //Show bookmarked POI
-                    Toast.makeText(getActivity(), "bookmark selected", Toast.LENGTH_SHORT);
-                    new AsyncTask<Void, Void, List<String>>() {
-                        @Override
-                        protected List<String> doInBackground(Void... params) {
-                            //Retrvive all ids from local bookmark
-                            Cursor cursor = getActivity().getContentResolver().query(
-                                    Contract.Bookmark.CONTENT_URI, Contract.Bookmark.PROJECTION_ALL, null, null, null);
-
-                            // This line is used to get rid of the warning
-                            if (cursor == null) {
-                                return new ArrayList<>();
-                            }
-                            List<String> idList = PentrefProvider.convertToBookmarkIds(cursor);
-                            cursor.close();
-                            return idList;
-                        }
-
-                        @Override
-                        protected void onPostExecute(List<String> strings) {
-                            super.onPostExecute(strings);
-                            //Add only the markers that match the bookmark
-                            for (Poi poi : mPois) {
-                                if (strings.contains(poi.getId())) {
-                                    mCategoriesPois.add(poi);
-                                    MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
-                                    mGoogleMap.addMarker(markerOptions).setTag(poi);
-                                }
-                            }
-                        }
-                    }.execute();
-                } else {
-                    // Add only the markers that match the selected category
-                    for (Poi poi : mPois) {
-                        if (poi.getCategoryId() == (position)) {
+                synchronized (mCategoriesPois) {
+                    mCategoriesPois.clear();
+                    if (position == 0) {
+                        for (Poi poi : mPois) {
                             mCategoriesPois.add(poi);
                             MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
                             mGoogleMap.addMarker(markerOptions).setTag(poi);
                         }
+                    } else if (position == mSpinner.getAdapter().getCount() - 1) {
+                        //Show bookmarked POI
+                        Toast.makeText(getActivity(), "bookmark selected", Toast.LENGTH_SHORT);
+                        new AsyncTask<Void, Void, List<String>>() {
+                            @Override
+                            protected List<String> doInBackground(Void... params) {
+                                //Retrvive all ids from local bookmark
+                                Cursor cursor = getActivity().getContentResolver().query(
+                                        Contract.Bookmark.CONTENT_URI, Contract.Bookmark.PROJECTION_ALL, null, null, null);
+
+                                // This line is used to get rid of the warning
+                                if (cursor == null) {
+                                    return new ArrayList<>();
+                                }
+                                List<String> idList = PentrefProvider.convertToBookmarkIds(cursor);
+                                cursor.close();
+                                return idList;
+                            }
+
+                            @Override
+                            protected void onPostExecute(List<String> strings) {
+                                super.onPostExecute(strings);
+                                //Add only the markers that match the bookmark
+                                for (Poi poi : mPois) {
+                                    if (strings.contains(poi.getId())) {
+                                        mCategoriesPois.add(poi);
+                                        MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                                        mGoogleMap.addMarker(markerOptions).setTag(poi);
+                                    }
+                                }
+                            }
+                        }.execute();
+                    } else {
+                        // Add only the markers that match the selected category
+                        for (Poi poi : mPois) {
+                            if (poi.getCategoryId() == (position)) {
+                                mCategoriesPois.add(poi);
+                                MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                                mGoogleMap.addMarker(markerOptions).setTag(poi);
+                            }
+                        }
                     }
+                    //Finish Categoriezd by setting mCategorized to true and  notify the mCategorisedPoi
+                    mCategorized = true;
+                    mCategoriesPois.notify();
                 }
                 //Update the bottomsheet if category is change and lastLocation is not null
                 if (mLastLocation != null) {
@@ -357,6 +371,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         googleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
+                mRequestLocationUpdate = true;
                 initiateLocationRequest();
                 return false;
             }
@@ -441,19 +456,28 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
     private void updateNearbyList(Location lastLocation) {
         List<Pair<Poi, Float>> poiListPair = new ArrayList<>();
-        for (Poi poiItem : mCategoriesPois) {
-            try {
-                Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
-                        poiItem.getLatitude(), poiItem.getLongitude(), results);
-
-                float distance = results[0];
-
-                Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
-                poiListPair.add(poiPair);
-            } catch (Exception e) {
-                int a = 1;
+        synchronized (mCategoriesPois) {
+            while(!mCategorized){
+                try {
+                    mCategoriesPois.wait();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
             }
+            for (Poi poiItem : mCategoriesPois) {
+                try {
+                    Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
+                            poiItem.getLatitude(), poiItem.getLongitude(), results);
 
+                    float distance = results[0];
+
+                    Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
+                    poiListPair.add(poiPair);
+                } catch (Exception e) {
+                    int a = 1;
+                }
+
+            }
         }
 
         Collections.sort(poiListPair, new DistanceComparator());
@@ -478,19 +502,28 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         //Save location to last location
         mLastLocation = location;
         List<Pair<Poi, Float>> poiListPair = new ArrayList<>();
-        for (Poi poiItem : mCategoriesPois) {
-            try {
-                Location.distanceBetween(location.getLatitude(), location.getLongitude(),
-                        poiItem.getLatitude(), poiItem.getLongitude(), results);
-
-                float distance = results[0];
-
-                Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
-                poiListPair.add(poiPair);
-            } catch (Exception e) {
-                int a = 1;
+        synchronized (mCategoriesPois) {
+            if(!mCategorized){
+                try {
+                    mCategoriesPois.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+            for (Poi poiItem : mCategoriesPois) {
+                try {
+                    Location.distanceBetween(location.getLatitude(), location.getLongitude(),
+                            poiItem.getLatitude(), poiItem.getLongitude(), results);
 
+                    float distance = results[0];
+
+                    Pair<Poi, Float> poiPair = new Pair<>(poiItem, distance);
+                    poiListPair.add(poiPair);
+                } catch (Exception e) {
+                    int a = 1;
+                }
+
+            }
         }
 
         Collections.sort(poiListPair, new DistanceComparator());
@@ -518,8 +551,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 .strokeWidth(5));
 
         //This will cause unexpected outcome for user. Need futhrer disucssion
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(
-                new LatLng(location.getLatitude(), location.getLongitude())));
+       // mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
 
         // Draw a line of the route the user has travelled
         if (mLastLatLng != null) {
@@ -650,10 +682,13 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     @Override
     public void onResume() {
         super.onResume();
+        mCategorized = false;
+        //
         if (mMapView != null) {
             // NullPointerException is thrown in certain circumstances
             try {
                 mMapView.onResume();
+                //resume location update
             } catch (Exception e) {
                 Log.e("DiscoverFragment", e.getMessage());
             }
@@ -722,6 +757,18 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
         if (mMapView != null) {
             mMapView.onLowMemory();
         }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if(mRequestLocationUpdate){
+            initiateLocationRequest();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
     }
     //endregion
 

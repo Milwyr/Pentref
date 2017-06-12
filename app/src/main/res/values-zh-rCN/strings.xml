@@ -15,7 +15,7 @@
 
     <!-- Navigation Drawer Headers -->
     <string name="discover">发现</string>
-    <string name="bookmarks">收藏</string>
+    <string name="bookmarks">書籤</string>
     <string name="weather">天气</string>
     <string name="transport_schedule">交通时间表</string>
     <string name="profile">帐户</string>

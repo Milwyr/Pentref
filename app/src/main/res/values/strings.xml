@@ -103,4 +103,5 @@
     <string name="login_label">LOGIN</string>
     <string name="firebase_sign_out">Sign Out</string>
     <string name="signining">Sign in</string>
+    <string name="dialog_title_delete_poi">Delete POI?</string>
 </resources>

@@ -5,36 +5,5 @@
     tools:context="com.ywca.pentref.fragments.AboutFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <Button
-            android:text="Test1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/test_btn"
-            android:layout_weight="1" />
-
-        <Button
-            android:text="Login Test"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/f_about_btn_login"
-            android:layout_weight="1" />
-
-        <Button
-            android:text="Signout test"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/f_about_btn_signout"
-            android:layout_weight="1" />
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Medium Text" />
 
 </FrameLayout>

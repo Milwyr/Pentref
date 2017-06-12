@@ -1,10 +1,13 @@
 package com.ywca.pentref.fragments;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -17,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
@@ -81,7 +85,7 @@ import java.util.Locale;
  * {@link PoiAdminFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
-public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback, View.OnClickListener, LocationListener, GoogleMap.OnMarkerClickListener {
+public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback, View.OnClickListener, LocationListener, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks {
 
     public static final String TAG = "PoiAdminFragment";
     //region Constants
@@ -92,6 +96,8 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     //endregion
     // Request code for checking whether GPS is turned on
     private final int REQUEST_CHECK_GPS_SETTINGS = 10001;
+    //Request code for addPOIActivity
+    private final int REQUEST_ADD_POI = 20000;
     private Circle mCircle;
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mGoogleMap;
@@ -108,12 +114,14 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     private RequestQueue mQueue;
     //region Geo-fencing API
     private LatLng mLastLatLng;
+    private boolean mRequestLocationUpdate;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        mRequestLocationUpdate = false;
         mPois = new ArrayList<>();
         mProgress = new ProgressDialog(getActivity());
         mProgress.setTitle("Loading");
@@ -122,6 +130,7 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
         // Build Google Api client and connect to it
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
                 .build();
         mGoogleApiClient.connect();
 
@@ -186,6 +195,9 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                 requestPermissions(new String[]{
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_PERMISSION);
+            } else {
+                //Location permissions have been granted for device after Marshmallow by runtime permissions already
+                googleMap.setMyLocationEnabled(true);
             }
         } else {
             // Location permissions have been granted prior to installation before Marshmallow (API 23)
@@ -216,7 +228,9 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
 
                 // Add a list of Points of Interest to the map
                 for (Poi poi : pois) {
-                    MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                    MarkerOptions markerOptions = new MarkerOptions()
+                            .position(poi.getLatLng())
+                            .title(poi.getName(getDeviceLocale()));
                     mGoogleMap.addMarker(markerOptions).setTag(poi);
                 }
 
@@ -254,6 +268,7 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
             @Override
             public boolean onMyLocationButtonClick() {
                 initiateLocationRequest();
+                mRequestLocationUpdate = true;
                 return false;
             }
         });
@@ -315,9 +330,6 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                 .radius(500)
                 .strokeWidth(5));
 
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(
-                new LatLng(location.getLatitude(), location.getLongitude())));
-
         // Draw a line of the route the user has travelled
         if (mLastLatLng != null) {
             PolylineOptions polylineOptions = new PolylineOptions()
@@ -357,58 +369,94 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                 // String eee = getCompleteAddressString(mCurrentMarker.getPosition().latitude,mCurrentMarker.getPosition().longitude);
                 intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LATITUDE, mCurrentMarker.getPosition().latitude);
                 intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LONGITUDE, mCurrentMarker.getPosition().longitude);
-                startActivity(intent);
+                startActivityForResult(intent, REQUEST_ADD_POI);
                 break;
             case R.id.poi_btn_del:
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                // Add the buttons
+                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked Yes button
+                        //Delete the selected poi from firebase realtime database
+                        DatabaseReference poiRef = FirebaseDatabase.getInstance().getReference().child("POI").child(mSelectedDeletePoi.getId());
+                        poiRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getActivity(), "Fail to delete", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        //TODO: Delete the selected poi pic from firebase storage
+                        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+                        StorageReference poiPicRef = storageRef.child("images/" + mSelectedDeletePoi.getHeaderImageFileName());
+                        poiPicRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(getActivity(), "Pic deleted", Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getActivity(), "fail to remove pic", Toast.LENGTH_SHORT).show();
+                            }
+                        });
 
-                Log.i("PoiAdminFragment", "DELpressed");
-                Log.i("PoiAdminFragment", "" + mSelectedDeletePoi.getId());
+                        //Delete the selected poi from local table
+                        // Defines selection criteria for the rows you want to delete
+                        String mSelectionClause = Contract.Poi._ID + " = ?";
+                        String[] mSelectionArgs = {mSelectedDeletePoi.getId() + ""};
+                        getActivity().getContentResolver().delete(Contract.Poi.CONTENT_URI, mSelectionClause, mSelectionArgs);
 
 
-                //Delete the selected poi from firebase realtime database
-                DatabaseReference poiRef = FirebaseDatabase.getInstance().getReference().child("POI").child(mSelectedDeletePoi.getId());
-                poiRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getActivity(), "Fail to delete", Toast.LENGTH_SHORT).show();
+                        //delete the SelectedDeleteMarker marker from the map
+                        mSelectedDeleteMarker.remove();
+                        mSelectedDeleteMarker = null;
+
                     }
                 });
-                //TODO: Delete the selected poi pic from firebase storage
-                StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                StorageReference poiPicRef = storageRef.child("images/" + mSelectedDeletePoi.getHeaderImageFileName());
-                poiPicRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(getActivity(), "Pic deleted", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getActivity(), "fail to remove pic", Toast.LENGTH_SHORT).show();
+                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
                     }
                 });
 
-                //Delete the selected poi from local table
-                // Defines selection criteria for the rows you want to delete
-                String mSelectionClause = Contract.Poi._ID + " = ?";
-                String[] mSelectionArgs = {mSelectedDeletePoi.getId() + ""};
-                getActivity().getContentResolver().delete(Contract.Poi.CONTENT_URI, mSelectionClause, mSelectionArgs);
-
-
-                //delete the SelectedDeleteMarker marker from the map
-                mSelectedDeleteMarker.remove();
-                mSelectedDeleteMarker = null;
-
-
+                // Create the AlertDialog
+                AlertDialog dialog = builder.create();
+                dialog.setTitle(R.string.dialog_title_delete_poi);
+                dialog.show();
                 break;
         }
 
     }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == REQUEST_ADD_POI) {
+            if(resultCode == Activity.RESULT_OK){
+                //Add the new POI to the map
+                Poi newPoi = data.getParcelableExtra("addedPOI");
+                MarkerOptions markerOptions = new MarkerOptions()
+                        .position(newPoi.getLatLng())
+                        .title(newPoi.getName(getDeviceLocale()));
+                mGoogleMap.addMarker(markerOptions).setTag(newPoi);
+                mPois.add(newPoi);
+
+                mCurrentMarker.remove();
+                mCurrentMarker = null;
+                mPoiAddCardView.setVisibility(View.GONE);
+
+
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
+        }
+    }//onActivityResult
+
 
     //Delete the local poi table and get the new one from the server
     private void syncWithServer() {
@@ -464,7 +512,7 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        if (marker == mCurrentMarker) {
+        if (mCurrentMarker != null && marker.getPosition().hashCode() == mCurrentMarker.getPosition().hashCode()) {
             mPoiAddCardView.setVisibility(View.VISIBLE);
             mPoiDelCardView.setVisibility(View.GONE);
         } else {
@@ -502,6 +550,9 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
             } catch (Exception e) {
                 Log.e("PoiAdminFragment", e.getMessage());
             }
+        }
+        if(!mGoogleApiClient.isConnecting()) {
+            mGoogleApiClient.connect();
         }
     }
 
@@ -581,6 +632,18 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
             //Log.w("My Current loction address", "Canont get Address!");
         }
         return strAdd;
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if(mRequestLocationUpdate){
+            initiateLocationRequest();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
     }
     //endregion
 
