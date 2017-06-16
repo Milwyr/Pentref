@@ -76,12 +76,12 @@
 
         <ImageView
             android:id="@+id/to"
-            app:srcCompat="@drawable/ic_arrow_downward_grey"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_alignStart="@id/route_number_text_view"
             android:layout_below="@id/departure_station_text_view"
-            android:layout_marginTop="3dp" />
+            android:layout_marginTop="3dp"
+            app:srcCompat="@drawable/ic_arrow_downward_grey" />
 
         <TextView
             android:id="@+id/destination_station_text_view"

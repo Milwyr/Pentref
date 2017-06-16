@@ -21,6 +21,10 @@
             android:id="@+id/nav_transportation"
             android:icon="@drawable/ic_bus_black_36dp"
             android:title="@string/transport_schedule" />
+        <item
+            android:id="@+id/nav_tour"
+            android:icon="@android:drawable/ic_menu_myplaces"
+            android:title="@string/tour" />
     </group>
 
     <group

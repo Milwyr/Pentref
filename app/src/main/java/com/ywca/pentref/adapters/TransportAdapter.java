@@ -21,6 +21,7 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.security.spec.ECField;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,17 +86,21 @@ public class TransportAdapter extends RecyclerView.Adapter<TransportAdapter.View
             if (transport.getFromTaiO() != null) {
                 localTimes = transport.getFromTaiO().getMonToSatTimes();
             } else {
-                localTimes = transport.getToTaiO().getMonToSatTimes();
+                localTimes = new ArrayList<>();
             }
         } else {
             if (transport.getFromTaiO() != null) {
                 localTimes = transport.getFromTaiO().getSunAndPublicHolidayTimes();
             } else {
-                localTimes = transport.getToTaiO().getSunAndPublicHolidayTimes();
+                localTimes = new ArrayList<>();
             }
         }
-
-        List<LocalTime> nextTwoDepartureTimes = Utility.getTimesAfterNow(localTimes, 2);
+        List<LocalTime> nextTwoDepartureTimes;
+        try {
+            nextTwoDepartureTimes = Utility.getTimesAfterNow(localTimes, 2);
+        }catch (Exception e){
+            nextTwoDepartureTimes =  new ArrayList<>();
+        }
         if (nextTwoDepartureTimes.isEmpty()) {
             holder.nextTransportTimeTextView.setText("N/A");
             holder.secondNextTransportTimeTextView.setText("N/A");

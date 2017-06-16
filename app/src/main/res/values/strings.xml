@@ -105,4 +105,7 @@
     <string name="signining">Sign in</string>
     <string name="dialog_title_delete_poi">Delete POI?</string>
     <string name="map_loading">Map Loading</string>
+    <string name="add_new_poi">Add New POI</string>
+    <string name="delete_poi">Delete POI</string>
+    <string name="tour">Tour</string>
 </resources>

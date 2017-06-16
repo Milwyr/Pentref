@@ -93,4 +93,5 @@
     <string name="email">登入密碼</string>
     <string name="firebase_sign_out">登出</string>
     <string name="signining">登入中</string>
+    <string name="tour">導賞團</string>
 </resources>

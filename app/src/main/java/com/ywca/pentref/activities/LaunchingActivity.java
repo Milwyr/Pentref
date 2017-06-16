@@ -130,8 +130,6 @@ public class LaunchingActivity extends BaseActivity {
 
     // Download Points of Interest, categories and transport schedule from server via json files
     private void downloadDataFromServer() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
         //Read all Points of Interest from the firebase and add them to SQLite database
         DatabaseReference poiRef = mDatabase.getReference("POI");
         poiRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -140,13 +138,9 @@ public class LaunchingActivity extends BaseActivity {
                 //dataSnapshot should contains a list of poi
                 for (DataSnapshot poiSnapshot : dataSnapshot.getChildren()) {
                     // TODO: handle the poiSnapshot
-                    //try read one first
-                    String test = (String) poiSnapshot.child("name").getValue();
-//                    Log.i(TAG,test);
                     //try firebase getvalue function
                     Poi poi = poiSnapshot.getValue(Poi.class);
                     poi.setId(poiSnapshot.getKey());
-                    int i = 5;
                     ContentValues values = PentrefProvider.getContentValues(poi);
                     try {
                         getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
@@ -165,48 +159,6 @@ public class LaunchingActivity extends BaseActivity {
             }
         });
 
-        /*// Read all Points of Interest from the server and add them to SQLite database
-        String poiUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=pois";
-        JsonArrayRequest poiJsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, poiUrl, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                *//*try {
-                    response.get(0).toString();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }*//*
-
-                // Parse the response array into a list of Points of Interest
-                Gson gson = new Gson();
-                List<Poi> pois = Arrays.asList(gson.fromJson(response.toString(), Poi[].class));
-
-                // Insert the pois into the local database
-                for (final Poi poi : pois) {
-                    ContentValues values = PentrefProvider.getContentValues(poi);
-
-                    try {
-                        getContentResolver().insert(Contract.Poi.CONTENT_URI, values);
-                        mArePoisDownloaded = true;
-                        updateIsFirstTimeInstalledFlag();
-                    } catch (Exception e) {
-                        Log.e("TutorialActivity:poi", e.getMessage());
-                    }
-
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                if (error != null) {
-                    Log.e("TutorialActivity", error.getMessage());
-                }
-            }
-        });
-        queue.add(poiJsonArrayRequest);
-
-
-*/
         //Read all poiCategories from firebase
         DatabaseReference categoryRef = mDatabase.getReference("Categories");
         categoryRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -240,38 +192,6 @@ public class LaunchingActivity extends BaseActivity {
                 int j = 0;
             }
         });
-       /* // Read all Point of Interest categories from the server and add them to SQLite database
-        String poiCategoriesUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=poi_categories";
-        JsonArrayRequest poiCategoryArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, poiCategoriesUrl, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                Gson gson = new Gson();
-                List<Category> categories = Arrays.asList(gson.fromJson(response.toString(), Category[].class));
-
-                for (Category item : categories) {
-                    ContentValues values = new ContentValues();
-                    values.put(Contract.Category._ID, item.getId());
-                    values.put(Contract.Category.COLUMN_NAME, item.getName());
-
-                    try {
-                        getContentResolver().insert(Contract.Category.CONTENT_URI, values);
-                        mArePoiCategoriesDownloaded = true;
-                        updateIsFirstTimeInstalledFlag();
-                    } catch (Exception e) {
-                        Log.e("TutorialActivity:cat", e.getMessage());
-                    }
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                if (error != null) {
-                    Log.e("TutorialActivity", error.getMessage());
-                }
-            }
-        });
-        queue.add(poiCategoryArrayRequest);*/
 
         //Get the teansports from firebase
         DatabaseReference transportRef = mDatabase.getReference("Transport");
@@ -314,44 +234,6 @@ public class LaunchingActivity extends BaseActivity {
             }
         });
 
-        // Fetch the transports json on the server and save it to a local json file
-        String transportUrl = Utility.SERVER_URL + "/PostReq.php?Method=GET&PATH=transport_schedule";
-        JsonArrayRequest transportJsonArrayRequest = new JsonArrayRequest(
-                Request.Method.GET, transportUrl, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                // Terminate if the transportation json file has been stored locally before
-                File transportsFile = new File(getFilesDir(), Utility.TRANSPORTATION_JSON_FILE_NAME);
-                if (transportsFile.exists()) {
-                    return;
-                }
-
-                // Create the transportation json file, and write the response json array
-                // that is read from server to the newly created local json file
-                try {
-                    boolean isFileCreated = transportsFile.createNewFile();
-                    if (isFileCreated) {
-                        FileWriter fileWriter = new FileWriter(transportsFile);
-                        fileWriter.write(response.toString());
-                        fileWriter.flush();
-                        fileWriter.close();
-                        mIsScheduleFileDownloaded = true;
-                        updateIsFirstTimeInstalledFlag();
-                    }
-                } catch (IOException e) {
-                    Log.e("TutorialActivity:trans", e.getMessage());
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                if (error != null) {
-                    Log.e("TutorialActivity", error.getMessage());
-                }
-            }
-        });
-        //Don't add this to queue to debug
-        //queue.add(transportJsonArrayRequest);
     }
 
     // Save the app is not installed for the first time in SharedPreferences

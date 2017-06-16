@@ -5,7 +5,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.amulyakhare.textdrawable.TextDrawable;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -39,6 +37,7 @@ import com.ywca.pentref.fragments.DiscoverFragment;
 import com.ywca.pentref.fragments.PoiAdminFragment;
 import com.ywca.pentref.fragments.ProfileFragment;
 import com.ywca.pentref.fragments.SettingsFragment;
+import com.ywca.pentref.fragments.TourFragment;
 import com.ywca.pentref.fragments.TransportationFragment;
 import com.ywca.pentref.fragments.WeatherFragment;
 import com.ywca.pentref.models.Poi;
@@ -48,6 +47,8 @@ public class MainActivity extends BaseActivity
 
     // The search view that is inflated as a menu item on the Action Bar
     private MenuItem mActionSearchMenuItem;
+    private MenuItem mPoiAddItem;
+    private MenuItem mPoiDeleteItem;
 
     private NavigationView mNavigationView;
     //Firebase Auth instance
@@ -55,6 +56,7 @@ public class MainActivity extends BaseActivity
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseDatabase mDatabase;
     private int mCurrentFragmentId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,9 +143,12 @@ public class MainActivity extends BaseActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the options menu with a search view
+        // Inflate the options menu with a search view and a poi delete btn
         getMenuInflater().inflate(R.menu.main, menu);
         mActionSearchMenuItem = menu.findItem(R.id.action_search);
+        mPoiAddItem = menu.findItem(R.id.admin_add_poi_item);
+        mPoiDeleteItem = menu.findItem(R.id.admin_delete_poi_item);
+
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
@@ -152,6 +157,8 @@ public class MainActivity extends BaseActivity
                 (SearchView) mActionSearchMenuItem.getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
+
+        //
 
         // The search view is only visible when the current fragment is discover fragment
         Fragment currentFragment = getFragmentManager().findFragmentById(R.id.frame);
@@ -239,6 +246,9 @@ public class MainActivity extends BaseActivity
             case R.id.nav_transportation:
                 changeFragment(R.string.transport_schedule, new TransportationFragment());
                 break;
+            case R.id.nav_tour:
+                changeFragment(R.string.tour, new TourFragment());
+                break;
             case R.id.nav_profile:
                 changeFragment(R.string.profile, new ProfileFragment());
                 break;
@@ -285,6 +295,8 @@ public class MainActivity extends BaseActivity
             mNavigationView.setCheckedItem(R.id.nav_settings);
         } else if (fragment instanceof PoiAdminFragment) {
             mNavigationView.setCheckedItem(R.id.nav_admin);
+        } else if (fragment instanceof TourFragment){
+            mNavigationView.setCheckedItem(R.id.nav_tour);
         }
 
         // The search view is only visible when the current fragment is discover fragment
@@ -314,6 +326,9 @@ public class MainActivity extends BaseActivity
         } else {
             mActionSearchMenuItem.setVisible(false);
         }
+        //Set mPoiDeleteItem invisible for all fragment
+        mPoiDeleteItem.setVisible(false);
+        mPoiAddItem.setVisible(false);
     }
 
     @Override

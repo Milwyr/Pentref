@@ -77,8 +77,12 @@ public class Timetable implements Parcelable {
     private List<String> convertToStringList(List<LocalTime> localTimes) {
         DateTimeFormatter formatter = DateTimeFormat.forPattern("HH:mm");
         List<String> timeStrings = new ArrayList<>();
-        for (LocalTime time : localTimes) {
-            timeStrings.add(formatter.print(time));
+        if(localTimes == null){
+            //do nth
+        }else {
+            for (LocalTime time : localTimes) {
+                timeStrings.add(formatter.print(time));
+            }
         }
         return timeStrings;
     }

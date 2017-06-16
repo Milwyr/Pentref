@@ -20,30 +20,4 @@
         map:uiZoomGestures="true"
         android:id="@+id/mapView" />
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/poi_add_card_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:visibility="gone" >
-
-        <Button
-            android:text="OK"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/okBtn" />
-    </android.support.v7.widget.CardView>
-    <android.support.v7.widget.CardView
-        android:id="@+id/poi_del_card_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:visibility="gone" >
-
-        <Button
-            android:text="Delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/poi_btn_del" />
-    </android.support.v7.widget.CardView>
 </FrameLayout>

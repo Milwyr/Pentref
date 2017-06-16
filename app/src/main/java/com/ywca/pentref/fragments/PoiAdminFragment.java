@@ -26,6 +26,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -85,7 +88,7 @@ import java.util.Locale;
  * {@link PoiAdminFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
-public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback, View.OnClickListener, LocationListener, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks {
+public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback, LocationListener, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks {
 
     public static final String TAG = "PoiAdminFragment";
     //region Constants
@@ -107,8 +110,6 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
     private MapView mMapView;
-    private CardView mPoiAddCardView;
-    private CardView mPoiDelCardView;
     private ArrayList<Poi> mPois;
     private ProgressDialog mProgress;
     private RequestQueue mQueue;
@@ -116,10 +117,14 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     private LatLng mLastLatLng;
     private boolean mRequestLocationUpdate;
 
+    private MenuItem mPoiAddItem;
+    private MenuItem mPoiDeleteItem;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         mRequestLocationUpdate = false;
         mPois = new ArrayList<>();
@@ -150,17 +155,99 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
             Log.e("PoiAdminFragment", e.getMessage());
         }
         mMapView.getMapAsync(this);
-        mPoiAddCardView = (CardView) rootView.findViewById(R.id.poi_add_card_view);
-        Button okBtn = (Button) rootView.findViewById(R.id.okBtn);
-        okBtn.setOnClickListener(this);
-
-        mPoiDelCardView = (CardView) rootView.findViewById(R.id.poi_del_card_view);
-        Button delBtn = (Button) rootView.findViewById(R.id.poi_btn_del);
-        delBtn.setOnClickListener(this);
-
-
         return rootView;
     }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Do something that differs the Activity's menu here
+        super.onCreateOptionsMenu(menu, inflater);
+        mPoiDeleteItem = menu.findItem(R.id.admin_delete_poi_item);
+        mPoiDeleteItem.setVisible(false);
+        mPoiAddItem = menu.findItem(R.id.admin_add_poi_item);
+        mPoiAddItem.setVisible(false);
+
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.admin_delete_poi_item:
+                if(mSelectedDeletePoi == null) break;
+                //Delete selected Poi
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                // Add the buttons
+                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked Yes button
+                        //Delete the selected poi from firebase realtime database
+                        DatabaseReference poiRef = FirebaseDatabase.getInstance().getReference().child("POI").child(mSelectedDeletePoi.getId());
+                        poiRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getActivity(), "Fail to delete", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        //TODO: Delete the selected poi pic from firebase storage
+                        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+                        StorageReference poiPicRef = storageRef.child("images/" + mSelectedDeletePoi.getHeaderImageFileName());
+                        poiPicRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(getActivity(), "Pic deleted", Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getActivity(), "fail to remove pic", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                        //Delete the selected poi from local table
+                        // Defines selection criteria for the rows you want to delete
+                        String mSelectionClause = Contract.Poi._ID + " = ?";
+                        String[] mSelectionArgs = {mSelectedDeletePoi.getId() + ""};
+                        getActivity().getContentResolver().delete(Contract.Poi.CONTENT_URI, mSelectionClause, mSelectionArgs);
+
+
+                        //delete the SelectedDeleteMarker marker from the map
+                        mSelectedDeleteMarker.remove();
+                        mSelectedDeleteMarker = null;
+
+                        //Set the delpoiitem to invisilble
+                        mPoiDeleteItem.setVisible(false);
+                    }
+                });
+                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+                // Create the AlertDialog
+                AlertDialog dialog = builder.create();
+                dialog.setTitle(R.string.dialog_title_delete_poi);
+                dialog.show();
+                break;
+            case R.id.admin_add_poi_item:
+                Intent intent = new Intent(getActivity(), AddPoiActivity.class);
+                // String eee = getCompleteAddressString(mCurrentMarker.getPosition().latitude,mCurrentMarker.getPosition().longitude);
+                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LATITUDE, mCurrentMarker.getPosition().latitude);
+                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LONGITUDE, mCurrentMarker.getPosition().longitude);
+                startActivityForResult(intent, REQUEST_ADD_POI);
+                break;
+            default:
+                break;
+        }
+
+        return false;
+    }
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -256,8 +343,8 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
                         .icon(BitmapDescriptorFactory
                                 .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                 mCurrentMarker = mGoogleMap.addMarker(makerOption);
-                mPoiAddCardView.setVisibility(View.VISIBLE);
-                mPoiDelCardView.setVisibility(View.GONE);
+                mPoiAddItem.setVisible(true);
+                mPoiDeleteItem.setVisible(false);
             }
         });
         Boolean test = mGoogleMap.getUiSettings().isZoomGesturesEnabled();
@@ -360,79 +447,6 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     //endregion
 
     @Override
-    public void onClick(View v) {
-        Log.i("PoiAdminFragment", "Onclick()");
-        switch (v.getId()) {
-            case R.id.okBtn:
-                Log.i("PoiAdminFragment", "OKpressed");
-                Intent intent = new Intent(getActivity(), AddPoiActivity.class);
-                // String eee = getCompleteAddressString(mCurrentMarker.getPosition().latitude,mCurrentMarker.getPosition().longitude);
-                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LATITUDE, mCurrentMarker.getPosition().latitude);
-                intent.putExtra(Utility.ADMIN_SELECTED_LOCATION_LONGITUDE, mCurrentMarker.getPosition().longitude);
-                startActivityForResult(intent, REQUEST_ADD_POI);
-                break;
-            case R.id.poi_btn_del:
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                // Add the buttons
-                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User clicked Yes button
-                        //Delete the selected poi from firebase realtime database
-                        DatabaseReference poiRef = FirebaseDatabase.getInstance().getReference().child("POI").child(mSelectedDeletePoi.getId());
-                        poiRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getActivity(), "Fail to delete", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        //TODO: Delete the selected poi pic from firebase storage
-                        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                        StorageReference poiPicRef = storageRef.child("images/" + mSelectedDeletePoi.getHeaderImageFileName());
-                        poiPicRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(getActivity(), "Pic deleted", Toast.LENGTH_SHORT).show();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getActivity(), "fail to remove pic", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-                        //Delete the selected poi from local table
-                        // Defines selection criteria for the rows you want to delete
-                        String mSelectionClause = Contract.Poi._ID + " = ?";
-                        String[] mSelectionArgs = {mSelectedDeletePoi.getId() + ""};
-                        getActivity().getContentResolver().delete(Contract.Poi.CONTENT_URI, mSelectionClause, mSelectionArgs);
-
-
-                        //delete the SelectedDeleteMarker marker from the map
-                        mSelectedDeleteMarker.remove();
-                        mSelectedDeleteMarker = null;
-
-                    }
-                });
-                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                    }
-                });
-
-                // Create the AlertDialog
-                AlertDialog dialog = builder.create();
-                dialog.setTitle(R.string.dialog_title_delete_poi);
-                dialog.show();
-                break;
-        }
-
-    }
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == REQUEST_ADD_POI) {
@@ -447,7 +461,7 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
 
                 mCurrentMarker.remove();
                 mCurrentMarker = null;
-                mPoiAddCardView.setVisibility(View.GONE);
+                mPoiAddItem.setVisible(false);
 
 
             }
@@ -513,11 +527,11 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     public boolean onMarkerClick(Marker marker) {
 
         if (mCurrentMarker != null && marker.getPosition().hashCode() == mCurrentMarker.getPosition().hashCode()) {
-            mPoiAddCardView.setVisibility(View.VISIBLE);
-            mPoiDelCardView.setVisibility(View.GONE);
+            mPoiAddItem.setVisible(true);
+            mPoiDeleteItem.setVisible(false);
         } else {
-            mPoiAddCardView.setVisibility(View.GONE);
-            mPoiDelCardView.setVisibility(View.VISIBLE);
+            mPoiAddItem.setVisible(false);
+            mPoiDeleteItem.setVisible(true);
             mSelectedDeletePoi = (Poi) marker.getTag();
             mSelectedDeleteMarker = marker;
         }

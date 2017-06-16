@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/transport_card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/activity_horizontal_margin"
+    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+    android:layout_marginStart="@dimen/activity_horizontal_margin"
+    android:layout_marginTop="6dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/tourImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentTop="true"
+            app:srcCompat="@drawable/poi36_ywca" />
+
+        <TextView
+            android:id="@+id/tourName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/tourImage"
+            android:text="Medium Text Long Long Long Long Long Long "
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            />
+
+        <TextView
+            android:id="@+id/tourDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tourName"
+            android:layout_marginTop="15dp"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:text="Medium Text Medium Text Medium Text Medium Text Medium Text Medium Text Medium Text Medium Text Medium Text Medium Text Medium Text"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
+
+
+</android.support.v7.widget.CardView>

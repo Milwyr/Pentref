@@ -2,6 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/admin_add_poi_item"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="@string/add_new_poi"
+        app:showAsAction="collapseActionView|ifRoom" />
+    <item
+        android:id="@+id/admin_delete_poi_item"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:title="@string/delete_poi"
+        app:showAsAction="collapseActionView|ifRoom" />
+    <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="@string/search_hint"
