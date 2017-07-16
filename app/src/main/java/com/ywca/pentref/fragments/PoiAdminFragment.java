@@ -230,7 +230,8 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
 
                 // Create the AlertDialog
                 AlertDialog dialog = builder.create();
-                dialog.setTitle(R.string.dialog_title_delete_poi);
+                String messageTitle = getString(R.string.dialog_title_delete_poi) + mSelectedDeletePoi.getName(getDeviceLocale());
+                dialog.setTitle(messageTitle);
                 dialog.show();
                 break;
             case R.id.admin_add_poi_item:
@@ -269,6 +270,8 @@ public class PoiAdminFragment extends BaseFragment implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
         mGoogleMap.clear();
+        //set map to satellite view
+        mGoogleMap.setMapType(mGoogleMap.MAP_TYPE_SATELLITE);
 
         //region Enable locate me button
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

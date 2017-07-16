@@ -59,9 +59,11 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:10.2.0'
     compile 'com.google.firebase:firebase-storage:10.2.0'
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
     androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
 }
+
 
 
 

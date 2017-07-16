@@ -45,6 +45,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -342,7 +343,9 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
 
                 // Add a list of Points of Interest to the map
                 for (Poi poi : pois) {
-                    MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                    MarkerOptions markerOptions = new MarkerOptions()
+                            .position(poi.getLatLng())
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
                     mGoogleMap.addMarker(markerOptions).setTag(poi);
                 }
 
@@ -591,7 +594,8 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
     public boolean onMarkerClick(Marker marker) {
         // Highlight the selected marker
         if (mPreviousMarker != null) {
-            mPreviousMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            Poi previous = (Poi) mPreviousMarker.getTag();
+            mPreviousMarker.setIcon(changeColorByCategory(previous.getCategoryId()));
         }
         marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
         mPreviousMarker = marker;
@@ -731,6 +735,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                 for (Poi poi : mPois) {
                     mCategoriesPois.add(poi);
                     MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                    markerOptions.icon(changeColorByCategory(poi.getCategoryId()));
                     mGoogleMap.addMarker(markerOptions).setTag(poi);
                 }
             } else if (position == mSpinner.getAdapter().getCount() - 1) {
@@ -760,6 +765,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                             if (strings.contains(poi.getId())) {
                                 mCategoriesPois.add(poi);
                                 MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                                markerOptions.icon(changeColorByCategory(poi.getCategoryId()));
                                 mGoogleMap.addMarker(markerOptions).setTag(poi);
                             }
                         }
@@ -771,6 +777,7 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
                     if (poi.getCategoryId() == (position)) {
                         mCategoriesPois.add(poi);
                         MarkerOptions markerOptions = new MarkerOptions().position(poi.getLatLng());
+                        markerOptions.icon(changeColorByCategory(poi.getCategoryId()));
                         mGoogleMap.addMarker(markerOptions).setTag(poi);
                     }
                 }
@@ -781,6 +788,23 @@ public class DiscoverFragment extends BaseFragment implements LocationListener,
             if (mLastLocation != null) {
                 updateNearbyList(mLastLocation);
             }
+    }
+
+    private BitmapDescriptor changeColorByCategory(int categoryID){
+        switch(categoryID){
+            case 0 :
+                return BitmapDescriptorFactory.defaultMarker((BitmapDescriptorFactory.HUE_VIOLET));
+            case 1 :
+                return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
+            case 2 :
+                return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+            case 3 :
+                return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA);
+            case 4 :
+                return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE);
+            default:
+                return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+        }
     }
 
     @Override

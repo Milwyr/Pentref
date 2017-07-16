@@ -264,7 +264,8 @@ public class ProfileFragment extends Fragment implements
                                     }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Log.e(TAG,e.getMessage());
+                                    Toast.makeText(getActivity(), "Authentication failed.", Toast.LENGTH_SHORT).show();
                                     progressDialog.dismiss();
                                 }
                             });

@@ -33,6 +33,8 @@ public class Utility {
     public static final String USER_PROFILE_NAME_EXTRA_KEY = "UserName";
     public static final String ADMIN_SELECTED_LOCATION_LATITUDE = "PoiLocationLatitude";
     public static final String ADMIN_SELECTED_LOCATION_LONGITUDE = "PoiLocationLongitude";
+    public static final String TOUR_EXTRA_KEY = "Tour";
+
 
 
     public static final String TRANSPORTATION_JSON_FILE_NAME = "transports.json";

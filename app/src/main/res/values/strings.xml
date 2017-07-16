@@ -20,7 +20,7 @@
     <string name="transport_schedule">Schedule</string>
     <string name="profile">Profile</string>
     <string name="settings">Settings</string>
-    <string name="about">About</string>
+    <string name="about">About Us</string>
     <string name="admin">Admin</string>
 
     <!-- Poi Details Activity -->
@@ -108,4 +108,10 @@
     <string name="add_new_poi">Add New POI</string>
     <string name="delete_poi">Delete POI</string>
     <string name="tour">Tour</string>
+    <string name="contact_us_address">Address: No. 1, MacDonnell Road, HongKong</string>
+    <string name="contact_us_Tel">Tel: 3476 1300</string>
+    <string name="contact_us">E-mail: ywca@ywca.org.hk</string>
+    <string name="contact_us_a_services">Administrative Services: 3476 1300</string>
+    <string name="contact_us_m_services">Member Services:3476 1324</string>
+    <string name="title_activity_tour_details">TourDetailsActivity</string>
 </resources>

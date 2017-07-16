@@ -20,7 +20,7 @@
     <string name="transport_schedule">交通時間表</string>
     <string name="profile">帳戶</string>
     <string name="settings">設定</string>
-    <string name="about">關於</string>
+    <string name="about">關於我們</string>
     <string name="admin">管理員</string>
 
     <!-- Poi Details Activity -->
@@ -93,5 +93,10 @@
     <string name="email">登入密碼</string>
     <string name="firebase_sign_out">登出</string>
     <string name="signining">登入中</string>
-    <string name="tour">導賞團</string>
+    <string name="tour">導賞活動</string>
+    <string name="contact_us_address">地址: 香港麥當勞道一號</string>
+    <string name="contact_us">電郵: ywca@ywca.org.hk</string>
+    <string name="contact_us_Tel">電話: 3476 1300</string>
+    <string name="contact_us_a_services">行政事務: 3476 1300</string>
+    <string name="contact_us_m_services">會員事務: 3476 1324</string>
 </resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/content_tour_whatsapp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Whatsapp:"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/content_tour_whatsappNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/content_tour_whatsapp"
+            android:text="TextView"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/content_tour_Description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/content_tour_whatsappNo"
+            android:paddingTop="20dp"
+            android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla orci vel quam lobortis condimentum. Nulla vitae scelerisque ex, tristique mattis est. Ut lobortis sapien vel purus sollicitudin, vitae ullamcorper odio iaculis. Suspendisse eu convallis turpis, sit amet facilisis justo. Cras non eleifend diam, vel tempor libero. In eu lectus pharetra, pellentesque augue eget, fringilla nisi. Etiam ornare ipsum nec neque scelerisque, ac interdum sem sagittis. Praesent tempor arcu ex, et euismod justo congue ac. Sed magna tellus, efficitur sit amet turpis non, luctus iaculis mi. Donec vel metus bibendum, dapibus erat at, consequat magna. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos."
+            android:textSize="24sp" />
+    </RelativeLayout>
+</android.support.v4.widget.NestedScrollView>

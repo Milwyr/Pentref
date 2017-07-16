@@ -5,8 +5,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -37,9 +41,9 @@
         <activity android:name=".activities.ChoosePageActivity" />
         <activity
             android:name=".activities.MainActivity"
-            android:parentActivityName=".activities.ChoosePageActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
+            android:parentActivityName=".activities.ChoosePageActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -62,12 +66,10 @@
             android:name=".activities.ReviewActivity"
             android:parentActivityName=".activities.PoiDetailsActivity" />
 
-
         <provider
             android:name=".common.PentrefProvider"
             android:authorities="com.ywca.pentref.provider"
             android:exported="false" />
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.ywca.pentref.file.provider"
@@ -75,7 +77,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
         <receiver
@@ -83,7 +85,11 @@
             android:enabled="true"
             android:exported="false" />
 
-        <activity android:name=".activities.AddPoiActivity"></activity>
+        <activity android:name=".activities.AddPoiActivity" />
+        <activity
+            android:name=".activities.TourDetailsActivity"
+            android:label="@string/title_activity_tour_details"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
